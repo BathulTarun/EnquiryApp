@@ -1,0 +1,58 @@
+// data/location.mock.ts
+
+import { Address } from "@/types/common";
+
+export const locations: Address[] = [
+  {
+    id: "l1",
+    label: "MG Road, Bangalore",
+    address1: "12, MG Road",
+    address2: "Near City Mall",
+    city: "Bangalore",
+    state: "Karnataka",
+    pincode: "560001",
+    landmark: "Opposite State Bank",
+    lat: 12.9716,
+    lng: 77.5946,
+    verified: true,
+  },
+  {
+    id: "l2",
+    label: "Connaught Place, New Delhi",
+    address1: "Block A, Connaught Place",
+    address2: "Inner Circle",
+    city: "New Delhi",
+    state: "Delhi",
+    pincode: "110001",
+    landmark: "Near Rajiv Chowk Metro",
+    lat: 28.6315,
+    lng: 77.2167,
+    verified: true,
+  },
+  {
+    id: "l3",
+    label: "Marine Drive, Mumbai",
+    address1: "Netaji Subhash Chandra Bose Road",
+    address2: "Marine Drive",
+    city: "Mumbai",
+    state: "Maharashtra",
+    pincode: "400020",
+    landmark: "Near Churchgate Station",
+    lat: 18.9432,
+    lng: 72.8235,
+    verified: true,
+  },
+  {
+    id: "l4",
+    label: "Banjara Hills, Hyderabad",
+    address1: "Road No 12, Banjara Hills",
+    address2: "",
+    city: "Hyderabad",
+    state: "Telangana",
+    pincode: "500034",
+    landmark: "Near GVK One Mall",
+    lat: 17.4156,
+    lng: 78.4347,
+    verified: true,
+  },
+];
