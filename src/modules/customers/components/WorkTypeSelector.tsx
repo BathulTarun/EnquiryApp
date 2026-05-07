@@ -32,8 +32,8 @@ const WorkTypeSelector = ({
 
       // map API → WorkType
       const mapped: WorkType[] = categories.map((c: any) => ({
-        id: String(c.CategoryID),
-        name: c.CategoryName,
+        id: String(c.CategoryID),  //cap CategoryID
+        name: c.CategoryName, //cap CategoryName
         subOptions: [], // initially empty
       }));
 
@@ -59,9 +59,9 @@ const WorkTypeSelector = ({
     );
 
     const productOptions = products.map((p: any) => ({
-  id: p.UID,
-  name: p.Name,
-  price:p.Price,
+  id: String(p.UID),  // p.UID, //uid
+  name: p.Name, //p.Name, //name
+  price:p.Price, //p.Price, //price
 }));
 
     const updatedType: WorkType = {

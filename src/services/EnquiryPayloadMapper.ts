@@ -38,7 +38,7 @@ export const mapEnquiryToApi = (enquiry: Enquiry) => {
 
     ProblemDescription: enquiry.workItems?.map((item) => ({
       CategoryID: Number(item.id), // ⚠️ replace with real mapping
-      ProductID: Number(item.productsId), // ⚠️ replace with real mapping
+      ProductID: item.productsId, // ⚠️ replace with real mapping
       Description: item.name,
       Images: item.images || [],
       Price: item.unitPrice || 0,

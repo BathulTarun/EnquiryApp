@@ -247,12 +247,15 @@ const imageStrings = photos.map((img) => img.url);
    // ✅ Correct structure
  workTypes: workTypes,
        // you can fill later
-  workItems: workTypes.map((w) => ({
+  workItems: workTypes.map((w) => {
+console.log("WorkType:", w.name, "Selected Product:", w.selectedSubOption);
+    return{
     id: w.id,
     name: w.name,
     productsId: w.selectedSubOption|| "",
+    }
   // default to first subOption if exists
-  })),        // REQUIRED
+  }),        // REQUIRED
  
  
   // address:

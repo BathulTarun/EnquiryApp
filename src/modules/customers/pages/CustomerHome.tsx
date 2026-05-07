@@ -139,6 +139,7 @@ console.log(customer);
   }
 
 const handleSubChange = (id: string, value: string) => {
+  console.log("SubOption changed for WorkType ID:", id, "New Value:", value);
   setSelectedWork((prev) =>
     prev.map((w) =>
       w.id === id ? { ...w, selectedSubOption: value } : w

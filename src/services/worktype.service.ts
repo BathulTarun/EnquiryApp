@@ -64,8 +64,19 @@ class WorkTypeService {
             }
           }
         );
+      //    const response=await fetch(
+      //     `${BASE_URL}/GetCategories`,
+      // {
+      //     method:"GET",
+      //       headers:{
+      //           "company":`${COMPANY_ID}`,
+      //           "tenant":`${TENANT_ID}`,
+      //       }
+      // }
+      // );
         const data= await response.json();
-        return data;
+        // return data.data; 
+        return data
     }catch(error){
       console.error("Error fetching categories:", error);
       return [];
@@ -87,8 +98,19 @@ class WorkTypeService {
             }
           }
         );
+      //   const response=await fetch(
+      //     `${BASE_URL}/GetProductsByCategory/?categoryId=${categoryId}`,
+      // {
+      //     method:"GET",
+      //       headers:{
+      //           "company":`${COMPANY_ID}`,
+      //           "tenant":`${TENANT_ID}`,
+      //       }
+      // }
+      // );
         const data= await response.json();
-        return data;
+        // return data.data; 
+         return data
     }catch(error){
       console.error("Error fetching categories:", error);
       return [];
