@@ -65,7 +65,7 @@ export class CustomerService {
 
       const result= await response.json();
       // return result || null;
-      console.log(result.Data);
+      // console.log(result.Data);
       if(result.Status === "Success"){
         return mapCustomerFromApi(result);
       }
@@ -149,7 +149,7 @@ export class CustomerService {
       // );
 
       const payload = mapCustomerToApi(customer);
-          console.log("FINAL PAYLOAD:", payload); // 
+          // console.log("FINAL PAYLOAD:", payload); // 
           const response = await fetch(`${FixedURL}/api/user/register`, {
             
             method: "POST",

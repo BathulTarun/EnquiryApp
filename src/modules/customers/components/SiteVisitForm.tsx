@@ -20,7 +20,7 @@ import { EnquiryService } from "@/services/enquiry.service";
 import { CustomerService } from "@/services/customer.service";
 import { OperatorService } from "@/services/operator.service";
 import { LocationService } from "@/services/location.service";
-
+import { toast } from "sonner";
 
 interface SiteVisitFormProps {
   addresses: Address[];
@@ -53,7 +53,7 @@ const SiteVisitForm = ({ addresses, contactNumber,customer,workTypes,customerId,
 
     const mapped = data.map(mapLocationToAddress);
     setLocations(mapped);
-    console.log("Loaded locations for customer:", mapped);
+    // console.log("Loaded locations for customer:", mapped);
   };
 
   loadLocations();
@@ -67,7 +67,7 @@ const allAddresses = [
   ...(locations || []),
 ];
 
-console.log("customer from site visit form", customer);
+// console.log("customer from site visit form", customer);
 
 const uniqueAddresses = allAddresses.filter(
   (addr, index, self) =>
@@ -161,7 +161,8 @@ const handleRemoveImage = (id: string) => {
 // };
 const saveAddress = async (): Promise<Address | null> => {
   if (!newAddr.address1 || !newAddr.city || !newAddr.pincode) {
-    alert("Please fill required address fields");
+    toast.error("Please fill required address fields");
+    // alert("Please fill required address fields");
     return null;
   }
 
@@ -172,6 +173,7 @@ const saveAddress = async (): Promise<Address | null> => {
     );
 
     if (res?.Status === "Success") {
+      toast.success("Address added successfully.");
       const savedAddress: Address = {
         id: res.Data, // ✅ backend ID
         ...newAddr,
@@ -182,6 +184,7 @@ const saveAddress = async (): Promise<Address | null> => {
 
     return null;
   } catch (error) {
+    toast.error("Error saving address.");
     console.error("Error saving address:", error);
     return null;
   }
@@ -205,7 +208,7 @@ const handleSaveNewAddress = async () => {
   const handleSubmit =async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customer) {
-  alert("Customer not loaded");
+  toast.error("Customer not loaded");
   return;
 }
 let finalAddress: Address;
@@ -223,7 +226,7 @@ let finalAddress: Address;
 // }
 if (addressChoice === "new") {
   if (!savedNewAddress) {
-    alert("Please save address first");
+    toast.error("Please save address first");
     return;
   }
 
@@ -248,7 +251,7 @@ const imageStrings = photos.map((img) => img.url);
  workTypes: workTypes,
        // you can fill later
   workItems: workTypes.map((w) => {
-console.log("WorkType:", w.name, "Selected Product:", w.selectedSubOption);
+// console.log("WorkType:", w.name, "Selected Product:", w.selectedSubOption);
     return{
     id: w.id,
     name: w.name,
@@ -287,12 +290,12 @@ console.log("WorkType:", w.name, "Selected Product:", w.selectedSubOption);
    
   const response = await CustomerService.createEnquiry(newEnquiry);
 
-console.log("API Response:", response);
+// console.log("API Response:", response);
 
 const enquiryId = response;
 
 if (!enquiryId) {
-  alert("Failed to create enquiry");
+  toast.error("Failed to create enquiry");
   return;
 }
 // use backend ID

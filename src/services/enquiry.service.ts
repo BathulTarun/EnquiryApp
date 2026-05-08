@@ -79,7 +79,7 @@ export class EnquiryService {
     //   }),
     // });
     const payload = mapEnquiryToApi(enquiry);
-    console.log("FINAL PAYLOAD:", payload); // 🔥 MUST CHECK
+    // console.log("FINAL PAYLOAD:", payload); //  MUST CHECK
     const response = await fetch(`${FixedURL}/api/enquiry/create`, {
       
       method: "POST",

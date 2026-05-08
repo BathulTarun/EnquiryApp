@@ -4,7 +4,7 @@ import { Address } from "@/types/common";
 
 export const locations: Address[] = [
   {
-    id: "l1",
+    id: 1,
     label: "MG Road, Bangalore",
     address1: "12, MG Road",
     address2: "Near City Mall",
@@ -17,7 +17,7 @@ export const locations: Address[] = [
     verified: true,
   },
   {
-    id: "l2",
+    id: 2,
     label: "Connaught Place, New Delhi",
     address1: "Block A, Connaught Place",
     address2: "Inner Circle",
@@ -30,7 +30,7 @@ export const locations: Address[] = [
     verified: true,
   },
   {
-    id: "l3",
+    id: 3,
     label: "Marine Drive, Mumbai",
     address1: "Netaji Subhash Chandra Bose Road",
     address2: "Marine Drive",
@@ -43,7 +43,7 @@ export const locations: Address[] = [
     verified: true,
   },
   {
-    id: "l4",
+    id: 4,
     label: "Banjara Hills, Hyderabad",
     address1: "Road No 12, Banjara Hills",
     address2: "",

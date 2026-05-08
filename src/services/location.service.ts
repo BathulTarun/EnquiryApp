@@ -50,38 +50,38 @@ static statesCache: any[] | null = null;
 
   // 🔹 Search locations
   static async search(query: string): Promise<Address[]> {
-    if (!query || query.length < 2) return [];
+  //   if (!query || query.length < 2) return [];
 
-     try {
-    const response = await fetch(
-      `${BASE_URL}/getlocations?search=${query}`,
-      {
-         method:"GET",
-            headers:{
-                "company":`${COMPANY_ID}`,
-                "tenant":`${TENANT_ID}`,
-            }
-      }
+  //    try {
+  //   const response = await fetch(
+  //     `${BASE_URL}/getlocations?search=${query}`,
+  //     {
+  //        method:"GET",
+  //           headers:{
+  //               "company":`${COMPANY_ID}`,
+  //               "tenant":`${TENANT_ID}`,
+  //           }
+  //     }
 
+  //   );
+
+  //   if (!response.ok) throw new Error("Search failed");
+
+  //    const result = await response.json();
+  //    const locations:Address[]= result.data;
+  //     return  locations;
+  // } catch (error) {
+  //   console.error("Search error:", error);
+  //   return [];
+  // }
+
+    const lower = query.toLowerCase();
+
+    return locations.filter((loc) =>
+      loc.label.toLowerCase().includes(lower) ||
+      loc.city.toLowerCase().includes(lower) ||
+      loc.address1.toLowerCase().includes(lower)
     );
-
-    if (!response.ok) throw new Error("Search failed");
-
-     const result = await response.json();
-     const locations:Address[]= result.data;
-      return  locations;
-  } catch (error) {
-    console.error("Search error:", error);
-    return [];
-  }
-
-    // const lower = query.toLowerCase();
-
-    // return locations.filter((loc) =>
-    //   loc.label.toLowerCase().includes(lower) ||
-    //   loc.city.toLowerCase().includes(lower) ||
-    //   loc.address1.toLowerCase().includes(lower)
-    // );
   }
 
   // 🔹 Get by ID

@@ -12,6 +12,8 @@ import { stat } from "fs";
 import { LocationService } from "@/services/location.service";
 import { AuthService } from "@/services/authService.service";
 import { TokenManager } from "@/services/tokenManager.service";
+// import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 interface CustomerFormProps {
   mobile: string;
   onSave: (customer: Customer) => void;
@@ -20,7 +22,7 @@ interface CustomerFormProps {
 const CustomerForm = ({ mobile, onSave }: CustomerFormProps) => {
 
 
-
+const [error,setError] = useState("");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -76,43 +78,63 @@ const CustomerForm = ({ mobile, onSave }: CustomerFormProps) => {
   }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const address: Address = {
-      // id: `A${Date.now()}`,
-      address1: form.address1,
-      address2: form.address2,
-      city: form.city,
-      state: form.state,
-      stateId: form.stateId,
-      pincode: form.pincode,
-      landmark: form.landmark,
-      lat: form.lat,
-      lng: form.lng,
-      verified: form.verified,
-    };
-      const newCustomer: Customer = {
-    // id: `C${Date.now()}`,
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const address: Address = {
+    address1: form.address1,
+    address2: form.address2,
+    city: form.city,
+    state: form.state,
+    stateId: form.stateId,
+    pincode: form.pincode,
+    landmark: form.landmark,
+    lat: form.lat,
+    lng: form.lng,
+    verified: form.verified,
+  };
+
+  const newCustomer: Customer = {
     name: form.name,
     mobile,
     email: form.email,
     addresses: [address],
   };
-  // addCustomer(newCustomer);
-  CustomerService.createCustomer(newCustomer).then(async (res) => {console.log("Customer saved to service:", res);
-  newCustomer.id = res.Data; // update with backend ID
-  console.log("New customer with ID:", newCustomer);
-  if(newCustomer.id){
-    const token=   await AuthService.getToken({ username: newCustomer.mobile, password: newCustomer.mobile });
-  TokenManager.setToken(token);
+
+  try {
+    const res = await CustomerService.createCustomer(newCustomer);
+
+    // console.log("Customer saved:", res);
+
+    if (res.Status === "Success") {
+      toast.success("Customer saved successfully.");
+      newCustomer.id = res.Data;
+
+      const token = await AuthService.getToken({
+        username: newCustomer.mobile,
+        password: newCustomer.mobile,
+      });
+
+      TokenManager.setToken(token);
+
+      onSave(newCustomer);
+    } else {
+      setError(res.ErrorMessage);
+           toast.error(res.ErrorMessage + " Failed to save customer. Please try again.");
+      // toast({
+      //   title: "Failed to save customer.",
+      //   description: res.ErrorMessage || "Please try again.",
+      // });
+    }
+  } catch (err) {
+    console.error(err);
+    toast.error("Something went wrong. Please try again.");
+    // toast({
+    //   title: "Error",
+    //   description: "Something went wrong.",
+    // });
   }
-  });
-
-
-  // console.log("New customer added:", newCustomer);  
-    onSave(newCustomer);
-   
-  };
+};
 
   const personalFields = [
     { key: "name", label: "Full Name", required: true },

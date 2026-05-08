@@ -9,6 +9,7 @@ import OtpService from "@/services/otp.service";
 import { CustomerService } from "@/services/customer.service";
 import { AuthService } from "@/services/authService.service";
 import { TokenManager } from "@/services/tokenManager.service";
+import { toast } from "sonner";
 interface MobileInputProps {
   onSearch: (mobile: string) => void;
   isLoading?: boolean;
@@ -34,9 +35,11 @@ const MobileInput =   ({ onSearch, isLoading }: MobileInputProps) => {
     if (mobile.length === 10) onSearch(mobile);
     OtpService.sendOtp(mobile).then((res) => {
       if (res.success) {
-        console.log("OTP sent successfully");
+        toast.success("OTP sent successfully");
+        // console.log("OTP sent successfully");
       } else {
-        console.log("Failed to send OTP");
+        toast.error("Failed to send OTP try again");
+        // console.log("Failed to send OTP");
       }
     });
     // otpService2.generateOTP(mobile).then((res) => {

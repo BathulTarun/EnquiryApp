@@ -14,7 +14,7 @@ import { CustomerService } from "@/services/customer.service";
 import { stat } from "fs";
 import { LocationService } from "@/services/location.service";
 import { mapLocationToAddress } from "@/services/AddressPayloadMapper";
-
+import { toast } from "sonner";
 interface CustomerDetailsProps {
   addresses: Address[];
   customer: Customer;
@@ -115,9 +115,9 @@ const uniqueAddresses = allAddresses.filter(
        const res = await CustomerService.addAddress(customer.id, address);
 
        if (res?.Status === "Success") {
-        
+        toast.success("Address added successfully.");
         const savedAddress: Address = {
-        id: res.Data, // ✅ use backend ID
+        id: res.Data, //  use backend ID
           ...address,
           };
   // ✅ Update UI immediately
@@ -143,9 +143,11 @@ onUpdateCustomer?.({
         verified: false,
       });
     } else {
+      toast.error("Failed to add address.");
       console.error("Failed to update customer");
     }
   } catch (error) {
+    toast.error("Error saving address.");
     console.error("Error saving address:", error);
   }
 };
@@ -212,7 +214,7 @@ onUpdateCustomer?.({
                 </Button>
               </div>
 
-              <LocationSearch onSelect={handleLocationSelect} />
+              <LocationSearch onSelect={handleLocationSelect}  />
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {addressFields.map((f) => (

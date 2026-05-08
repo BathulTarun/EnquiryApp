@@ -26,11 +26,15 @@ import { Engineer } from "@/types/engineer";
 import { LocationService } from "@/services/location.service";
 import { TokenManager } from "@/services/tokenManager.service";
 import { AuthService } from "@/services/authService.service";
+// import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+
+import { title } from "process";
 
 type Step = "home" | "mobile" | "otp" | "form" | "worktype" | "visit";
 
 const Index = () => {
-  
+
   const [step, setStep] = useState<Step>("home");
   const navigate = useNavigate();
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -68,6 +72,7 @@ const [engineers, setEngineers] = useState<Engineer[]>([]);
 
     setLocations(mapped);
   };
+  
 
   
 
@@ -85,7 +90,7 @@ useEffect(() => {
   const fetchEngineers = async () => {
     const data = await OperatorService.getAllOperators();
     setEngineers(data);
-    console.log("Engineers"+engineers);
+    // console.log("Engineers"+engineers);
   };
   fetchEngineers();
 }, []);
@@ -102,15 +107,29 @@ useEffect(() => {
   const handleMobileSearch = async (num: string) => {
 
     // TokenManager.clearToken();
-  const token=   await AuthService.getToken({ username: num, password: num });
-  TokenManager.setToken(token);
+  // const token=   await AuthService.getToken({ username: num, password: num });
+  // TokenManager.setToken(token);    //added in otpverfication.ts 45 line
     setMobile(num);
     setStep("otp"); 
   };
 
   const handleOtpVerified =async  () => {
  
+      // If token is NOT present → customer does not exist
+  if (TokenManager.getToken()==="null" || !TokenManager.getToken()) {
+    toast.error("No customer found. Please create a new customer profile.");
+    // toast({
+    //     title: "No customer found.",
+    //     description: "Please create a new customer profile.",
+    //   });
+    setIsNew(true);
+    setCustomer(null);
+    setStep("form");
+    return;
+  }
+  // console.log("OTP verified, token set:", TokenManager.getToken());
   // getEnqueriesByCustomerMobile();
+
     const found = await CustomerService.getByMobile(mobile);
     if (found) {
       loadLocations();
@@ -119,6 +138,12 @@ useEffect(() => {
      await getEnqueriesByCustomerId(found.id);
     } else {
       TokenManager.clearToken();
+      toast.error("No customer found. Please create a new customer profile.");
+      // toast({
+      //   title: "No customer found.",
+      //   description: "Please create a new customer profile.",
+      // });
+     
       setIsNew(true);
       setCustomer(null);
     }
@@ -126,10 +151,10 @@ useEffect(() => {
      
   };
  
-console.log(customer);
+// console.log(customer);
   const getEnqueriesByCustomerId = async (customerId: number)=> {
     const data= await CustomerService.getEnquriesByCustomerId(customerId);
-    console.log("Enquiries", data);
+    // console.log("Enquiries", data);
      setCustomerEnquiries(data);
   }
 
@@ -139,7 +164,7 @@ console.log(customer);
   }
 
 const handleSubChange = (id: string, value: string) => {
-  console.log("SubOption changed for WorkType ID:", id, "New Value:", value);
+  // console.log("SubOption changed for WorkType ID:", id, "New Value:", value);
   setSelectedWork((prev) =>
     prev.map((w) =>
       w.id === id ? { ...w, selectedSubOption: value } : w
@@ -151,7 +176,13 @@ const handleSubChange = (id: string, value: string) => {
 
  
   const handleCustomerSave = async (c: Customer) => {
+   
     setCustomer(c);
+    if(!c.id){
+      setIsNew(true);
+     }
+
+   
   //   if(c.id){
   //  const token=   await AuthService.getToken({ username: c.mobile, password: c.mobile });
   //  TokenManager.setToken(token);

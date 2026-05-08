@@ -4,6 +4,8 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { Loader2, ShieldCheck } from "lucide-react";
 import  OtpService  from "@/services/otp.service";
 import { AuthService } from "@/services/authService.service";
+import { TokenManager } from "@/services/tokenManager.service";
+import { toast } from "sonner";
 
 interface OTPVerificationProps {
   mobile: string;
@@ -40,12 +42,18 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
     const res = await OtpService.verifyOtp(mobile, otp);
     
     if (res.verified) {
+      toast.success("OTP verified successfully!");
+        const token=   await AuthService.getToken({ username: mobile, password: mobile });
+  TokenManager.setToken(token);
+
       onVerified(); // success
      
     } else {
+      toast.error("Invalid OTP. Please try again.");
       setError("Invalid OTP");
     }
   } catch (err) {
+    toast.error("Something went wrong. Please try again.");
     setError("Something went wrong");
   }
 
@@ -54,6 +62,15 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
   };
 
   const handleResend = async () => {
+     OtpService.sendOtp(mobile).then((res) => {
+          if (res.success) {
+            toast.success("OTP sent successfully");
+            // console.log("OTP sent successfully");
+          } else {
+            toast.error("Failed to send OTP try again");
+            // console.log("Failed to send OTP");
+          }
+        });
     setIsSending(true);
     setError("");
     setOtp("");
@@ -73,7 +90,7 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
       <div>
         <h2 className="text-xl font-semibold mb-1">Verify OTP</h2>
         <p className="text-sm text-muted-foreground">
-          A 6-digit code has been sent to <span className="font-medium text-foreground">{mobile}</span>
+          A 5-digit code has been sent to <span className="font-medium text-foreground">{mobile}</span>
         </p>
       </div>
 
