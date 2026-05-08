@@ -42,18 +42,24 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
     const res = await OtpService.verifyOtp(mobile, otp);
     
     if (res.verified) {
-      toast.success("OTP verified successfully!");
+      toast.success("OTP verified successfully!",{
+        duration: 5000,
+      });
         const token=   await AuthService.getToken({ username: mobile, password: mobile });
   TokenManager.setToken(token);
 
       onVerified(); // success
      
     } else {
-      toast.error("Invalid OTP. Please try again.");
+      toast.error("Invalid OTP. Please try again.",{
+        duration: 5000,
+      });
       setError("Invalid OTP");
     }
   } catch (err) {
-    toast.error("Something went wrong. Please try again.");
+    toast.error("Something went wrong. Please try again.",{
+      duration: 5000,
+    });
     setError("Something went wrong");
   }
 
@@ -64,10 +70,14 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
   const handleResend = async () => {
      OtpService.sendOtp(mobile).then((res) => {
           if (res.success) {
-            toast.success("OTP sent successfully");
+            toast.success("OTP sent successfully",{
+              duration: 5000,
+            });
             // console.log("OTP sent successfully");
           } else {
-            toast.error("Failed to send OTP try again");
+            toast.error("Failed to send OTP try again",{
+              duration: 5000,
+            });
             // console.log("Failed to send OTP");
           }
         });

@@ -117,7 +117,9 @@ useEffect(() => {
  
       // If token is NOT present → customer does not exist
   if (TokenManager.getToken()==="null" || !TokenManager.getToken()) {
-    toast.error("No customer found. Please create a new customer profile.");
+    toast.error("No customer found. Please create a new customer profile.",{
+      duration: 5000,
+    });
     // toast({
     //     title: "No customer found.",
     //     description: "Please create a new customer profile.",
@@ -138,7 +140,9 @@ useEffect(() => {
      await getEnqueriesByCustomerId(found.id);
     } else {
       TokenManager.clearToken();
-      toast.error("No customer found. Please create a new customer profile.");
+      toast.error("No customer found. Please create a new customer profile.",{
+        duration: 5000,
+      });
       // toast({
       //   title: "No customer found.",
       //   description: "Please create a new customer profile.",

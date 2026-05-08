@@ -35,10 +35,15 @@ const MobileInput =   ({ onSearch, isLoading }: MobileInputProps) => {
     if (mobile.length === 10) onSearch(mobile);
     OtpService.sendOtp(mobile).then((res) => {
       if (res.success) {
-        toast.success("OTP sent successfully");
+        toast.success("OTP sent successfully",{
+          duration: 5000,
+        }
+        );
         // console.log("OTP sent successfully");
       } else {
-        toast.error("Failed to send OTP try again");
+        toast.error("Failed to send OTP try again",{
+          duration: 5000,
+        });
         // console.log("Failed to send OTP");
       }
     });

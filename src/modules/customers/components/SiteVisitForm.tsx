@@ -161,7 +161,9 @@ const handleRemoveImage = (id: string) => {
 // };
 const saveAddress = async (): Promise<Address | null> => {
   if (!newAddr.address1 || !newAddr.city || !newAddr.pincode) {
-    toast.error("Please fill required address fields");
+    toast.error("Please fill required address fields",{
+      duration: 5000,
+    });
     // alert("Please fill required address fields");
     return null;
   }
@@ -173,7 +175,9 @@ const saveAddress = async (): Promise<Address | null> => {
     );
 
     if (res?.Status === "Success") {
-      toast.success("Address added successfully.");
+      toast.success("Address added successfully.",{
+        duration: 5000,
+      });
       const savedAddress: Address = {
         id: res.Data, // ✅ backend ID
         ...newAddr,
@@ -184,7 +188,9 @@ const saveAddress = async (): Promise<Address | null> => {
 
     return null;
   } catch (error) {
-    toast.error("Error saving address.");
+    toast.error("Error saving address.",{
+      duration: 5000,
+    });
     console.error("Error saving address:", error);
     return null;
   }
@@ -208,7 +214,9 @@ const handleSaveNewAddress = async () => {
   const handleSubmit =async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customer) {
-  toast.error("Customer not loaded");
+  toast.error("Customer not loaded",{
+    duration: 5000,
+  });
   return;
 }
 let finalAddress: Address;
@@ -226,7 +234,9 @@ let finalAddress: Address;
 // }
 if (addressChoice === "new") {
   if (!savedNewAddress) {
-    toast.error("Please save address first");
+    toast.error("Please save address first",{
+      duration: 5000,
+    });
     return;
   }
 
@@ -295,7 +305,9 @@ const imageStrings = photos.map((img) => img.url);
 const enquiryId = response;
 
 if (!enquiryId) {
-  toast.error("Failed to create enquiry");
+  toast.error("Failed to create enquiry",{
+    duration: 5000,
+  });
   return;
 }
 // use backend ID

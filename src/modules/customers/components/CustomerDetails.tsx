@@ -115,7 +115,9 @@ const uniqueAddresses = allAddresses.filter(
        const res = await CustomerService.addAddress(customer.id, address);
 
        if (res?.Status === "Success") {
-        toast.success("Address added successfully.");
+        toast.success("Address added successfully.",{
+          duration: 5000,
+        });
         const savedAddress: Address = {
         id: res.Data, //  use backend ID
           ...address,
@@ -143,11 +145,15 @@ onUpdateCustomer?.({
         verified: false,
       });
     } else {
-      toast.error("Failed to add address.");
+      toast.error("Failed to add address.",{
+        duration: 5000,
+      });
       console.error("Failed to update customer");
     }
   } catch (error) {
-    toast.error("Error saving address.");
+    toast.error("Error saving address.",{
+      duration: 5000,
+    });
     console.error("Error saving address:", error);
   }
 };
@@ -203,7 +209,7 @@ onUpdateCustomer?.({
           {/* Add New Address */}
           {!showAddAddress ? (
             <Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => setShowAddAddress(true)}>
-              <Plus size={14} /> Add New Address
+              <Plus size={14} /> Add Site Address
             </Button>
           ) : (
             <div className="mt-3 p-4 border border-border rounded-lg space-y-4 bg-muted/30">

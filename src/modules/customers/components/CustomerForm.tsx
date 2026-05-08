@@ -107,7 +107,9 @@ const handleSubmit = async (e: React.FormEvent) => {
     // console.log("Customer saved:", res);
 
     if (res.Status === "Success") {
-      toast.success("Customer saved successfully.");
+      toast.success("Customer saved successfully.",{
+        duration: 5000,
+      });
       newCustomer.id = res.Data;
 
       const token = await AuthService.getToken({
@@ -120,7 +122,9 @@ const handleSubmit = async (e: React.FormEvent) => {
       onSave(newCustomer);
     } else {
       setError(res.ErrorMessage);
-           toast.error(res.ErrorMessage + " Failed to save customer. Please try again.");
+           toast.error(res.ErrorMessage + " Failed to save customer. Please try again.",{
+              duration: 5000,
+           });
       // toast({
       //   title: "Failed to save customer.",
       //   description: res.ErrorMessage || "Please try again.",
@@ -128,7 +132,9 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
   } catch (err) {
     console.error(err);
-    toast.error("Something went wrong. Please try again.");
+    toast.error("Something went wrong. Please try again.",{
+      duration: 5000,
+    });
     // toast({
     //   title: "Error",
     //   description: "Something went wrong.",
