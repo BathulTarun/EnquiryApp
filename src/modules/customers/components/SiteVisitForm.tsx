@@ -195,19 +195,7 @@ const saveAddress = async (): Promise<Address | null> => {
     return null;
   }
 };
- console.log("Mapped work items:", workTypes.map((w) => ({
-  id: w.id,
-  name: w.name,
-  subCategoryId:
-    w.selectedSubCategory?.id || "",    
-  subCategoryName:
-    w.selectedSubCategory?.name || "",    
-  productsId:
-    w.selectedProduct?.id || "",
-  productName:  
-    w.selectedProduct?.name || "",
-  unitPrice: w.selectedProduct?.price || 0,
-})));
+
 const handleSaveNewAddress = async () => {
   const saved = await saveAddress();
 

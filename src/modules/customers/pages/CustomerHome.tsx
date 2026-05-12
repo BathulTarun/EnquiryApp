@@ -30,6 +30,7 @@ import { AuthService } from "@/services/authService.service";
 import { toast } from "sonner";
 
 import { title } from "process";
+import { a } from "vitest/dist/chunks/suite.d.FvehnV49.js";
 
 type Step = "home" | "mobile" | "otp" | "form" | "worktype" | "visit";
 
@@ -53,8 +54,8 @@ const [customerEnquiries, setCustomerEnquiries] = useState<Enquiry[]>([]);
 const [engineers, setEngineers] = useState<Engineer[]>([]);
   const [locations, setLocations] = useState<Address[]>([]);
  const[token,setToken]=useState("");
-  const loadLocations = async () => {
-    const data = await LocationService.getAllLocationsForCustomer(customer.id);
+  const loadLocations = async (customerId: number) => {
+    const data = await LocationService.getAllLocationsForCustomer(customerId);
 
     const mapped = data.map((loc: any) => ({
       id:loc.LocationID,
@@ -134,7 +135,7 @@ useEffect(() => {
 
     const found = await CustomerService.getByMobile(mobile);
     if (found) {
-      loadLocations();
+     await loadLocations(found.id);
       setCustomer(found);
       setIsNew(false);
      await getEnqueriesByCustomerId(found.id);
