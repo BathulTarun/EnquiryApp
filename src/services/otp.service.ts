@@ -14,7 +14,7 @@ class OtpService {
       //     method: "GET",
       //     headers: {
       //       "company":`${COMPANY_ID}`,
-      //        "tenant":`${TENANT_ID}`,
+      //       "tenant":`${TENANT_ID}`,
       //     },
       //   }
       // );
@@ -24,6 +24,8 @@ class OtpService {
           method: "POST",
           headers:{
           "Content-Type": "application/json",
+            "company":`${COMPANY_ID}`,
+            "tenant":`${TENANT_ID}`,
           "package":"ecommerce.mobile.andhrakitchenwares.com",
           },
           body: JSON.stringify({Username: mobile})
@@ -63,6 +65,8 @@ class OtpService {
           method: "POST",
           headers:{
           "Content-Type": "application/json",
+            "company":`${COMPANY_ID}`,
+            "tenant":`${TENANT_ID}`,
           "package":"ecommerce.mobile.andhrakitchenwares.com",
           },
           body: JSON.stringify({Username: mobile,Code:otp})
