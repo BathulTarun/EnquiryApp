@@ -30,6 +30,10 @@ export interface StatusEntry {
 export interface WorkItem {
   id: string;
   productsId?: string; // maps to product UID from ERP
+  productName?: string; // for display, can be fetched from backend if not provided
+  CategoryID?: number; // maps to work type ID
+  subCategoryID?: number; // maps to subcategory ID
+  subCategoryName?: string; // for display, can be fetched from backend if not provided
   name: string;
   measurement?: string;
   quantity?: string;

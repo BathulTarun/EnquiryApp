@@ -4,7 +4,7 @@ import { WorkType } from "@/types/common";
 // import { WORK_TYPES, SUB_OPTIONS } from "@/data/enquiry.mock";
 import { error } from "console";
 
-// const BASE_URL = "http://localhost:7071/api";
+const BASE_URL = "http://localhost:7071/api";
 const COMPANY_ID=import.meta.env.VITE_COMPANY_ID;
 const TENANT_ID=import.meta.env.VITE_TENANT_ID;
 
@@ -76,7 +76,7 @@ class WorkTypeService {
       // );
         const data= await response.json();
         // return data.data; 
-        return data
+        return data;
     }catch(error){
       console.error("Error fetching categories:", error);
       return [];
@@ -84,10 +84,44 @@ class WorkTypeService {
   }
 
 
-  static async getProductsByCategores(categoryId: number): Promise<string[]> {
+    static async getSubCategories(categoryId: number) {
+    try {
+      const response = await fetch(
+        `${FixedURL}/api/subcategory/get?category=${categoryId}`,
+        {
+          method:"GET",
+            headers:{
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "true",
+                "company":`${COMPANY_ID}`,
+                "tenant":`${TENANT_ID}`,
+            }
+        }
+      );
+      // const response = await fetch(
+      //   `${BASE_URL}/GetSubCategories?categoryId=${categoryId}`,
+      //   {
+      //     method:"GET",
+      //       headers:{
+      //           "company":`${COMPANY_ID}`,
+      //           "tenant":`${TENANT_ID}`,
+      //       }
+      //   }
+      // );
+      const data= await response.json();
+        // return data.data; 
+        return data;
+    } catch (error) {
+      console.error("Error fetching subcategories:", error);
+      return [];
+    }
+  }
+
+
+  static async getProductsBySubcategory(subcategoryId: number): Promise<string[]> {
     try{
         const response=await fetch(
-          `${FixedURL}/api/products/get?category=${categoryId}`,
+          `${FixedURL}/api/products/get?subCategory=${subcategoryId}`,
           {
             method:"GET",
             headers:{
@@ -99,7 +133,7 @@ class WorkTypeService {
           }
         );
       //   const response=await fetch(
-      //     `${BASE_URL}/GetProductsByCategory/?categoryId=${categoryId}`,
+      //     `${BASE_URL}/GetProductsBySubCategory?subCategoryId=${subcategoryId}`,
       // {
       //     method:"GET",
       //       headers:{
@@ -110,7 +144,7 @@ class WorkTypeService {
       // );
         const data= await response.json();
         // return data.data; 
-         return data
+         return data;
     }catch(error){
       console.error("Error fetching categories:", error);
       return [];

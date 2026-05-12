@@ -42,16 +42,36 @@ const EnquirySummary = ({ customer, workTypes, visitDate, visitTime, address, re
                 <Badge key={w.id} variant="secondary" className="text-xs">{w.name}</Badge>
               ))}
             </div>
-           {workTypes.map((w) =>
+           {/* {workTypes.map((w) =>
   w.selectedSubOption ? (
     <p
       key={w.id}
       className="text-xs text-muted-foreground mt-1"
     >
-      {w.name}: {w.selectedSubOption}
+      {w.name}: {w.selectedSubOption.name}
     </p>
   ) : null
-)}
+)} */}
+
+{workTypes.map((w) => (
+  <div key={w.id}>
+    <p className="text-xs font-medium">
+      {w.name}
+    </p>
+
+    {w.selectedSubCategory && (
+      <p className="text-xs text-muted-foreground">
+        {w.selectedSubCategory.name}
+      </p>
+    )}
+
+    {w.selectedProduct && (
+      <p className="text-xs text-primary">
+        {w.selectedProduct.name}
+      </p>
+    )}
+  </div>
+))}
           </div>
         )}
 

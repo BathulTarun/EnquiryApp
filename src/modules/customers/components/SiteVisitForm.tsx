@@ -49,7 +49,7 @@ const SiteVisitForm = ({ addresses, contactNumber,customer,workTypes,customerId,
   const [locations, setLocations] = useState<Address[]>([]);
   useEffect(() => {
   const loadLocations = async () => {
-    const data = await LocationService.getAllLocationsForCustomer();
+    const data = await LocationService.getAllLocationsForCustomer(customer.id);
 
     const mapped = data.map(mapLocationToAddress);
     setLocations(mapped);
@@ -195,7 +195,19 @@ const saveAddress = async (): Promise<Address | null> => {
     return null;
   }
 };
-
+ console.log("Mapped work items:", workTypes.map((w) => ({
+  id: w.id,
+  name: w.name,
+  subCategoryId:
+    w.selectedSubCategory?.id || "",    
+  subCategoryName:
+    w.selectedSubCategory?.name || "",    
+  productsId:
+    w.selectedProduct?.id || "",
+  productName:  
+    w.selectedProduct?.name || "",
+  unitPrice: w.selectedProduct?.price || 0,
+})));
 const handleSaveNewAddress = async () => {
   const saved = await saveAddress();
 
@@ -260,17 +272,37 @@ const imageStrings = photos.map((img) => img.url);
    // ✅ Correct structure
  workTypes: workTypes,
        // you can fill later
-  workItems: workTypes.map((w) => {
-// console.log("WorkType:", w.name, "Selected Product:", w.selectedSubOption);
-    return{
+//   workItems: workTypes.map((w) => {
+// // console.log("WorkType:", w.name, "Selected Product:", w.selectedSubOption);
+//     return{
+//     id: w.id,
+//     name: w.name,
+//     productsId: String(w.selectedSubOption.id)|| "",
+//     }
+//   // default to first subOption if exists
+//   }),        // REQUIRED
+ workItems: workTypes.map((w) => {
+  return {
     id: w.id,
     name: w.name,
-    productsId: w.selectedSubOption|| "",
-    }
-  // default to first subOption if exists
-  }),        // REQUIRED
- 
- 
+
+    subCategoryID:
+      Number(w.selectedSubCategory?.id) ,
+
+    subCategoryName:
+      w.selectedSubCategory?.name || "",
+
+    productsId:
+      w.selectedProduct?.id || "",
+
+    productName:
+      w.selectedProduct?.name || "",
+
+    unitPrice: w.selectedProduct?.price || 0,
+
+  };
+}),
+
   // address:
   //   addressChoice === "new"
   //     ? { ...newAddr, id: crypto.randomUUID() }
@@ -349,7 +381,7 @@ onSubmit(enquiryId);
               <Label className="flex items-center gap-1.5">
                 <Calendar size={14} /> Date <span className="text-destructive">*</span>
               </Label>
-              <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="mt-1" />
+              <Input type="date" min={new Date().toISOString().split("T")[0]} value={date} onChange={(e) => setDate(e.target.value)} required className="mt-1" />
             </div>
             <div className="sm:col-span-2">
               <Label className="flex items-center gap-1.5 mb-2">
@@ -357,7 +389,7 @@ onSubmit(enquiryId);
               </Label>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                {slots.map((slot) => {
-  const selected = timeSlot === slot.id;
+  const selected = timeSlot === slot.label;
                   return (
                     <button
                       key={slot.id}

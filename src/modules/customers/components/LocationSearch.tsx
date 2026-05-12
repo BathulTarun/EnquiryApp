@@ -86,27 +86,60 @@ const handleSearch = (value: string) => {
   }
 };
 
-  const handleSelectSuggestion = (loc: Address) => {
-  setQuery(loc.label);
-  setSelected(loc);
+//   const handleSelectSuggestion = (loc: Address) => {
+//   setQuery(loc.label);
+//   setSelected(loc);
+//   setShowSuggestions(false);
+//   const matchedState = getStateId(loc.state);
+
+//   onSelect({
+//     id: loc.id,
+//     address1: loc.address1,
+//     address2: loc.address2,
+//     city: loc.city,
+//     state: matchedState?.Name || loc.state,
+//     stateId: matchedState ? Number(matchedState.ID) : 0,
+//     pincode: loc.pincode,
+//     landmark: loc.landmark,
+//     lat: loc.lat,
+//     lng: loc.lng,
+//     verified: loc.verified
+//   });
+// };
+const handleSelectSuggestion = async (loc: Address) => {
   setShowSuggestions(false);
-  const matchedState = getStateId(loc.state);
+
+  // fetch full place details
+  const details = await LocationService.getPlaceDetails(
+    loc.placeId || ""
+  );
+
+  const fullLocation: Address = {
+    ...loc,
+    ...details,
+  };
+
+  setQuery(fullLocation.label);
+  setSelected(fullLocation);
+
+  const matchedState = getStateId(fullLocation.state);
 
   onSelect({
-    id: loc.id,
-    address1: loc.address1,
-    address2: loc.address2,
-    city: loc.city,
-    state: matchedState?.Name || loc.state,
-    stateId: matchedState ? Number(matchedState.ID) : 0,
-    pincode: loc.pincode,
-    landmark: loc.landmark,
-    lat: loc.lat,
-    lng: loc.lng,
-    verified: loc.verified
+    id: fullLocation.id,
+    address1: fullLocation.address1,
+    address2: fullLocation.address2,
+    city: fullLocation.city,
+    state: matchedState?.Name || fullLocation.state,
+    stateId: matchedState
+      ? Number(matchedState.ID)
+      : 0,
+    pincode: fullLocation.pincode,
+    landmark: fullLocation.landmark,
+    lat: fullLocation.lat,
+    lng: fullLocation.lng,
+    verified: true,
   });
 };
-
   return (
     <div className="space-y-3">
       <div ref={containerRef} className="relative">

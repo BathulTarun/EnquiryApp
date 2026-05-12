@@ -12,4 +12,6 @@ export const timeSlots: TimeSlot[] = [
   { id: "t9", label: "3:00 PM – 4:00 PM", startHour: 15, endHour: 16 },
   { id: "t10", label: "4:00 PM – 5:00 PM", startHour: 16, endHour: 17 },
   { id: "t11", label: "5:00 PM – 6:00 PM", startHour: 17, endHour: 18 },
+  { id: "t12", label: "6:00 PM – 7:00 PM", startHour: 18, endHour: 19 },
+  { id: "t13", label: "7:00 PM – 8:00 PM", startHour: 19, endHour: 20 },
 ];

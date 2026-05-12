@@ -47,16 +47,16 @@ class OtpService {
   ): Promise<{ verified: boolean }> {
     
     try {
-    //   const response = await fetch(
-    //     `${BASE_URL}/VerifyOtp?mobile=${mobile}&otp=${otp}`,
-    //     {
-    //       method: "GET",
-    //       headers: {
-    //        "company":`${COMPANY_ID}`,
-    //         "tenant":`${TENANT_ID}`,
-    //       },
-    //     }
-    //   );
+      // const response = await fetch(
+      //   `${BASE_URL}/VerifyOtp?mobile=${mobile}&otp=${otp}`,
+      //   {
+      //     method: "GET",
+      //     headers: {
+      //      "company":`${COMPANY_ID}`,
+      //       "tenant":`${TENANT_ID}`,
+      //     },
+      //   }
+      // );
         const response = await fetch(
         `${FixedURL}/api/user/validateOTP`,
         {

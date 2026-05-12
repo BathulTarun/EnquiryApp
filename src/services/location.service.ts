@@ -74,20 +74,124 @@ static statesCache: any[] | null = null;
   //   console.error("Search error:", error);
   //   return [];
   // }
+  if (!query || query.length < 2) return [];
 
-    const lower = query.toLowerCase();
+    return new Promise((resolve) => {
+      const service = new google.maps.places.AutocompleteService();
 
-    return locations.filter((loc) =>
-      loc.label.toLowerCase().includes(lower) ||
-      loc.city.toLowerCase().includes(lower) ||
-      loc.address1.toLowerCase().includes(lower)
-    );
+      service.getPlacePredictions(
+        {
+          input: query,
+          componentRestrictions: {
+            country: "in",
+          },
+        },
+        (predictions, status) => {
+          if (
+            status !== google.maps.places.PlacesServiceStatus.OK ||
+            !predictions
+          ) {
+            resolve([]);
+            return;
+          }
+
+const results: Address[] = predictions.map((item, index) => ({
+  id: (index),
+  placeId: item.place_id,
+  label: item.description,
+  address1: item.structured_formatting?.main_text || "",
+  address2: "",
+  city: "",
+  state: "",
+  pincode: "",
+  landmark: "",
+  lat: 0,
+  lng: 0,
+}));
+
+          resolve(results);
+        }
+      );
+    });
+
+    // const lower = query.toLowerCase();
+
+    // return locations.filter((loc) =>
+    //   loc.label.toLowerCase().includes(lower) ||
+    //   loc.city.toLowerCase().includes(lower) ||
+    //   loc.address1.toLowerCase().includes(lower)
+    // );
   }
 
   // 🔹 Get by ID
   // static async getById(id: string): Promise<Address | null> {
   //   return locations.find((l) => l.id === id) || null;
   // }
+
+  static async getPlaceDetails(placeId: string): Promise<Partial<Address>> {
+  return new Promise((resolve) => {
+    const service = new google.maps.places.PlacesService(
+      document.createElement("div")
+    );
+
+    service.getDetails(
+      {
+        placeId,
+        fields: [
+          "address_components",
+          "geometry",
+          "formatted_address",
+        ],
+      },
+      (place, status) => {
+        if (
+          status !== google.maps.places.PlacesServiceStatus.OK ||
+          !place
+        ) {
+          resolve({});
+          return;
+        }
+
+        let city = "";
+        let state = "";
+        let pincode = "";
+        let landmark = "";
+
+
+        place.address_components?.forEach((component) => {
+          const types = component.types;
+
+          if (types.includes("locality") || types.includes("administrative_area_level_2")) {
+            city = component.long_name;
+          }
+
+          if (types.includes("administrative_area_level_1")) {
+            state = component.long_name;
+          }
+
+          if (types.includes("postal_code")) {
+            pincode = component.long_name;
+          }
+
+          if (types.includes("sublocality") || types.includes("route")) {
+          landmark = component.long_name;
+          }
+        });
+
+        resolve({
+          label: place.formatted_address || "",
+          address1: place.formatted_address || "",
+          city,
+          state,
+          pincode,
+          landmark,
+          lat: place.geometry?.location?.lat() || 0,
+          lng: place.geometry?.location?.lng() || 0,
+        });
+      }
+    );
+  });
+}
 
 
   static async getStates(): Promise<{ id: number; name: string }[]> {
@@ -120,17 +224,20 @@ static statesCache: any[] | null = null;
   }
 
 
-  static async getAllLocationsForCustomer(): Promise<Address[]> {
+  static async getAllLocationsForCustomer(customerId: Number): Promise<Address[]> {
     try {
-       const token = TokenManager.getToken();
+      //  const token = TokenManager.getToken();
       const response = await fetch(
-        `${FixedURL}/api/location/search`,
+        // `${FixedURL}/api/location/search`,
+        `${FixedURL}/api/enquiry/get-locations?id=${customerId}`,
         {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
             "ngrok-skip-browser-warning": "true",
-            "Authorization": `Bearer ${token}`,
+            "company":`${COMPANY_ID}`,
+            "tenant":`${TENANT_ID}`,
+            // "Authorization": `Bearer ${token}`,
             "Package":`ecommerce.mobile.andhrakitchenwares.com`,
           },
         }

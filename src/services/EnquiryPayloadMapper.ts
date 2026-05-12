@@ -1,4 +1,5 @@
 import { Enquiry } from "@/types/enquiry";
+import { Sub } from "@radix-ui/react-context-menu";
 
 export const mapEnquiryToApi = (enquiry: Enquiry) => {
   return {
@@ -37,9 +38,10 @@ export const mapEnquiryToApi = (enquiry: Enquiry) => {
     Remarks: enquiry.description || "",
 
     ProblemDescription: enquiry.workItems?.map((item) => ({
-      CategoryID: Number(item.id), // ⚠️ replace with real mapping
-      ProductID: item.productsId, // ⚠️ replace with real mapping
-      Description: item.name,
+      CategoryID: Number(item.id), 
+      SubCategoryID: Number(item.subCategoryID), 
+      ProductID: item.productsId, 
+      Description: item.notes,
       Images: item.images || [],
       Price: item.unitPrice || 0,
     })) || [],

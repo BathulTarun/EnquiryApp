@@ -64,7 +64,7 @@ export class EnquiryService {
   static async create(enquiry: Enquiry): Promise<string | null> {
    
     try {
-      const token = TokenManager.getToken();
+      // const token = TokenManager.getToken();
     // const response = await fetch(`${BASE_URL}/CreateEnquiry`, {
     //   method: "POST",
     //   headers: {
@@ -86,7 +86,9 @@ export class EnquiryService {
       headers: {
        "Content-Type": "application/json",
             "ngrok-skip-browser-warning": "true",
-            "Authorization": `Bearer ${token}`,
+            "company":`${COMPANY_ID}`,
+            "tenant":`${TENANT_ID}`,
+            // "Authorization": `Bearer ${token}`,
             "Package":`ecommerce.mobile.andhrakitchenwares.com`,
       },
       body: JSON.stringify(payload),

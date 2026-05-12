@@ -4,20 +4,35 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Wrench } from "lucide-react";
 import { useEffect, useState } from "react";
-import { WorkType } from "@/types/common";
+import { SelectedProduct, WorkType } from "@/types/common";
 import WorkTypeService from "@/services/worktype.service";
-import { SelectedSubOption } from "@/types/common";
+// import { SelectedSubOption } from "@/types/common";
+
 
 interface WorkTypeSelectorProps {
   selected: WorkType[];
   onToggle: (type: WorkType) => void;
-  onSubChange: (id: string, value: string) => void;
+  // onSubChange: (id: string, value: SelectedSubOption) => void;
+onUpdate: (type: WorkType) => void;
+   onSubCategoryChange: (
+    workTypeId: string,
+    subCategory: { id: string; name: string }
+  ) => void;
+
+  onProductChange: (
+    workTypeId: string,
+    product: SelectedProduct
+  ) => void;
 }
+
 
 const WorkTypeSelector = ({
   selected,
   onToggle,
-  onSubChange,
+  onUpdate,
+  // onSubChange,
+  onSubCategoryChange,
+  onProductChange,
 }: WorkTypeSelectorProps) => {
   const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
 
@@ -44,33 +59,142 @@ const WorkTypeSelector = ({
   }, []);
 
   // ✅ Load products when category selected
-  const handleToggle = async (type: WorkType) => {
-    const isSelected = selectedMap.has(type.id);
+//   const handleToggle = async (type: WorkType) => {
+//     const isSelected = selectedMap.has(type.id);
 
-    // If already selected → just toggle off
-    if (isSelected) {
-      onToggle(type);
-      return;
-    }
+//     // If already selected → just toggle off
+//     if (isSelected) {
+//       onToggle(type);
+//       return;
+//     }
 
-    // Fetch products only when selecting
-    const products = await WorkTypeService.getProductsByCategores(
-      Number(type.id)
-    );
+//     // Fetch products only when selecting
+//     const products = await WorkTypeService.getProductsByCategores(
+//       Number(type.id)
+//     );
 
-    const productOptions = products.map((p: any) => ({
-  id: String(p.UID),  // p.UID, //uid
-  name: p.Name, //p.Name, //name
-  price:p.Price, //p.Price, //price
-}));
+//     const productOptions = products.map((p: any) => ({
+//   id: String(p.UID),  // p.UID, //uid
+//   name: p.Name, //p.Name, //name
+//   price:p.Price, //p.Price, //price
+// }));
 
-    const updatedType: WorkType = {
-      ...type,
-      subOptions: productOptions,
-    };
+//     const updatedType: WorkType = {
+//       ...type,
+//       subOptions: productOptions,
+//     };
 
-    onToggle(updatedType);
-  };
+//     onToggle(updatedType);
+//   };
+
+// const handleToggle = async (type: WorkType) => {
+//   const isSelected = selectedMap.has(type.id);
+
+//   if (isSelected) {
+//     onToggle(type);
+//     return;
+//   }
+
+//   const subCats = await WorkTypeService.getSubCategories(
+//     Number(type.id)
+//   );
+
+//   const mappedSubCats = subCats.map((s: any) => ({
+//     id: String(s.SubCategoryID),
+//     name: s.SubCategoryName,
+//     products: [],
+//   }));
+
+//   onToggle({
+//     ...type,
+//     subCategories: mappedSubCats,
+//   });
+// };
+const handleToggle = async (type: WorkType) => {
+  const isSelected = selectedMap.has(type.id);
+
+  // Remove if already selected
+  if (isSelected) {
+    onToggle(type);
+    return;
+  }
+
+  // 1. Get sub categories
+  const subCats = await WorkTypeService.getSubCategories(
+    Number(type.id)
+  );
+
+  // 2. Load products for EACH subcategory
+  const mappedSubCats = await Promise.all(
+    subCats.map(async (s: any) => {
+
+      const products =
+        await WorkTypeService.getProductsBySubcategory(
+          Number(s.SubCategoryID)
+        );
+
+      const mappedProducts = products.map((p: any) => ({
+        id: String(p.UID),
+        name: p.Name,
+        price: p.Price,
+      }));
+
+      return {
+        id: String(s.SubCategoryID),
+        name: s.SubCategoryName,
+        products: mappedProducts,
+      };
+    })
+  );
+
+  // 3. Remove subcategories with no products
+  const filteredSubCats = mappedSubCats.filter(
+    (sub) => sub.products.length > 0
+  );
+
+  // 4. Save in selected state
+  onToggle({
+    ...type,
+    subCategories: filteredSubCats,
+  });
+};
+
+
+// const handleSubCategorySelect = async (
+//   type: WorkType,
+//   subCat: any
+// ) => {
+//   const products = await WorkTypeService.getProductsBySubcategory(
+//     Number(subCat.id)
+//   );
+
+//   const mappedProducts = products.map((p: any) => ({
+//     id: String(p.UID),
+//     name: p.Name,
+//     price: p.Price,
+//   }));
+
+//   const updatedSubCats =
+//     type.subCategories?.map((s) =>
+//       s.id === subCat.id
+//         ? { ...s, products: mappedProducts }
+//         : s
+//     ) || [];
+
+// onUpdate({
+//   ...type,
+//   subCategories: updatedSubCats,
+//   selectedSubCategory: {
+//     id: subCat.id,
+//     name: subCat.name,
+//   },
+// });
+
+//   onSubCategoryChange(type.id!, {
+//     id: subCat.id,
+//     name: subCat.name,
+//   });
+// };
 
   return (
     <Card>
@@ -95,7 +219,7 @@ const WorkTypeSelector = ({
                       ? "border-primary bg-primary/5"
                       : "border-border hover:border-primary/40"
                   }`}
-                  onClick={() => handleToggle(type)} // ✅ changed
+                  onClick={() => handleToggle(type)} //  changed
                 >
                   <Checkbox
                     checked={checked}
@@ -106,9 +230,9 @@ const WorkTypeSelector = ({
                 </div>
 
                 {/* ✅ Products as sub options */}
-                {checked && selectedItem?.subOptions && (
+                {/* {checked && selectedItem?.subOptions && (
                   <div className="ml-8 mt-2 mb-1">
-                   {/* <RadioGroup
+                   <RadioGroup
   value={selectedItem?.selectedSubOption?.id || ""}
   onValueChange={(v) => {
     const selectedProduct = selectedItem?.subOptions?.find(
@@ -116,17 +240,22 @@ const WorkTypeSelector = ({
     );
 
     if (selectedProduct) {
-      onSubChange(type.id!, {
-        id: selectedProduct.id,
-        name: selectedProduct.name,
-        price: selectedProduct.price,
-      });
+      // onSubChange(type.id!, {
+      //   id: selectedProduct.id,
+      //   name: selectedProduct.name,
+      //   price: selectedProduct.price,
+      // });
+      onProductChange(type.id!, {
+  id: product.id,
+  name: product.name,
+  price: product.price,
+});
     }
   }}
   className="grid grid-cols-2 gap-2"
 > */}
-<RadioGroup value={selectedItem?.selectedSubOption || ""} onValueChange={(v) => onSubChange(type.id, v)} className="grid grid-cols-2 gap-2" >
-                      {selectedItem.subOptions.map((opt) => (
+{/* <RadioGroup value={selectedItem?.selectedSubOption || ""} onValueChange={(v) => onSubChange(type.id, v)} className="grid grid-cols-2 gap-2" > */}
+                      {/* {selectedItem.subOptions.map((opt) => (
                         <div key={opt.id} className="flex items-center gap-1.5">
                           <RadioGroupItem
                             value={opt.id}
@@ -142,7 +271,103 @@ const WorkTypeSelector = ({
                       ))}
                     </RadioGroup>
                   </div>
-                )}
+                )} */}
+
+                {/* Sub Categories */}
+{checked && selectedItem?.subCategories && (
+  <div className="ml-8 mt-3 space-y-3">
+
+    <RadioGroup
+      value={selectedItem.selectedSubCategory?.id || ""}
+      onValueChange={(v) => {
+        const subCat = selectedItem.subCategories?.find(
+          (s) => s.id === v
+        );
+
+        if (subCat) {
+  onUpdate({
+    ...selectedItem,
+    selectedSubCategory: {
+      id: subCat.id,
+      name: subCat.name,
+    },
+  });
+
+  onSubCategoryChange(type.id!, {
+    id: subCat.id,
+    name: subCat.name,
+  });
+}
+      }}
+    >
+      {selectedItem.subCategories.map((sub) => (
+        <div key={sub.id} className="space-y-2">
+
+          {/* SubCategory */}
+          <div className="flex items-center gap-2">
+            <RadioGroupItem
+              value={sub.id}
+              id={`${type.id}-sub-${sub.id}`}
+            />
+
+            <Label
+              htmlFor={`${type.id}-sub-${sub.id}`}
+              className="cursor-pointer font-medium text-sm"
+            >
+              {sub.name}
+            </Label>
+          </div>
+
+          {/* Products */}
+          {selectedItem.selectedSubCategory?.id === sub.id &&
+            sub.products &&
+            sub.products.length > 0 && (
+              <div className="ml-6 mt-2">
+                <RadioGroup
+                  value={
+                    selectedItem.selectedProduct?.id || ""
+                  }
+                  onValueChange={(v) => {
+                    const product = sub.products?.find(
+                      (p) => p.id === v
+                    );
+
+                    if (product) {
+                      onProductChange(type.id!, {
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                      });
+                    }
+                  }}
+                  className="grid grid-cols-2 gap-2"
+                >
+                  {sub.products.map((product) => (
+                    <div
+                      key={product.id}
+                      className="flex items-center gap-2"
+                    >
+                      <RadioGroupItem
+                        value={product.id}
+                        id={`${type.id}-product-${product.id}`}
+                      />
+
+                      <Label
+                        htmlFor={`${type.id}-product-${product.id}`}
+                        className="text-sm cursor-pointer"
+                      >
+                        {product.name}
+                      </Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              </div>
+            )}
+        </div>
+      ))}
+    </RadioGroup>
+  </div>
+)}
               </div>
             );
           })}

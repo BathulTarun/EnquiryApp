@@ -35,7 +35,7 @@ export class CustomerService {
   //  Get customer by mobile 
   static async getByMobile(mobile: string): Promise<Customer | null> {
     try{
-       const token = TokenManager.getToken();
+      //  const token = TokenManager.getToken();
       // const response= await fetch(
       //   `${BASE_URL}/getcustomerbymobile?mobile=${mobile}`,
       //   {
@@ -53,8 +53,9 @@ export class CustomerService {
           headers:{
             "Content-Type": "application/json",
             "ngrok-skip-browser-warning": "true",
-            //  "Bearer Token":`${Authorization}`,
-            "Authorization": `Bearer ${token}`,
+              "company":`${COMPANY_ID}`,
+              "tenant":`${TENANT_ID}`,
+            // "Authorization": `Bearer ${token}`,
             "Package":`ecommerce.mobile.andhrakitchenwares.com`,
           }
         }
@@ -90,7 +91,7 @@ export class CustomerService {
    //GET Enquiries by Cust ID
    static async getEnquriesByCustomerId(customerID: number){
     try{
-       const token = TokenManager.getToken();
+      //  const token = TokenManager.getToken();
       // const response=await fetch(
       //   `${BASE_URL}/getenquiriesbyCustomerId?customerId=${customerID}`,
       //   {
@@ -108,8 +109,9 @@ export class CustomerService {
              headers:{
               "Content-Type": "application/json",
               "ngrok-skip-browser-warning": "true",
-              // "Bearer Token":`${Authorization}`,
-               "Authorization": `Bearer ${token}`,
+              "company":`${COMPANY_ID}`,
+              "tenant":`${TENANT_ID}`,
+              //  "Authorization": `Bearer ${token}`,
               "Package":"ecommerce.mobile.andhrakitchenwares.com"
              }
         }
@@ -134,7 +136,7 @@ export class CustomerService {
   static async createCustomer(customer: Omit<Customer, "id">): Promise<any | null> {
 
     try{
-       const token = TokenManager.getToken();
+      //  const token = TokenManager.getToken();
       // const response= await fetch(
       //   `${BASE_URL}/createcustomer`,
       //   {
@@ -156,7 +158,9 @@ export class CustomerService {
             headers: {
              "Content-Type": "application/json",
                   "ngrok-skip-browser-warning": "true",
-                  "Authorization": `Bearer ${token}`,
+                  // "Authorization": `Bearer ${token}`,
+                  "company":`${COMPANY_ID}`,
+                  "tenant":`${TENANT_ID}`,
                   "Package":`ecommerce.mobile.andhrakitchenwares.com`,
             },
             body: JSON.stringify(payload),
@@ -175,7 +179,7 @@ export class CustomerService {
 static async addAddress( customerId: Number, address: Address): Promise<any | null> {
 
   try{
-     const token = TokenManager.getToken();
+    //  const token = TokenManager.getToken();
     // const response= await fetch(
     //   `${BASE_URL}/addaddress`,
     //   {
@@ -193,14 +197,17 @@ static async addAddress( customerId: Number, address: Address): Promise<any | nu
     // );
     const payload = mapAddressToApi(address,customerId);
       const response= await fetch(
-      `${FixedURL}/api/location/create`,
+      // `${FixedURL}/api/location/create`,
+       `${FixedURL}/api/enquiry/create-location`,
       {
         "method":"POST",
         headers:{
             "Content-Type": "application/json",
                   "ngrok-skip-browser-warning": "true",
-                  "Authorization": `Bearer ${token}`,
+                  // "Authorization": `Bearer ${token}`,
                   "Package":`ecommerce.mobile.andhrakitchenwares.com`,
+                  "company":`${COMPANY_ID}`,
+                  "tenant":`${TENANT_ID}`,
           },
            body: JSON.stringify({
             customerId:customerId,

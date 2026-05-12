@@ -42,7 +42,7 @@ const [locations, setLocations] = useState<Address[]>([]);
 //new for address
 useEffect(() => {
   const fetchLocations = async () => {
-    const data = await LocationService.getAllLocationsForCustomer();
+    const data = await LocationService.getAllLocationsForCustomer(customer.id);
 
     const mapped = data.map(mapLocationToAddress);
 
@@ -275,14 +275,13 @@ onUpdateCustomer?.({
         </CardContent>
       </Card>
 
+      {enquiries.length > 0 && (
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">Previous Enquiries</CardTitle>
         </CardHeader>
         <CardContent>
-          {enquiries.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No previous enquiries</p>
-          ) : (
+         
             <div className="space-y-3">
               {enquiries.map((enq) => (
                <div key={enq.id} className="p-3 rounded-lg bg-muted/50 border border-border"  onClick={() => onSelectEnquiry(enq)}>
@@ -295,10 +294,25 @@ onUpdateCustomer?.({
  <p className="text-xs text-muted-foreground mb-1">
   {enq.siteVisit?.scheduledDate || "Not scheduled"}
 </p>
-  <p className="text-sm">
+  {/* <p className="text-sm">
   {enq.workTypes?.map((w) =>
     `${w.name}${w.selectedSubOption ? ` (${w.selectedSubOption})` : ""}`
   ).join(", ")}
+</p> */}
+<p className="text-sm">
+  {enq.workTypes
+    ?.map((w) => {
+      const subCat = w.selectedSubCategory?.name
+        ? ` - ${w.selectedSubCategory.name}`
+        : "";
+
+      const product = w.selectedProduct?.name
+        ? ` (${w.selectedProduct.name})`
+        : "";
+
+      return `${w.name}${subCat}${product}`;
+    })
+    .join(", ")}
 </p>
   {/* Remarks */}
   {enq.remarks && (
@@ -309,9 +323,11 @@ onUpdateCustomer?.({
 </div>
               ))}
             </div>
-          )}
+         
         </CardContent>
       </Card>
+     )}
+
     </div>
   );
 }; 

@@ -8,7 +8,7 @@ import WorkTypeSelector from "@/modules/customers/components/WorkTypeSelector";
 import SiteVisitForm from "@/modules/customers/components/SiteVisitForm";
 import EnquirySummary from "@/modules/customers/components/EnquirySummary";
 import ConfirmationDialog from "@/modules/customers/components/ConfirmationDialog";
-import {  Address ,SelectedSubOption} from "@/types/common";
+import {  Address ,SelectedProduct} from "@/types/common";
 import { WorkType } from "@/types/common";
 import { Customer } from "@/types/customer";
 import EnquiryDetailsDialog from "@/modules/customers/components/EnquiryDetailsDialog";
@@ -54,7 +54,7 @@ const [engineers, setEngineers] = useState<Engineer[]>([]);
   const [locations, setLocations] = useState<Address[]>([]);
  const[token,setToken]=useState("");
   const loadLocations = async () => {
-    const data = await LocationService.getAllLocationsForCustomer();
+    const data = await LocationService.getAllLocationsForCustomer(customer.id);
 
     const mapped = data.map((loc: any) => ({
       id:loc.LocationID,
@@ -116,19 +116,19 @@ useEffect(() => {
   const handleOtpVerified =async  () => {
  
       // If token is NOT present → customer does not exist
-  if (TokenManager.getToken()==="null" || !TokenManager.getToken()) {
-    toast.error("No customer found. Please create a new customer profile.",{
-      duration: 5000,
-    });
-    // toast({
-    //     title: "No customer found.",
-    //     description: "Please create a new customer profile.",
-    //   });
-    setIsNew(true);
-    setCustomer(null);
-    setStep("form");
-    return;
-  }
+  // if (TokenManager.getToken()==="null" || !TokenManager.getToken()) {
+  //   toast.error("No customer found. Please create a new customer profile.",{
+  //     duration: 5000,
+  //   });
+  //   // toast({
+  //   //     title: "No customer found.",
+  //   //     description: "Please create a new customer profile.",
+  //   //   });
+  //   setIsNew(true);
+  //   setCustomer(null);
+  //   setStep("form");
+  //   return;
+  // }
   // console.log("OTP verified, token set:", TokenManager.getToken());
   // getEnqueriesByCustomerMobile();
 
@@ -139,7 +139,7 @@ useEffect(() => {
       setIsNew(false);
      await getEnqueriesByCustomerId(found.id);
     } else {
-      TokenManager.clearToken();
+      // TokenManager.clearToken();
       toast.error("No customer found. Please create a new customer profile.",{
         duration: 5000,
       });
@@ -167,15 +167,53 @@ useEffect(() => {
     return data;
   }
 
-const handleSubChange = (id: string, value: string) => {
-  // console.log("SubOption changed for WorkType ID:", id, "New Value:", value);
+// const handleSubChange = (id: string, value: SelectedSubOption) => {
+//   // console.log("SubOption changed for WorkType ID:", id, "New Value:", value);
+//   setSelectedWork((prev) =>
+//     prev.map((w) =>
+//       w.id === id ? { ...w, selectedSubOption: value } : w
+//     )
+//   );
+// };
+
+const handleSubCategoryChange = (
+  workTypeId: string,
+  subCategory: { id: string; name: string }
+) => {
   setSelectedWork((prev) =>
     prev.map((w) =>
-      w.id === id ? { ...w, selectedSubOption: value } : w
+      w.id === workTypeId
+        ? {
+            ...w,
+            selectedSubCategory: subCategory,
+          }
+        : w
     )
   );
 };
 
+const handleProductChange = (
+  workTypeId: string,
+  product: SelectedProduct
+) => {
+  setSelectedWork((prev) =>
+    prev.map((w) =>
+      w.id === workTypeId
+        ? {
+            ...w,
+            selectedProduct: product,
+          }
+        : w
+    )
+  );
+};
+const updateWorkType = (updated: WorkType) => {
+  setSelectedWork((prev) =>
+    prev.map((w) =>
+      w.id === updated.id ? updated : w
+    )
+  );
+};
 
 
  
@@ -210,7 +248,7 @@ const handleSubChange = (id: string, value: string) => {
  
 
   const reset = () => {
-    TokenManager.clearToken();
+    // TokenManager.clearToken();
     setStep("home");
     setCustomer(null);
     setIsNew(false);
@@ -239,12 +277,12 @@ const handleSubChange = (id: string, value: string) => {
 
   const prevStep = () => {
     if (step === "otp"){
-       TokenManager.clearToken();
+      //  TokenManager.clearToken();
        setStep("mobile");
       
       }
     else if (step === "form"){
-    TokenManager.clearToken();
+    // TokenManager.clearToken();
      setStep("otp");
     }
     else if (step === "worktype") setStep("form");
@@ -385,7 +423,11 @@ const handleSubChange = (id: string, value: string) => {
               // workTypes={workTypes}
                 selected={selectedWork}
                 onToggle={toggleWork}
-                 onSubChange={handleSubChange}
+                onUpdate={updateWorkType}
+                //  onSubChange={handleSubChange}
+                onSubCategoryChange={handleSubCategoryChange }
+              onProductChange={handleProductChange }
+                 
               />
               <div className="flex justify-between">
                 <Button variant="outline" onClick={prevStep}>
@@ -440,7 +482,9 @@ const handleSubChange = (id: string, value: string) => {
       <ConfirmationDialog
         open={confirmOpen}
         enquiryId={enquiryId}
-        onClose={() => { setConfirmOpen(false); reset();TokenManager.clearToken(); }}
+        onClose={() => { setConfirmOpen(false); reset();
+          // TokenManager.clearToken();
+         }}
       />
 
 {selectedEnquiry && (

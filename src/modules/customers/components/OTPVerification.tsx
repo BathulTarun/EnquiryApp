@@ -45,8 +45,8 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
       toast.success("OTP verified successfully!",{
         duration: 5000,
       });
-        const token=   await AuthService.getToken({ username: mobile, password: mobile });
-  TokenManager.setToken(token);
+  //       const token=   await AuthService.getToken({ username: mobile, password: mobile });
+  // TokenManager.setToken(token);
 
       onVerified(); // success
      
@@ -143,7 +143,7 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
         )}
       </div>
 
-      <p className="text-xs text-muted-foreground">For testing, use OTP: <span className="font-mono font-medium">123456</span></p>
+      
     </div>
   );
 };

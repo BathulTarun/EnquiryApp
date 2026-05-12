@@ -52,10 +52,10 @@ const [error,setError] = useState("");
 
   const handleLocationSelect = (loc: LocationResult) => {
 
-     if (!states.length) {
-    console.warn("States not loaded yet");
-    return;
-  }
+  //    if (!states.length) {
+  //   console.warn("States not loaded yet");
+  //   return;
+  // }
 
   const matchedState = states.find(
     (s) => s.Name.toLowerCase() === loc.state.toLowerCase()
@@ -112,12 +112,21 @@ const handleSubmit = async (e: React.FormEvent) => {
       });
       newCustomer.id = res.Data;
 
-      const token = await AuthService.getToken({
-        username: newCustomer.mobile,
-        password: newCustomer.mobile,
-      });
+      // const token = await AuthService.getToken({
+      //   username: newCustomer.mobile,
+      //   password: newCustomer.mobile,
+      // });
 
-      TokenManager.setToken(token);
+      // TokenManager.setToken(token);
+      // if(TokenManager.getToken()){
+      if(newCustomer.id){
+        const res= await CustomerService.addAddress(newCustomer.id!, address);
+        if(res.Status === "Success"){
+          console.log("Address added successfully");
+        } else {
+          console.error("Failed to add address:", res.ErrorMessage);
+        }
+      }
 
       onSave(newCustomer);
     } else {
@@ -252,7 +261,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
 
           <Button type="submit" className="w-full md:w-auto"
-           disabled={!form.name || !form.address1 || !form.city || !form.pincode}>
+           disabled={!form.name || !form.address1 || !form.city || !form.pincode }>
             Save Customer
           </Button>
         </form>
