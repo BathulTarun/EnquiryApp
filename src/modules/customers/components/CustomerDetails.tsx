@@ -188,7 +188,7 @@ onUpdateCustomer?.({
         <CardContent className="space-y-2 text-sm">
           <p className="font-semibold text-base">{customer.name}</p>
           <p className="flex items-center gap-2 text-muted-foreground">
-            <Phone size={14} /> {customer.mobile}
+            <Phone size={14} /> {customer.mobile} , {customer.mobile2}
           </p>
           <p className="flex items-center gap-2 text-muted-foreground">
             <Mail size={14} /> {customer.email}

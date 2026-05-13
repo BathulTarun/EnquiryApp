@@ -152,7 +152,10 @@ export class CustomerService {
 
       const payload = mapCustomerToApi(customer);
           // console.log("FINAL PAYLOAD:", payload); // 
-          const response = await fetch(`${FixedURL}/api/user/register`, {
+          const response = await fetch(
+            // `${FixedURL}/api/user/register`,
+             `${FixedURL}/api/enquiry/register-customer`,
+             {
             
             method: "POST",
             headers: {

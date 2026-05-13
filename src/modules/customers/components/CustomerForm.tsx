@@ -97,6 +97,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   const newCustomer: Customer = {
     name: form.name,
     mobile,
+    mobile2:"",
     email: form.email,
     addresses: [address],
   };

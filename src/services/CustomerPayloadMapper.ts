@@ -27,6 +27,7 @@ export const mapCustomerFromApi = (apiResponse: any): Customer | null => {
     name: data.ContactPerson || "",
     mobile: data.MobileFirst || "",
     email: data.Email || "",
+    mobile2:data.MobileSecond || "",
     // addresses: [address]
   };
 
@@ -38,17 +39,17 @@ export const mapCustomerToApi = (customer: Omit<Customer, "id">) => {
   const address = customer.addresses?.[0];
 
   return {
-    BasicDetails: {
+    // BasicDetails:
+    //  {
       FirmName: customer.name,
       ContactPerson: customer.name,
       Email: customer.email,
       MobileFirst: customer.mobile,
-
       City: address?.city || "",
       PostalCode: address?.pincode || "",
 
       State: {
-        ID: address?.stateId || 0,   // ⚠️ IMPORTANT
+        ID: address?.stateId || 0,   //  IMPORTANT
         Name: address?.state // optional (backend usually ignores or fills)
       },
 
@@ -63,11 +64,12 @@ export const mapCustomerToApi = (customer: Omit<Customer, "id">) => {
       AddressLine2: address?.address2 || "",
       LandMark: address?.landmark || "",
 
-    },
-     IdentityInformation: {
-    Username: customer.mobile,
-    Password: customer.mobile,
-    ConfirmPassword: customer.mobile
-  }
+    // },
+
+  //    IdentityInformation: {
+  //   Username: customer.mobile,
+  //   Password: customer.mobile,
+  //   ConfirmPassword: customer.mobile
+  // }
   };
 };

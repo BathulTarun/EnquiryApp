@@ -54,6 +54,7 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
       toast.error("Invalid OTP. Please try again.",{
         duration: 5000,
       });
+      setOtp("");
       setError("Invalid OTP");
     }
   } catch (err) {
