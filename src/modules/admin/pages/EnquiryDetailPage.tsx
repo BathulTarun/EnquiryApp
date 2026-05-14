@@ -124,7 +124,7 @@ const isTimeConflict = engineerTasks.some(
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate("/admin/enquiries")}><ArrowLeft className="h-5 w-5" /></Button>
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ArrowLeft className="h-5 w-5" /></Button>
         <h2 className="text-2xl font-medium">Enquiry Details</h2>
       </div>
 
@@ -190,7 +190,7 @@ const isTimeConflict = engineerTasks.some(
           <Card className="material-shadow">
             <CardHeader className="pb-3"><CardTitle className="text-base">Work Details</CardTitle></CardHeader>
             <CardContent className="text-sm space-y-2">
-              <div className="flex gap-2"><Wrench className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" /><div><span className="font-medium">{enquiry.workTypes.map((wt) => wt.name).join(", ")}</span> – {enquiry.workTypes.map((wt) => wt.selectedSubOption).join(", ")}<p className="text-muted-foreground mt-1">{enquiry.description}</p></div></div>
+              <div className="flex gap-2"><Wrench className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" /><div><span className="font-medium">{enquiry.workTypes.map((wt) => wt.name).join(", ")}</span> – {enquiry.workTypes.map((wt) => wt.selectedProduct).join(", ")}<p className="text-muted-foreground mt-1">{enquiry.description}</p></div></div>
               {engineer && <div className="flex gap-2 pt-2 border-t"><User className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" /><div><p className="text-muted-foreground text-xs">Assigned Engineer</p><span className="font-medium">{engineer.name}</span> – {engineer.phone}</div></div>}
             </CardContent>
           </Card>

@@ -24,9 +24,8 @@ import EnquiryDetailPage from "./modules/admin/pages/EnquiryDetailPage";
 import EnquiriesPage from "./modules/admin/pages/EnquiriesPage";
 import DashboardPage from "./modules/admin/pages/DashboardPage";
 import CreateQuotationPage from "./modules/admin/pages/CreateQuotationsPage.tsx";
-
 import GlobalLogin from "./pages/GlobalLogin.tsx";
-
+import EngineerDetailPage from "./modules/admin/pages/EnginnerDetailPasge.tsx";
 import CustomerDetails from "./modules/customers/components/CustomerDetails.tsx";
 import { customers } from "./data/adminMockData.ts";
 import QuotationDetails from "./modules/admin/pages/QuotationsDetailsPage.tsx";
@@ -75,6 +74,7 @@ const App = () => {
                   {/* CUSTOMER */}
         <Route path="/customer" element={<CustomerHome />} />
         
+        
       
 
               {/* OPERATOR */}
@@ -104,6 +104,7 @@ const App = () => {
     <Route path="enquiries" element={<EnquiriesPage />} />
     <Route path="enquiries/:id" element={<EnquiryDetailPage />} />
     <Route path="engineers" element={<EngineersPage />} />
+     <Route path="engineers/:id" element={<EngineerDetailPage />} />
     <Route path="quotations" element={<QuotationsPage />} />
     <Route path="quotations/create" element={<CreateQuotationPage />} />
     <Route path="quotations/:id" element={<QuotationDetails />} />

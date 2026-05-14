@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {   Address } from "@/types/common";
 import { Customer } from "@/types/customer";
 import { Enquiry } from "@/types/enquiry";
@@ -38,6 +39,8 @@ const CustomerDetails = ({ customer, enquiries, addresses, onUpdateCustomer, onS
 const [states, setStates] = useState<any[]>([]);
 // new for address
 const [locations, setLocations] = useState<Address[]>([]);
+
+const navigate=useNavigate();
 
 //new for address
 useEffect(() => {
@@ -82,6 +85,7 @@ const uniqueAddresses = allAddresses.filter(
     lat: 0,
     lng: 0,
     verified: false,
+    addressType: "",
   });
 
 
@@ -102,6 +106,7 @@ const uniqueAddresses = allAddresses.filter(
       lat: loc.lat,
       lng: loc.lng,
       verified: loc.verified,
+      addressType: "",
     });
   };
 
@@ -143,6 +148,7 @@ onUpdateCustomer?.({
         lat: 0,
         lng: 0,
         verified: false,
+        addressType: "Home",
       });
     } else {
       toast.error("Failed to add address.",{
@@ -197,6 +203,7 @@ onUpdateCustomer?.({
             {uniqueAddresses.map((addr,index) => (
             <div key={addr.id || index} className="flex items-start gap-2 text-muted-foreground">
               <MapPin size={14} className="mt-0.5 shrink-0" />
+              <span className=" text-xs text-primary">{ addr.addressType || "Home"} </span>
               <div>
                 <span>{[addr.address1, addr.address2, addr.city, addr.pincode].filter(Boolean).join(", ")}</span>
                 {addr.verified && (
@@ -221,7 +228,35 @@ onUpdateCustomer?.({
               </div>
 
               <LocationSearch onSelect={handleLocationSelect}  />
+              <div className="space-y-1">
+  <Label className="text-xs">
+    Address Type
+  </Label>
 
+  <div className="flex gap-2">
+    {["Home", "Office", "Other"].map((type) => (
+      <Button
+        key={type}
+        type="button"
+        size="sm"
+        variant={
+          newAddr.addressType === type
+            ? "default"
+            : "outline"
+        }
+        onClick={() =>
+          setNewAddr((p) => ({
+            ...p,
+            addressType: type,
+          }))
+        }
+        className="h-8 px-3 text-xs"
+      >
+        {type}
+      </Button>
+    ))}
+  </div>
+</div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {addressFields.map((f) => (
   <div key={f.key} className={f.wide ? "md:col-span-2" : ""}>
@@ -283,16 +318,20 @@ onUpdateCustomer?.({
         <CardContent>
          
             <div className="space-y-3">
-              {enquiries.map((enq) => (
-               <div key={enq.id} className="p-3 rounded-lg bg-muted/50 border border-border"  onClick={() => onSelectEnquiry(enq)}>
+              {enquiries.map((enq) => {
+                return(
+               <div key={enq.id} className="p-3 rounded-lg bg-muted/50 border border-border"  >
   
   <div className="flex justify-between items-start mb-1">
-   <span className="font-medium text-sm">{enq.id}</span>
+   <span className="font-medium text-sm">ENQ-{enq.id}</span>
     <Badge className={statusColor[enq.status]}>{enq.status}</Badge>
   </div>
 
  <p className="text-xs text-muted-foreground mb-1">
-  {enq.siteVisit?.scheduledDate || "Not scheduled"}
+  {enq.siteVisit?.scheduledDate?.split("T")[0]
+  .split("-")
+  .reverse()
+  .join("-") || "Not scheduled"}, {enq.siteVisit?.scheduledTime || ""}
 </p>
   {/* <p className="text-sm">
   {enq.workTypes?.map((w) =>
@@ -300,20 +339,21 @@ onUpdateCustomer?.({
   ).join(", ")}
 </p> */}
 <p className="text-sm">
-  {enq.workTypes
+  {enq.workItems
     ?.map((w) => {
-      const subCat = w.selectedSubCategory?.name
-        ? ` - ${w.selectedSubCategory.name}`
+      const subCat = w.subCategoryName
+        ? ` - ${w.subCategoryName}`
         : "";
 
-      const product = w.selectedProduct?.name
-        ? ` (${w.selectedProduct.name})`
+      const product = w.productName
+        ? ` (${w.productName})`
         : "";
 
-      return `${w.name}${subCat}${product}`;
+      return `${w.name}${subCat}`;
     })
     .join(", ")}
 </p>
+<p className="text-xs text-primary">{enq.assignedEngineerId || "Scheduling Shortly"}</p>
   {/* Remarks */}
   {enq.remarks && (
     <p className="text-xs text-muted-foreground mt-1">
@@ -321,7 +361,7 @@ onUpdateCustomer?.({
     </p>
   )}
 </div>
-              ))}
+)})}
             </div>
          
         </CardContent>

@@ -23,6 +23,11 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
   const [timer, setTimer] = useState(RESEND_TIMER);
   const [canResend, setCanResend] = useState(false);
 
+  useEffect(() => {
+  if (otp.length === 5 && !isVerifying) {
+    handleVerify();
+  }
+}, [otp]);
   
   useEffect(() => {
     if (timer <= 0) {
@@ -62,10 +67,9 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
       duration: 5000,
     });
     setError("Something went wrong");
-  }
-
-    
+  }finally {
     setIsVerifying(false);
+  }
   };
 
   const handleResend = async () => {
@@ -106,7 +110,11 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
       </div>
 
       <div className="flex justify-center">
-        <InputOTP maxLength={5} value={otp} onChange={(val) => { setOtp(val); setError(""); }}>
+        <InputOTP maxLength={5} value={otp} onChange={(val) => { setOtp(val); setError(""); }}  onKeyDown={(e) => {
+    if (e.key === "Enter" && otp.length === 5) {
+      handleVerify();
+    }
+  }}>
           <InputOTPGroup>
             <InputOTPSlot index={0} />
             <InputOTPSlot index={1} />

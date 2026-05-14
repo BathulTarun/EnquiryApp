@@ -171,7 +171,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, FileText } from "lucide-react";
+import { Plus, FileText, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 
@@ -241,7 +241,9 @@ const QuotationsPage = () => {
       
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Quotations</h2>
+        <h2 className="text-2xl font-bold"><Button variant="ghost" onClick={() => navigate("/admin/dashboard")}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+        </Button>Quotations</h2>
         <Button onClick={() => navigate("/admin/quotations/create")}>
           <Plus className="h-4 w-4 mr-1" />
           New Quotation

@@ -2,7 +2,7 @@ import { Address } from "@/types/common";
 
 export const mapAddressToApi = (address: Address, customerId: Number) => {
   return {
-    Name: address.label || "Address",
+    Name: address.addressType ,
 
     AddressLine1: address.address1,
     AddressLine2: address.address2 || "",
@@ -35,5 +35,6 @@ export const mapLocationToAddress = (loc: any): Address => ({
   landmark: loc.LandMark || "",
   lat: 0, // not provided
   lng: 0,
+  addressType: loc.Name || "Home",
   verified: true, // since coming from saved data
 });

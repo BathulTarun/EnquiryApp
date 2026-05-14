@@ -27,10 +27,10 @@ export class CustomerService {
   }
 
   //  Get customer by ID
-  // static async getById(id: string): Promise<Customer | null> {
-  //   const customer = customers.find((c) => c.id === id);
-  //   return customer || null;
-  // }
+  static async getById(id: number): Promise<Customer | null> {
+    const customer = customers.find((c) => c.id === id);
+    return customer || null;
+  }
 
   //  Get customer by mobile 
   static async getByMobile(mobile: string): Promise<Customer | null> {

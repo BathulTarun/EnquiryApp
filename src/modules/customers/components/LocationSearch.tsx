@@ -17,6 +17,7 @@ export interface LocationResult {
   lat: number;
   lng: number;
   verified: boolean;
+  addressType?: string;
 }
 
 interface LocationSearchProps {

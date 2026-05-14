@@ -37,22 +37,11 @@ const EnquirySummary = ({ customer, workTypes, visitDate, visitTime, address, re
         {workTypes.length > 0 && (
           <div>
             <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider mb-2">Work Types</h4>
-            <div className="flex flex-wrap gap-1.5">
+            {/* <div className="flex flex-wrap gap-1.5">
               {workTypes.map((w) => (
                 <Badge key={w.id} variant="secondary" className="text-xs">{w.name}</Badge>
               ))}
             </div>
-           {/* {workTypes.map((w) =>
-  w.selectedSubOption ? (
-    <p
-      key={w.id}
-      className="text-xs text-muted-foreground mt-1"
-    >
-      {w.name}: {w.selectedSubOption.name}
-    </p>
-  ) : null
-)} */}
-
 {workTypes.map((w) => (
   <div key={w.id}>
     <p className="text-xs font-medium">
@@ -71,7 +60,26 @@ const EnquirySummary = ({ customer, workTypes, visitDate, visitTime, address, re
       </p>
     )}
   </div>
-))}
+))} */}
+<div className="flex flex-wrap gap-1.5">
+  {workTypes.map((w) => (
+    <div
+      key={w.id}
+      className="rounded-md border bg-secondary px-2 py-1"
+    >
+      <p className="text-xs ">
+        {w.name}
+      </p>
+
+       <p className="text-xs text-muted-foreground">
+        {w.selectedSubCategory?.name}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        {w.selectedProduct?.name}
+      </p>
+    </div>
+  ))}
+</div>
           </div>
         )}
 

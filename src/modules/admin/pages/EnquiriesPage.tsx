@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format, isWithinInterval, startOfDay, endOfDay } from "date-fns";
-import { Search, CalendarIcon, X, Filter } from "lucide-react";
+import { Search, CalendarIcon, X, Filter, ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EnquiryStatus } from "@/types/enquiry";
 import type { DateRange } from "react-day-picker";
@@ -18,6 +18,7 @@ import { OperatorService } from "@/services/operator.service";
 import { Enquiry } from "@/types/enquiry";
 import { Customer } from "@/types/customer";
 import { Engineer } from "@/types/engineer";
+import { Arrow } from "@radix-ui/react-tooltip";
 
 const allStatuses: EnquiryStatus[] = ["Pending", "SiteVisitScheduled", "SiteVisitRescheduled", "SiteVisitCompleted", "ReadyForQuotation", "Completed"];
 const workTypes = ["Electrical", "Plumbing", "HVAC", "Civil"];
@@ -87,7 +88,10 @@ const EnquiriesPage = () => {
   return (
     <div className="space-y-4 animate-fade-in">
       <div className="flex items-center justify-between">
-      <h2 className="text-2xl font-medium">Enquiries</h2>
+       
+      <h2 className="text-2xl font-medium"> <Button variant="ghost" onClick={() => navigate("/admin/dashboard")}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+        </Button>Enquiries</h2>
        <Button
         variant={showFilters ? "default" : "outline"}
         size="icon"
@@ -162,7 +166,7 @@ const EnquiriesPage = () => {
                 </div>
                 <div className="text-sm text-muted-foreground space-y-1">
                   <p>{cust?.mobile}</p>
-                  <p>{enq.workTypes.map((wt) => wt.name).join(", ")} – {enq.workTypes.map((wt)=>wt.selectedSubOption).join(",")}</p>
+                  <p>{enq.workTypes.map((wt) => wt.name).join(", ")} – {enq.workTypes.map((wt)=>wt.selectedProduct).join(",")}</p>
                   <p>{format(new Date(enq.createdAt), "dd MMM yyyy")}</p>
                 </div>
               </CardContent>

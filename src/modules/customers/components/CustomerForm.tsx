@@ -36,6 +36,7 @@ const [error,setError] = useState("");
     lat: 0,
     lng: 0,
     verified: false,
+    addressType: "Home",
   });
 
   const [states, setStates] = useState<any[]>([]);
@@ -92,6 +93,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     lat: form.lat,
     lng: form.lng,
     verified: form.verified,
+     addressType: form.addressType,
   };
 
   const newCustomer: Customer = {
@@ -205,6 +207,35 @@ const handleSubmit = async (e: React.FormEvent) => {
             </h3>
 
             <LocationSearch onSelect={handleLocationSelect} />
+            <div className="space-y-1">
+  <Label className="text-xs">
+    Address Type
+  </Label>
+
+  <div className="flex gap-2">
+    {["Home", "Office", "Other"].map((type) => (
+      <Button
+        key={type}
+        type="button"
+        size="sm"
+        variant={
+          form.addressType === type
+            ? "default"
+            : "outline"
+        }
+        onClick={() =>
+          setForm((p) => ({
+            ...p,
+            addressType: type,
+          }))
+        }
+        className="h-8 px-3 text-xs"
+      >
+        {type}
+      </Button>
+    ))}
+  </div>
+</div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {addressFields.map((f) => (

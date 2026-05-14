@@ -2,6 +2,8 @@ import { EnquiryService } from "./enquiry.service";
 import { engineers } from "@/data/engineer.mock";
 import { Engineer } from "@/types/engineer";
 import { EnquiryStatus, WorkItem } from "@/types/enquiry";
+import { CustomerService } from "./customer.service";
+import { AuthService } from "./authService.service";
 
 export class OperatorService {
 
@@ -15,6 +17,7 @@ export class OperatorService {
 
   static async getTasksByEngineer(engineerId: string) {
     return EnquiryService.getByEngineer(engineerId);
+    // return CustomerService.getEnquriesByCustomerId(19693);
   }
 
   static async getEngineerByTask(taskId: string): Promise<Engineer | null> {

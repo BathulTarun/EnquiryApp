@@ -14,6 +14,7 @@ export interface Address {
   lng?: number;
   verified?: boolean;
   country?: string;
+  addressType?: string;
 }
 
 export interface Remark {

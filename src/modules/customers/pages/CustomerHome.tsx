@@ -11,7 +11,7 @@ import ConfirmationDialog from "@/modules/customers/components/ConfirmationDialo
 import {  Address ,SelectedProduct} from "@/types/common";
 import { WorkType } from "@/types/common";
 import { Customer } from "@/types/customer";
-import EnquiryDetailsDialog from "@/modules/customers/components/EnquiryDetailsDialog";
+
 import { Plus, ArrowLeft } from "lucide-react";
 import {  useNavigate } from "react-router-dom";
 import WorkTypeService from "@/services/worktype.service";
@@ -69,8 +69,8 @@ const [engineers, setEngineers] = useState<Engineer[]>([]);
       lat: 0,
       lng: 0,
       verified: true,
+      addressType: loc.Name ,
     }));
-
     setLocations(mapped);
   };
   
@@ -488,14 +488,13 @@ const updateWorkType = (updated: WorkType) => {
          }}
       />
 
-{selectedEnquiry && (
-      <EnquiryDetailsDialog
-  open={detailsOpen}
-  enquiry={selectedEnquiry}
-  engineers={engineers}
-  onClose={() => setDetailsOpen(false)}
-/>
-)}
+{/* {selectedEnquiry && (
+//       <EnquiryDetailsPage
+//  enquiry={selectedEnquiry}
+//   engineers={engineers}
+//   onBack={() => navigate(-1)}
+// />
+)} */}
 
     </div>
   );

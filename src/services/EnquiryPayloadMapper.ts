@@ -41,7 +41,7 @@ export const mapEnquiryToApi = (enquiry: Enquiry) => {
       CategoryID: Number(item.id), 
       SubCategoryID: Number(item.subCategoryID), 
       ProductID: item.productsId, 
-      Description: item.notes,
+      Description: item.name,
       Images: item.images || [],
       Price: item.unitPrice || 0,
     })) || [],
@@ -82,7 +82,7 @@ export const mapEnquiryFromApi = (apiEnquiry: any): Enquiry => {
 
     workItems: apiEnquiry.ProblemDescription?.map((item: any, i: number) => ({
       id: i.toString(),
-      name: item.Description || `Product ${item.ProductID}`,
+      name: item.Description || "",
       quantity: item.Quantity,
       unitPrice: item.Price,
       images: item.Images || [],

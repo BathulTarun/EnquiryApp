@@ -19,6 +19,7 @@ export const mapCustomerFromApi = (apiResponse: any): Customer | null => {
     country: data.Country?.Name || "",
     lat: undefined,
     lng: undefined,
+    addressType:data.Name || "",
     verified: true
   };
 
