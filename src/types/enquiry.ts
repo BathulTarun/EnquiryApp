@@ -58,6 +58,7 @@ export interface SiteVisit {
 
 export interface Enquiry {
   id?: string;
+  EnquiryNumber?:string;
   customer?: Customer;
   addressId?: number;
   address: Address;

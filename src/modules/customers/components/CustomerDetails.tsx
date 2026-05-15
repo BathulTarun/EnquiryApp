@@ -323,7 +323,7 @@ onUpdateCustomer?.({
                <div key={enq.id} className="p-3 rounded-lg bg-muted/50 border border-border"  >
   
   <div className="flex justify-between items-start mb-1">
-   <span className="font-medium text-sm">ENQ-{enq.id}</span>
+   <span className="font-medium text-sm">{enq.EnquiryNumber || `ENQ-${enq.id}`}</span>
     <Badge className={statusColor[enq.status]}>{enq.status}</Badge>
   </div>
 

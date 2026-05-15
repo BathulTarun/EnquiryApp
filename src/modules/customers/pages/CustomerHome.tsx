@@ -54,6 +54,8 @@ const [customerEnquiries, setCustomerEnquiries] = useState<Enquiry[]>([]);
 const [engineers, setEngineers] = useState<Engineer[]>([]);
   const [locations, setLocations] = useState<Address[]>([]);
  const[token,setToken]=useState("");
+ const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+
   const loadLocations = async (customerId: number) => {
     const data = await LocationService.getAllLocationsForCustomer(customerId);
 
@@ -132,27 +134,33 @@ useEffect(() => {
   // }
   // console.log("OTP verified, token set:", TokenManager.getToken());
   // getEnqueriesByCustomerMobile();
+setIsLoadingCustomer(true);
 
+    try {
     const found = await CustomerService.getByMobile(mobile);
+
     if (found) {
-     await loadLocations(found.id);
+      await loadLocations(found.id);
+
       setCustomer(found);
       setIsNew(false);
-     await getEnqueriesByCustomerId(found.id);
+
+      await getEnqueriesByCustomerId(found.id);
     } else {
-      // TokenManager.clearToken();
-      toast.error("No customer found. Please create a new customer profile.",{
+      toast.error("No customer found. Please create a new customer profile.", {
         duration: 5000,
       });
-      // toast({
-      //   title: "No customer found.",
-      //   description: "Please create a new customer profile.",
-      // });
-     
+
       setIsNew(true);
       setCustomer(null);
     }
+
     setStep("form");
+  } catch (error) {
+    toast.error("Failed to load customer details");
+  } finally {
+    setIsLoadingCustomer(false);
+  }
      
   };
  
@@ -379,7 +387,7 @@ const updateWorkType = (updated: WorkType) => {
         {/* OTP Verification */}
         {step === "otp" && (
           <div className="max-w-md mx-auto">
-            <OTPVerification mobile={mobile} onVerified={handleOtpVerified} />
+            <OTPVerification mobile={mobile} onVerified={handleOtpVerified} isLoading={isLoadingCustomer} />
             <div className="mt-6 text-center">
               <Button variant="outline" onClick={prevStep}>
                 <ArrowLeft size={16} /> Change Number

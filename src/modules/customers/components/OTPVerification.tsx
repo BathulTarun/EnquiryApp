@@ -6,16 +6,17 @@ import  OtpService  from "@/services/otp.service";
 import { AuthService } from "@/services/authService.service";
 import { TokenManager } from "@/services/tokenManager.service";
 import { toast } from "sonner";
-
+import PageLoader from "@/components/PageLoader";
 interface OTPVerificationProps {
   mobile: string;
   onVerified: () => void;
+  isLoading?: boolean;
 }
 
 
 const RESEND_TIMER = 30;
 
-const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
+const OTPVerification = ({ mobile, onVerified,isLoading, }: OTPVerificationProps) => {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -95,6 +96,10 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
     setTimer(RESEND_TIMER);
   };
 
+   if (isLoading) {
+    return <PageLoader />;
+  }
+
   return (
     <div className="space-y-6 text-center">
       <div className="flex justify-center">
@@ -128,7 +133,7 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
 
       {error && <p className="text-sm text-destructive font-medium">{error}</p>}
 
-      <Button
+      {/* <Button
         onClick={handleVerify}
         disabled={otp.length !== 5 || isVerifying}
         className="w-full max-w-xs mx-auto"
@@ -136,7 +141,7 @@ const OTPVerification = ({ mobile, onVerified }: OTPVerificationProps) => {
       >
         {isVerifying && <Loader2 className="animate-spin" />}
         Verify OTP
-      </Button>
+      </Button> */}
 
       <div className="text-sm text-muted-foreground">
         {canResend ? (

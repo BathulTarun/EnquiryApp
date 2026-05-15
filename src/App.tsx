@@ -73,7 +73,7 @@ const App = () => {
 
                   {/* CUSTOMER */}
         <Route path="/customer" element={<CustomerHome />} />
-        
+
         
       
 

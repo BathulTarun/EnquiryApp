@@ -11,6 +11,8 @@ import { OperatorService } from "@/services/operator.service";
 
 import { Engineer } from "@/types/engineer";
 import { Enquiry } from "@/types/enquiry";
+import { UserManager } from "@/services/userManager";
+import { TokenManager } from "@/services/tokenManager.service";
 
 
 const statusIcon: Record<string, React.ReactNode> = {
@@ -61,7 +63,8 @@ const Dashboard: React.FC = () => {
 
  useEffect(() => {
   const engineer = async()=>{
-    const res = await OperatorService.getEngineerById(engineerId!);
+    // const res = await OperatorService.getEngineerById(engineerId!);
+    const res=UserManager.getUser();
     setEngineer(res);
     console.log("Engineer details:", res);
   };
@@ -90,7 +93,7 @@ console.log("Engineer ID from params:", engineerId);
           <h1 className="text-s text-muted-foreground">{engineer?.name}</h1>
           </div>
         
-          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
+          <Button variant="ghost" size="icon" onClick={() => {navigate("/"),TokenManager.clearToken(),UserManager.clearUser()}}>
             <LogOut className="w-5 h-5" />
           </Button>
         </div>

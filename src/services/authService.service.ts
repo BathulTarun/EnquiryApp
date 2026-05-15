@@ -1,7 +1,9 @@
 // services/auth.service.ts
 
 import { TokenManager } from "./tokenManager.service";
-
+import { mapOperatorFromApi } from "./OperatorPayloadMapper";
+import { Engineer } from "@/types/engineer";
+import { UserManager } from "./userManager";
 const FixedURL= import.meta.env.VITE_API_BASE_URL;
 
 const PackageName = "ecommerce.mobile.andhrakitchenwares.com";
@@ -66,6 +68,36 @@ export class AuthService {
     } catch (error) {
       console.error("Package info error:", error);
       return null;
+    }
+  }
+
+  static async getUserDetails(token:string):Promise<Engineer | null> {
+   
+    try{
+       const response = await fetch(`${FixedURL}/api/user/profile`,
+         {
+          method:"GET",
+          headers:{
+             "Content-Type": "application/json",
+                  "ngrok-skip-browser-warning": "true",
+                  "Package":`ecommerce.mobile.andhrakitchenwares.com`,
+                  "Authorization":`bearer ${token}`
+          }
+         }
+       );
+       if(!response.ok){
+          throw  new Error("filed to load");
+       }
+       const result=await response.json();
+       if(result.Status === "Success"){
+            UserManager.setUser(mapOperatorFromApi(result));
+            console.log("Local storage data",UserManager.getUser());
+            return mapOperatorFromApi(result);
+       }
+        return null;
+    }
+    catch(error){
+   return null;
     }
   }
 }

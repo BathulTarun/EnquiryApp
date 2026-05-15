@@ -67,7 +67,7 @@ export const mapEnquiryToApi = (enquiry: Enquiry) => {
 export const mapEnquiryFromApi = (apiEnquiry: any): Enquiry => {
   return {
     id: apiEnquiry.ID?.toString(),
-
+    EnquiryNumber:apiEnquiry.EnquiryNumber, 
     customer: undefined, // not provided
 
     address: {

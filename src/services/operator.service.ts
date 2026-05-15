@@ -4,6 +4,12 @@ import { Engineer } from "@/types/engineer";
 import { EnquiryStatus, WorkItem } from "@/types/enquiry";
 import { CustomerService } from "./customer.service";
 import { AuthService } from "./authService.service";
+const COMPANY_ID=import.meta.env.VITE_COMPANY_ID;
+const TENANT_ID=import.meta.env.VITE_TENANT_ID;
+
+
+
+const FixedURL= import.meta.env.VITE_API_BASE_URL;
 
 export class OperatorService {
 
@@ -59,4 +65,7 @@ export class OperatorService {
   static async getAllOperators(): Promise<Engineer[]> {
     return engineers;
   }
+
+
+  
 }
