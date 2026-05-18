@@ -153,6 +153,8 @@ setIsLoadingCustomer(true);
 
       setIsNew(true);
       setCustomer(null);
+      setLocations([]); // CLEAR OLD LOCATIONS
+      setCustomerEnquiries([]); // optional
     }
 
     setStep("form");
@@ -256,19 +258,27 @@ const updateWorkType = (updated: WorkType) => {
 
  
 
-  const reset = () => {
-    // TokenManager.clearToken();
-    setStep("home");
-    setCustomer(null);
-    setIsNew(false);
-    setMobile("");
-    setSelectedWork([]);
-    // setSelectedSubs({});
-    setVisitDate("");
-    setVisitTime("");
-    setVisitAddress(null);
-    setRemarks("");
-  };
+const reset = () => {
+  setStep("home");
+
+  setCustomer(null);
+  setIsNew(false);
+
+  setMobile("");
+
+  setSelectedWork([]);
+
+  setVisitDate("");
+  setVisitTime("");
+  setVisitAddress(null);
+
+  setRemarks("");
+
+  setLocations([]); // IMPORTANT
+  setCustomerEnquiries([]); // IMPORTANT
+
+  setSelectedEnquiry(null); // optional
+};
 
 
 
