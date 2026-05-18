@@ -285,7 +285,14 @@ const reset = () => {
 
   const canGoNext = () => {
     if (step === "form") return !!customer;
-    if (step === "worktype") return selectedWork.length > 0;
+    if (step === "worktype")return (
+      selectedWork.length > 0 &&
+      selectedWork.every(
+        (item) =>
+          item.selectedSubCategory &&
+          item.selectedProduct
+      )
+    );
     return true;
   };
 
