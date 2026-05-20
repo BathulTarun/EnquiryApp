@@ -30,6 +30,13 @@ export interface ProductOption {
   price?: number;
 }
 
+
+export interface Product{
+  UID?:string;
+  Name?:string;
+  Price:string;
+}
+
 export interface SubCategory  {
   id: string;   // product UID
   name: string; // product Name

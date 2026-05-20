@@ -18,6 +18,7 @@ import { format } from "date-fns";
 
 const EngineerDetailsPage = () => {
   const { id } = useParams();
+  const enginnerid =Number(id);
   const navigate = useNavigate();
 
   const [engineer, setEngineer] = useState<Engineer | null>(null);
@@ -27,7 +28,7 @@ const EngineerDetailsPage = () => {
   useEffect(() => {
     const loadData = async () => {
       const engs = await OperatorService.getAllOperators();
-      const found = engs.find((e) => e.id === id);
+      const found = engs.find((e) => e.id === enginnerid);
 
       setEngineer(found || null);
 
@@ -42,7 +43,7 @@ const EngineerDetailsPage = () => {
   }, [id]);
 
   const engineerTasks =
-    enquiries?.filter((e) => e.assignedEngineerId === id) || [];
+    enquiries?.filter((e) => e.assignedEngineerId === enginnerid) || [];
 
   if (!engineer) {
     return <div>Engineer not found</div>;

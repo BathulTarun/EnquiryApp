@@ -173,10 +173,10 @@ setIsLoadingCustomer(true);
      setCustomerEnquiries(data);
   }
 
-  const getEngineerById=async (id:string)=>{
-    const data= await OperatorService.getEngineerById(id);
-    return data;
-  }
+  // const getEngineerById=async (id:string)=>{
+  //   const data= await OperatorService.getEngineerById(id);
+  //   return data;
+  // }
 
 // const handleSubChange = (id: string, value: SelectedSubOption) => {
 //   // console.log("SubOption changed for WorkType ID:", id, "New Value:", value);

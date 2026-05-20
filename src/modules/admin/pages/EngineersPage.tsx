@@ -30,7 +30,7 @@ const EngineersPage = () => {
   }, []);
 
 
-  const getTaskCount = (id: string) => enquiriesList?.filter((e) => e.assignedEngineerId === id && e.status !== "Completed").length;
+  const getTaskCount = (id: string) => enquiriesList?.filter((e) => e.assignedEngineerId === Number(id) && e.status !== "Completed").length;
   return (
     <div className="space-y-4 animate-fade-in">
       <h2 className="text-2xl font-medium"><Button variant="ghost" onClick={() => navigate("/admin/dashboard")}>
@@ -57,7 +57,7 @@ const EngineersPage = () => {
               </div>
               <div className="text-sm text-muted-foreground space-y-1">
                 <div className="flex items-center gap-2"><Phone className="h-3 w-3" />{eng.phone}</div>
-                <div className="flex items-center gap-2"><Wrench className="h-3 w-3" />{getTaskCount(eng.id)} active tasks</div>
+                <div className="flex items-center gap-2"><Wrench className="h-3 w-3" />{getTaskCount(String(eng.id))} active tasks</div>
               </div>
             </CardContent>
           </Card>

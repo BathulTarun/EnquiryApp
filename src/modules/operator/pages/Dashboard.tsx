@@ -54,7 +54,8 @@ const Dashboard: React.FC = () => {
 
  useEffect(() => {
   const enquiries = async()=>{
-    const res=await OperatorService.getTasksByEngineer(engineerId!);
+    // const res=await OperatorService.getTasksByEngineer(engineerId!);
+    const res=await OperatorService.getEnquriesByOperatorId(Number(engineerId!));
     setMyEnquiries(res);
     console.log("Enquiries for engineer:", res);
   };
@@ -74,13 +75,14 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
    const { engineerId } = useParams();
+   const id =Number(engineerId);
   
 console.log("Engineer ID from params:", engineerId);
 
     
 
   // const sections = ["My Tasks", "Upcoming", "Completed", "Pending", "Rescheduled"];
- const sections = ["Pending", "Rescheduled","Upcoming","My Tasks"];
+ const sections = ["Pending", "Rescheduled","My Tasks"];
  const [engineer, setEngineer] = React.useState<Engineer | null>(null);
  const [myEnquiries,setMyEnquiries] = React.useState<Enquiry[]>([]);
   return (
@@ -135,12 +137,20 @@ console.log("Engineer ID from params:", engineerId);
               console.log("Task:", task),
               <button
                 key={task.id}
-                onClick={() => navigate(`/operator/tasks/${task.id}`)}
+                onClick={() => navigate(`/operator/tasks/${task.id}`,{
+                  state: { enquiry: task }
+                })}
                 className="w-full bg-card rounded-lg shadow-material-sm p-4 text-left hover:shadow-material transition-shadow flex items-center justify-between gap-3"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-card-foreground truncate">{task.customer.name}</p>
-                  <p className="text-sm text-muted-foreground">{task.workTypes.map((wt)=>wt.name).join(",")} · {task.siteVisit.scheduledDate}</p>
+                  <p className="font-medium text-card-foreground truncate">{task.EnquiryNumber || `ENQ-${task.id}`}</p>
+                  <p className="text-xs text-muted-foreground mb-1">
+  {task.siteVisit?.scheduledDate?.split("T")[0]
+  .split("-")
+  .reverse()
+  .join("-")}, {task.siteVisit?.scheduledTime}
+</p>
+                  <p className="text-sm text-muted-foreground">{task.workItems.map((wt)=>wt.name).join(",")}</p>
                 </div>
                 <Badge variant="outline" className={statusColors[task.status]}>{task.status}</Badge>
               </button>

@@ -49,7 +49,7 @@ export class EnquiryService {
   }
 
   //  Get enquiries by engineer
-  static async getByEngineer(engineerId: string): Promise<Enquiry[]> {
+  static async getByEngineer(engineerId: number): Promise<Enquiry[]> {
    
     return enquiries.filter((e) => e.assignedEngineerId === engineerId);
   }
@@ -151,7 +151,7 @@ export class EnquiryService {
   //  Assign engineer
   static async assignEngineer(
     enquiryId: string,
-    engineerId: string
+    engineerId: number
   ): Promise<void> {
     
 
@@ -241,4 +241,46 @@ export class EnquiryService {
   static generateEnquiryId(): string {
     return `ENQ-${Date.now()}`;
   }
+
+
+
+
+  static async updateEnquiry(payload: any) {
+
+  try {
+
+    const response = await fetch(
+      `${FixedURL}/api/enquiry/update`,
+      {
+        method: "PUT",
+
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+          "company": `${COMPANY_ID}`,
+          "tenant": `${TENANT_ID}`,
+          "Package": "ecommerce.mobile.andhrakitchenwares.com",
+        },
+
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to update enquiry");
+    }
+
+     const result = await response.json();
+     if(result.Status === "Success"){
+       return result;
+     }
+     return "";
+
+  } catch (error) {
+
+    console.error("Update enquiry error:", error);
+
+    throw error;
+  }
+}
 }

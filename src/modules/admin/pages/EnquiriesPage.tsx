@@ -68,7 +68,7 @@ const EnquiriesPage = () => {
       const cust = customersList.find((c) => c.id === enq.customer.id);
       if (statusFilter !== "all" && enq.status !== statusFilter) return false;
       if (workTypeFilter !== "all" && !enq.workTypes?.some((wt) => wt.name === workTypeFilter)) return false;
-      if (engineerFilter !== "all" && enq.assignedEngineerId !== engineerFilter) return false;
+      if (engineerFilter !== "all" && String(enq.assignedEngineerId) !== engineerFilter) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
         const matchesName = cust?.name.toLowerCase().includes(q);
@@ -145,7 +145,7 @@ const EnquiriesPage = () => {
               <SelectTrigger><SelectValue placeholder="Engineer" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Engineers</SelectItem>
-                {engineersList.map((e) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
+                {engineersList.map((e) => <SelectItem key={e.id} value={String(e.id)}>{e.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>

@@ -1,7 +1,9 @@
 import { EnquiryService } from "./enquiry.service";
 import { engineers } from "@/data/engineer.mock";
 import { Engineer } from "@/types/engineer";
+import { Enquiry } from "@/types/enquiry";
 import { EnquiryStatus, WorkItem } from "@/types/enquiry";
+import { mapEnquiryFromApi } from "./EnquiryPayloadMapper";
 import { CustomerService } from "./customer.service";
 import { AuthService } from "./authService.service";
 const COMPANY_ID=import.meta.env.VITE_COMPANY_ID;
@@ -21,7 +23,7 @@ export class OperatorService {
   }
 
 
-  static async getTasksByEngineer(engineerId: string) {
+  static async getTasksByEngineer(engineerId: number) {
     return EnquiryService.getByEngineer(engineerId);
     // return CustomerService.getEnquriesByCustomerId(19693);
   }
@@ -33,7 +35,7 @@ export class OperatorService {
     return engineers.find(e => e.id === enquiry.assignedEngineerId) || null;
   }
 
-  static async getEngineerById(engineerId: string): Promise<Engineer | null> {
+  static async getEngineerById(engineerId: number): Promise<Engineer | null> {
     return engineers.find(e => e.id === engineerId) || null;
   }
 
@@ -67,5 +69,39 @@ export class OperatorService {
   }
 
 
+  static async getEnquriesByOperatorId(operatorID: number){
+      try{
+         const response=await fetch( 
+          `${FixedURL}/api/enquiry/getbyoperatorid?id=${operatorID}`,
+          {
+               method:"GET",
+               headers:{
+                "Content-Type": "application/json",
+                "ngrok-skip-browser-warning": "true",
+                "company":`${COMPANY_ID}`,
+                "tenant":`${TENANT_ID}`,
+                //  "Authorization": `Bearer ${token}`,
+                "Package":"ecommerce.mobile.andhrakitchenwares.com"
+               }
+          }
+        );
+         if(!response.ok){
+          throw  new Error("filed to load");
+         }
   
+         const result= await response.json();
+         const enquiries: Enquiry[] =
+    result.Data?.map((item: any) => mapEnquiryFromApi(item)) || [];
+         return enquiries;
+      }catch(error){
+        console.error("failed to get customer",error)
+        return null;
+      }
+      // return await EnquiryService.getByCustomer(customerID);
+     }
+
+
+  static async updateEnquiry(payload:any){
+      return await EnquiryService.updateEnquiry(payload);
+  }
 }

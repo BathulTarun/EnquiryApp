@@ -184,8 +184,12 @@ const saveAddress = async (): Promise<Address | null> => {
       };
 
       return savedAddress;
+    }else {
+      toast.error("Failed to add address try again.",{
+        duration: 5000,
+      });
+      console.error("Failed to update customer");
     }
-
     return null;
   } catch (error) {
     toast.error("Error saving address.",{

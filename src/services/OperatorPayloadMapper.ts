@@ -6,7 +6,7 @@ export const mapOperatorFromApi = (apiResponse: any): Engineer | null => {
 
  const data = apiResponse.Data;
   const operator: Engineer = {
-     id: String(data.BasicDetails.CustomerID),
+     id: data.BasicDetails.CustomerID,
   name: data.UserName || "",
   phone:  data.BasicDetails.MobileFirst || "",
   email: data.Email || "",

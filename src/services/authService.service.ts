@@ -5,7 +5,6 @@ import { mapOperatorFromApi } from "./OperatorPayloadMapper";
 import { Engineer } from "@/types/engineer";
 import { UserManager } from "./userManager";
 const FixedURL= import.meta.env.VITE_API_BASE_URL;
-
 const PackageName = "ecommerce.mobile.andhrakitchenwares.com";
 const Platform = "Android";
 

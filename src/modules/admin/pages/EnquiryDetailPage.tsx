@@ -87,18 +87,18 @@ const EnquiryDetailPage = () => {
   }
 
   if (selectedEngineer && enquiry) {
-    await EnquiryService.assignEngineer(enquiry.id, selectedEngineer);
+    await EnquiryService.assignEngineer(enquiry.id,Number(selectedEngineer));
     await EnquiryService.updateStatus(enquiry.id, "SiteVisitScheduled");
 
     // ✅ UPDATE UI STATE
     setEnquiry({
       ...enquiry,
-      assignedEngineerId: selectedEngineer,
+      assignedEngineerId: Number(selectedEngineer),
       status: "SiteVisitScheduled",
     });
 
     // also update engineer object
-    const eng = await OperatorService.getEngineerById(selectedEngineer);
+    const eng = await OperatorService.getEngineerById(Number(selectedEngineer));
     setEngineer(eng);
 
     setAssignDialogOpen(false);
@@ -112,7 +112,7 @@ const EnquiryDetailPage = () => {
  const engineerTasks = selectedEngineer
   ? enquiriesList.filter((e) => {
       return (
-        e.assignedEngineerId === selectedEngineer &&
+        e.assignedEngineerId === Number(selectedEngineer) &&
         e.id !== enquiry.id &&
         e.siteVisit.scheduledDate === enquiryDate //  same day filter
       );
@@ -229,7 +229,7 @@ const isTimeConflict = engineerTasks.some(
                </SelectTrigger>
                <SelectContent>
                 {engineersList.map((e) => (
-                  <SelectItem key={e.id} value={e.id}>
+                  <SelectItem key={e.id} value={String(e.id)}>
                 {e.name} ({e.status})
                   </SelectItem>
                 ))}
@@ -239,7 +239,7 @@ const isTimeConflict = engineerTasks.some(
                 <DialogContent>
                   <DialogHeader><DialogTitle>Assign Engineer</DialogTitle></DialogHeader>
                   <div className="space-y-3">
-                    <p className="text-sm">Assigning: <strong>{engineersList.find((e) => e.id === selectedEngineer)?.name}</strong></p>
+                    <p className="text-sm">Assigning: <strong>{engineersList.find((e) => e.id === Number(selectedEngineer))?.name}</strong></p>
                    {engineerTasks.length > 0 ? (
   <div>
     <p className="text-sm text-muted-foreground mb-2">

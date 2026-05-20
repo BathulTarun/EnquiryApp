@@ -1,5 +1,5 @@
 import React, { useState, useMemo,useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams ,useLocation} from "react-router-dom";
 import { ALL_STATUSES, WorkItem ,Enquiry} from "@/types/enquiry";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { EnquiryService } from "@/services/enquiry.service";
 import { OperatorService } from "@/services/operator.service";
+import { mapUpdatedEnquiryToApi } from "@/services/EnquiryPayloadMapper";
+import { fileToBase64 } from "@/components/ImageConvertor";
 import {
   ArrowLeft,
   Phone,
@@ -40,18 +42,22 @@ const TaskDetail: React.FC = () => {
 };
 
 
-useEffect(() => { 
-const enquiry = async()=>{
-  const res = await EnquiryService.getById(taskId!);
-  setMyTask(res);
-  console.log("Enquiry details:", res);
-};
-enquiry();
-},[]);
+// useEffect(() => { 
+// const enquiry = async()=>{
+//   const res = await EnquiryService.getById(taskId!);
+//   setMyTask(res);
+//   console.log("Enquiry details:", res);
+// };
+// enquiry();
+// },[]);
+
+const location = useLocation();
+const enquiry = location.state?.enquiry;
 
 
 
-const[task,setMyTask] =  React.useState<Enquiry | null>(null);
+
+const[task,setMyTask] =  React.useState<Enquiry | null>(enquiry || null);
   const { taskId } = useParams<{ taskId: string }>();
 
   console.log("Task ID from params:", taskId);
@@ -115,31 +121,69 @@ const [previewImage, setPreviewImage] = useState<{
 
 
    
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+//   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+//   const files = e.target.files;
+//   if (!files) return;
+
+//   if (!selectedItemId) {
+//     toast.error("Please select a work item first");
+//     return;
+//   }
+
+//   const newImages = Array.from(files).map((file) => ({
+//     id: crypto.randomUUID(),
+//     url: URL.createObjectURL(file),
+//     workItemId: selectedItemId,
+//   }));
+
+//   // ✅ local preview
+//   setImages((prev) => [...prev, ...newImages]);
+
+
+//   OperatorService.addWorkItemsImages(
+//     task.id,
+//     selectedItemId,
+//     newImages.map((img) => img.url)
+//   );
+// };
+const handleImageUpload = async (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
   const files = e.target.files;
+
   if (!files) return;
 
   if (!selectedItemId) {
     toast.error("Please select a work item first");
     return;
   }
-
-  const newImages = Array.from(files).map((file) => ({
+  const previewImages = Array.from(files).map((file) => ({
     id: crypto.randomUUID(),
     url: URL.createObjectURL(file),
     workItemId: selectedItemId,
   }));
 
-  // ✅ local preview
-  setImages((prev) => [...prev, ...newImages]);
+  setImages((prev) => [...prev, ...previewImages]);
+const base64Images = await Promise.all(
+  Array.from(files).map((file) =>
+    fileToBase64(file)
+  )
+);
 
+  setWorkItems((prev) =>
+    prev.map((item) => {
+      if (item.id !== selectedItemId)
+        return item;
 
-  OperatorService.addWorkItemsImages(
-    task.id,
-    selectedItemId,
-    newImages.map((img) => img.url)
+      return {
+        ...item,
+        images: [
+          ...(item.images || []),
+          ...base64Images,
+        ],
+      };
+    })
   );
-
 };
   // handler to remove image from state (and ideally from server in a real app)
 const handleRemoveImage = (id: string) => {
@@ -163,36 +207,93 @@ const getItemName = (id: string) => {
     toast.success("Site visit completed & quotation created");
   };
 
-  const handleReschedule = () => {
-    if (!rescheduleReason) {
-      toast.error("Please select a reason");
-      return;
-    }
-    // updateEnquiryStatus(task.id, "Site Visit Rescheduled");
-    OperatorService.updateTaskStatus(task.id, "SiteVisitRescheduled", rescheduleReason + (rescheduleNote ? ` - ${rescheduleNote}` : ""));
-    setShowReschedule(false);
-    toast.info("Task rescheduled");
+  // const handleReschedule = () => {
+  //   if (!rescheduleReason) {
+  //     toast.error("Please select a reason");
+  //     return;
+  //   }
+  //   // updateEnquiryStatus(task.id, "Site Visit Rescheduled");
+  //   OperatorService.updateTaskStatus(task.id, "SiteVisitRescheduled", rescheduleReason + (rescheduleNote ? ` - ${rescheduleNote}` : ""));
+  //   setShowReschedule(false);
+  //   toast.info("Task rescheduled");
+  // };
+
+  const handleReschedule = async () => {
+
+  const updatedTask = {
+    ...task,
+
+    siteVisit: {
+      ...task.siteVisit,
+
+      notes:
+        rescheduleReason +
+        (rescheduleNote
+          ? ` - ${rescheduleNote}`
+          : ""),
+    },
   };
 
-  const handleSave = () => {
-    // updateWorkItems(task.id, workItems);
-    OperatorService.updateWorkItems(task.id, workItems);
-    // saveTask(task.id);
-    OperatorService.saveTask(task.id);
-    toast.success("Draft saved");
+  const payload = mapUpdatedEnquiryToApi(
+    updatedTask,
+    workItems,
+    "SiteVisitRescheduled"
+  );
+
+  await OperatorService.updateEnquiry(payload);
+
+  toast.success("Task Rescheduled");
+};
+const openNavigation = (lat: number, lng: number) => {
+  window.open(
+    `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`,
+    "_blank"
+  );
+};
+
+  const handleSave =async () => {
+    // // updateWorkItems(task.id, workItems);
+    // OperatorService.updateWorkItems(task.id, workItems);
+    // // saveTask(task.id);
+    // OperatorService.saveTask(task.id);
+    // toast.success("Draft saved");
+     const payload = mapUpdatedEnquiryToApi(
+    task,
+    workItems,
+    task.status
+  );
+
+  const result =await OperatorService.updateEnquiry(payload);
+if(result){
+  toast.success("Draft saved");
+}else{
+  toast.error("Failed to save");
+}
   };
 
-  const handleSubmit = () => {
-    // updateWorkItems(task.id, workItems);
-    OperatorService.updateWorkItems(task.id, workItems);
-    // submitTask(task.id);
-    OperatorService.submitTask(task.id);
-    //  updateEnquiryStatus(task.id, "Site Visit Completed");
-     OperatorService.updateTaskStatus(task.id, "SiteVisitCompleted");
-    //  updateEnquiryStatus(task.id, "Ready For Quotation");
-     OperatorService.updateTaskStatus(task.id, "ReadyForQuotation");
-    toast.success("Submitted — quotation created in Admin Panel");
-  };
+  // const handleSubmit = () => {
+  //   // updateWorkItems(task.id, workItems);
+  //   OperatorService.updateWorkItems(task.id, workItems);
+  //   // submitTask(task.id);
+  //   OperatorService.submitTask(task.id);
+  //   //  updateEnquiryStatus(task.id, "Site Visit Completed");
+  //    OperatorService.updateTaskStatus(task.id, "SiteVisitCompleted");
+  //   //  updateEnquiryStatus(task.id, "Ready For Quotation");
+  //    OperatorService.updateTaskStatus(task.id, "ReadyForQuotation");
+  //   toast.success("Submitted — quotation created in Admin Panel");
+  // };
+  const handleSubmit = async () => {
+
+  const payload = mapUpdatedEnquiryToApi(
+    task,
+    workItems,
+    "ReadyForQuotation"
+  );
+
+  await OperatorService.updateEnquiry(payload);
+
+  toast.success("Submitted successfully");
+};
  console.log(task);
   
 
@@ -237,7 +338,7 @@ const handleEditItem = (item: WorkItem) => {
           </Button>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-card-foreground truncate">{task.customer.name}</p>
-            <p className="text-xs text-muted-foreground">{task.id}</p>
+            <p className="text-xs text-muted-foreground">{task.EnquiryNumber}</p>
           </div>
            <Badge variant="outline" className={statusColors[task.status]}>{task.status}</Badge>
         </div>
@@ -315,8 +416,10 @@ const handleEditItem = (item: WorkItem) => {
                 </div>
               </div>
               <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                <Button variant="outline" onClick={() => openNavigation(task.address.lat,task.address.lng)}>
                 <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{task.siteVisit.address.address1 + ", " + task.siteVisit.address.city}</span>
+                <span>{task.address.address1 + ", " + task.address.city}</span>
+                </Button>
               </div>
             </section>
 
@@ -326,7 +429,7 @@ const handleEditItem = (item: WorkItem) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div className="flex items-center gap-2 text-card-foreground">
                   <Wrench className="w-4 h-4 text-muted-foreground" />
-                  <span>{task.workTypes.map((wt)=>wt.name).join(",")}{task.workTypes.map((wt)=>wt.selectedSubOption).join(",") ? ` — ${task.workTypes.map((wt)=>wt.selectedSubOption).join(",")}` : ""}</span>
+                  {/* <span>{task.workTypes.map((wt)=>wt.name).join(",")}{task.workTypes.map((wt)=>wt.selectedSubOption).join(",") ? ` — ${task.workTypes.map((wt)=>wt.selectedSubOption).join(",")}` : ""}</span> */}
                 </div>
                 <div className="flex items-center gap-2 text-card-foreground">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
@@ -591,6 +694,7 @@ const handleEditItem = (item: WorkItem) => {
       <Input
         placeholder="Item Name"
         value={newItem.name}
+        disabled={!!editingItemId && !newItem.isCustom}
         onChange={(e) =>
           setNewItem({ ...newItem, name: e.target.value })
         }

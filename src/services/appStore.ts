@@ -16,7 +16,7 @@ interface AppState {
   isLoggedIn: boolean;
   role: "admin" | "operator" | "id";
 
-  login: ( username: string, password: string) => Promise<{ role: "admin" | "operator"; id: string ,name:string} | null>;
+  login: ( username: string, password: string) => Promise<{ role: "admin" | "operator"; id: number ,name:string} | null>;
   logout: () => void;
 
 }
@@ -29,22 +29,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   login:async (username: string, password: string) => {
   if (username === "admin" && password === "admin123") {
     set({ isLoggedIn: true, role: "admin" });
-    return { role: "admin", id: "admin" ,name:""};
+    return { role: "admin", id: 1 ,name:""};
   }
 
-const eng = await OperatorService.login(username, password);
-  if (eng) {
+// const eng = await OperatorService.login(username, password);
+//   if (eng) {
+//     set({ isLoggedIn: true, role: "operator" });
+//     return { role: "operator" ,id: eng.id,name:""};
+//   }
+
+  const user = await AuthService.getToken({username:username, password:password});
+  if (user) {
     set({ isLoggedIn: true, role: "operator" });
-    return { role: "operator" ,id: eng.id,name:""};
+   const token= TokenManager.getToken();
+   const data=await AuthService.getUserDetails(token);
+    return { role: "operator" ,id:data.id,name:data.name,detail:data};
   }
-
-  // const user = await AuthService.getToken({username:username, password:password});
-  // if (user) {
-  //   set({ isLoggedIn: true, role: "operator" });
-  //  const token= TokenManager.getToken();
-  //  const data=await AuthService.getUserDetails(token);
-  //   return { role: "operator" ,id:data.id,name:data.name,detail:data};
-  // }
 
 
   return null;

@@ -25,8 +25,6 @@ export interface StatusEntry {
   remarks?: string;
 }
 
-
-
 export interface WorkItem {
   id: string;
   productsId?: string; // maps to product UID from ERP
@@ -44,11 +42,12 @@ export interface WorkItem {
 }
 
 export interface SiteVisit {
+  id?:number;
   scheduledDate: string;
   scheduledTime: string;
   contactNumber?: string;
   address?: Address;
-  engineerId?: string;
+  engineerId?: number;
   rescheduledDate?: string;
   rescheduledTime?: string;
   rescheduleReason?: string;
@@ -60,6 +59,7 @@ export interface Enquiry {
   id?: string;
   EnquiryNumber?:string;
   customer?: Customer;
+  customerId?:string;
   addressId?: number;
   address: Address;
   workItems?: WorkItem[];
@@ -69,7 +69,7 @@ export interface Enquiry {
   statusHistory: StatusEntry[];
   status?: EnquiryStatus;
   remarks?: Remark[];   // admin 
-  assignedEngineerId?: string;
+  assignedEngineerId?: number;
   images?: string[];
   createdAt?: string;
   updatedAt?: string;
