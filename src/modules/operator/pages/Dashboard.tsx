@@ -13,7 +13,7 @@ import { Engineer } from "@/types/engineer";
 import { Enquiry } from "@/types/enquiry";
 import { UserManager } from "@/services/userManager";
 import { TokenManager } from "@/services/tokenManager.service";
-
+import WorkTypeService from "@/services/worktype.service";
 
 const statusIcon: Record<string, React.ReactNode> = {
   "My Tasks": <ClipboardList className="w-5 h-5" />,
@@ -52,6 +52,9 @@ const cardColors: Record<string, string> = {
 
 const Dashboard: React.FC = () => {
 
+
+  const [productNames, setProductNames] = React.useState<Record<string, string>>({});
+
  useEffect(() => {
   const enquiries = async()=>{
     // const res=await OperatorService.getTasksByEngineer(engineerId!);
@@ -71,6 +74,8 @@ const Dashboard: React.FC = () => {
   };
   engineer();
  },[]);
+
+ 
     
   const navigate = useNavigate();
 
@@ -85,6 +90,39 @@ console.log("Engineer ID from params:", engineerId);
  const sections = ["Pending", "Rescheduled","My Tasks"];
  const [engineer, setEngineer] = React.useState<Engineer | null>(null);
  const [myEnquiries,setMyEnquiries] = React.useState<Enquiry[]>([]);
+
+ useEffect(() => {
+  const loadProducts = async () => {
+    const ids = myEnquiries.flatMap(
+      (task) =>
+        task.workItems?.map((w) => w.productsId) || []
+    );
+
+    const uniqueIds = [...new Set(ids)];
+
+    const productMap: Record<string, string> = {};
+
+    for (const id of uniqueIds) {
+      try {
+        const product =
+          await WorkTypeService.getProductsByID(id);
+
+        productMap[id] = product?.Name || "";
+      } catch (error) {
+        console.error(
+          "Failed to fetch product:",
+          id
+        );
+      }
+    }
+
+    setProductNames(productMap);
+  };
+
+  if (myEnquiries.length > 0) {
+    loadProducts();
+  }
+}, [myEnquiries]);
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -150,7 +188,8 @@ console.log("Engineer ID from params:", engineerId);
   .reverse()
   .join("-")}, {task.siteVisit?.scheduledTime}
 </p>
-                  <p className="text-sm text-muted-foreground">{task.workItems.map((wt)=>wt.name).join(",")}</p>
+                  {/* <p className="text-sm text-muted-foreground">{task.workItems.map((wt)=>productNames[wt.productsId] ).join(",")}</p> */}
+                  <p className="text-sm text-muted-foreground">{task.description}</p>
                 </div>
                 <Badge variant="outline" className={statusColors[task.status]}>{task.status}</Badge>
               </button>

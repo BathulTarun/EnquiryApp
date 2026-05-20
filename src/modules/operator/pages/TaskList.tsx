@@ -124,7 +124,7 @@ const[tasks,setTasks] =  React.useState<Enquiry[]>([]);
   : "";
       
 
-      return `${w.name}${subCat}${product}`;
+      return `${product}`;
     })
     .join(", ")}</span>
               </div>

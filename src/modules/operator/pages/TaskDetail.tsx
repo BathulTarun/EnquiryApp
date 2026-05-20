@@ -11,6 +11,7 @@ import { OperatorService } from "@/services/operator.service";
 import { mapUpdatedEnquiryToApi } from "@/services/EnquiryPayloadMapper";
 import { fileToBase64 } from "@/components/ImageConvertor";
 import WorkTypeSelector from "@/modules/customers/components/WorkTypeSelector";
+import WorkTypeService from "@/services/worktype.service";
 import { WorkType ,SelectedProduct } from "@/types/common";
 import {
   ArrowLeft,
@@ -59,6 +60,10 @@ const enquiry = location.state?.enquiry;
 const [selectorOpen, setSelectorOpen] = useState(false);
 
 const [selectedWork, setSelectedWork] = useState<WorkType[]>([]);
+
+const [productNames, setProductNames] = React.useState<Record<string, string>>({});
+
+
 
 
 const[task,setMyTask] =  React.useState<Enquiry | null>(enquiry || null);
@@ -115,7 +120,38 @@ const [previewImage, setPreviewImage] = useState<{
     );
   }
 
+useEffect(() => {
+  const loadProducts = async () => {
+    const ids =
+      workItems
+        ?.map((w) => w.productsId)
+        .filter(Boolean) || [];
 
+    const uniqueIds = [...new Set(ids)];
+
+    const productMap: Record<string, string> = {};
+
+    for (const id of uniqueIds) {
+      try {
+        const product =
+          await WorkTypeService.getProductsByID(id);
+
+        productMap[id] = product?.Name || "";
+      } catch (error) {
+        console.error(
+          "Failed to fetch product:",
+          id
+        );
+      }
+    }
+
+    setProductNames(productMap);
+  };
+
+  if (workItems.length > 0) {
+    loadProducts();
+  }
+}, [workItems]);
 
 
 
@@ -199,7 +235,7 @@ newItems.push({
   productsId:
     work.selectedProduct.id,
 
-  name: work.selectedProduct.name,
+  name: "Operator",
 
   quantity: "1",
 
@@ -533,7 +569,7 @@ const handleEditItem = (item: WorkItem) => {
               <div className="flex items-start gap-2 text-sm text-muted-foreground">
                 <Button variant="outline" onClick={() => openNavigation(task.address.lat,task.address.lng)}>
                 <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{task.address.address1 + ", " + task.address.city}</span>
+                <span>{task.address.landmark + ", " + task.address.city}</span>
                 </Button>
               </div>
             </section>
@@ -544,7 +580,7 @@ const handleEditItem = (item: WorkItem) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div className="flex items-center gap-2 text-card-foreground">
                   <Wrench className="w-4 h-4 text-muted-foreground" />
-                  {/* <span>{task.workTypes.map((wt)=>wt.name).join(",")}{task.workTypes.map((wt)=>wt.selectedSubOption).join(",") ? ` — ${task.workTypes.map((wt)=>wt.selectedSubOption).join(",")}` : ""}</span> */}
+                  <span>{task.description}</span>
                 </div>
                 <div className="flex items-center gap-2 text-card-foreground">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
@@ -642,7 +678,7 @@ const handleEditItem = (item: WorkItem) => {
         <div className="flex items-center gap-2 text-sm">
   <span className="text-muted-foreground">Name:</span>
   <span className="font-medium">
-    {item.name || "Unnamed Item"}
+    {productNames[item.productsId]}
   </span>
 </div>
 
@@ -676,7 +712,7 @@ const handleEditItem = (item: WorkItem) => {
         </button>
 
         {/* DELETE */}
-        {item.isCustom && (
+        {item.name == "Operator" && (
           <button onClick={() => handleRemoveItem(item.id)}>
             <X className="w-4 h-4 text-red-500" />
           </button>
@@ -816,7 +852,7 @@ const handleEditItem = (item: WorkItem) => {
       {/* Name */}
       <Input
         placeholder="Item Name"
-        value={newItem.name}
+        value= {productNames[newItem.productsId]}
         disabled={!!editingItemId && !newItem.isCustom}
         onChange={(e) =>
           setNewItem({ ...newItem, name: e.target.value })
