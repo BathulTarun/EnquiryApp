@@ -88,7 +88,30 @@ const uniqueAddresses = allAddresses.filter(
     addressType: "",
   });
 
+const getStatusNote = (status: string) => {
+  switch (status) {
+    case "Pending":
+      return "Scheduling Shortly";
 
+    case "SiteVisitScheduled":
+      return "Engineer Assigned";
+
+    case "SiteVisitRescheduled":
+      return "Visit Rescheduled";
+
+    case "SiteVisitCompleted":
+      return "Site Visit Completed";
+
+    case "ReadyForQuotation":
+      return "Quotation in Progress";
+
+    case "Completed":
+      return "Service Completed";
+
+    default:
+      return "Status Updating";
+  }
+};
 
   const handleLocationSelect = (loc: LocationResult) => {
      const matchedState = states.find(
@@ -353,7 +376,7 @@ onUpdateCustomer?.({
     })
     .join(", ")}
 </p>
-<p className="text-xs text-primary">{enq.assignedEngineerId || "Scheduling Shortly"}</p>
+<p className="text-xs text-primary"> {getStatusNote(enq.status)}</p>
   {/* Remarks */}
   {enq.remarks && (
     <p className="text-xs text-muted-foreground mt-1">
