@@ -10,6 +10,8 @@ import { EnquiryService } from "@/services/enquiry.service";
 import { OperatorService } from "@/services/operator.service";
 import { mapUpdatedEnquiryToApi } from "@/services/EnquiryPayloadMapper";
 import { fileToBase64 } from "@/components/ImageConvertor";
+import WorkTypeSelector from "@/modules/customers/components/WorkTypeSelector";
+import { WorkType ,SelectedProduct } from "@/types/common";
 import {
   ArrowLeft,
   Phone,
@@ -54,7 +56,9 @@ const TaskDetail: React.FC = () => {
 const location = useLocation();
 const enquiry = location.state?.enquiry;
 
+const [selectorOpen, setSelectorOpen] = useState(false);
 
+const [selectedWork, setSelectedWork] = useState<WorkType[]>([]);
 
 
 const[task,setMyTask] =  React.useState<Enquiry | null>(enquiry || null);
@@ -119,7 +123,118 @@ const [previewImage, setPreviewImage] = useState<{
     setWorkItems((prev) => prev.filter((i) => i.id !== id));
   };
 
+const toggleWork = (type: WorkType) => {
+  setSelectedWork((prev) => {
+    const exists = prev.find((t) => t.id === type.id);
 
+    if (exists) {
+      return prev.filter((t) => t.id !== type.id);
+    }
+
+    return [...prev, type];
+  });
+};
+
+const updateWorkType = (updated: WorkType) => {
+  setSelectedWork((prev) =>
+    prev.map((w) =>
+      w.id === updated.id ? updated : w
+    )
+  );
+};
+
+const handleSubCategoryChange = (
+  workTypeId: string,
+  subCategory: { id: string; name: string }
+) => {
+  setSelectedWork((prev) =>
+    prev.map((w) =>
+      w.id === workTypeId
+        ? {
+            ...w,
+            selectedSubCategory: subCategory,
+          }
+        : w
+    )
+  );
+};
+
+const handleProductChange = (
+  workTypeId: string,
+  product: SelectedProduct
+) => {
+  setSelectedWork((prev) =>
+    prev.map((w) =>
+      w.id === workTypeId
+        ? {
+            ...w,
+            selectedProduct: {
+              id: product.id,
+              name: product.name,
+              price: product.price,
+            },
+          }
+        : w
+    )
+  );
+};
+
+const addSelectedProductsToWorkItems = () => {
+
+  const newItems: WorkItem[] = [];
+
+  selectedWork.forEach((work) => {
+
+    if (!work.selectedProduct) return;
+
+newItems.push({
+  id: crypto.randomUUID(),
+
+  // IMPORTANT
+  CategoryID: Number(work.id),
+
+  subCategoryID:
+    Number(work.selectedSubCategory?.id),
+
+  productsId:
+    work.selectedProduct.id,
+
+  name: work.selectedProduct.name,
+
+  quantity: "1",
+
+  measurement: "",
+
+  unitPrice:
+    work.selectedProduct.price || 0,
+
+  notes: "",
+
+  isCustom: false,
+
+  images: [],
+});
+  });
+
+  setWorkItems((prev) => {
+
+    // prevent duplicates
+    const existingIds = prev.map((i) => i.name);
+
+    const filtered = newItems.filter(
+      (i) => !existingIds.includes(i.name)
+    );
+
+    return [...prev, ...filtered];
+  });
+
+  // reset selector state
+  setSelectedWork([]);
+
+  setSelectorOpen(false);
+
+  toast.success("Products added");
+};
    
 //   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
 //   const files = e.target.files;
@@ -492,7 +607,7 @@ const handleEditItem = (item: WorkItem) => {
             <section className="bg-card rounded-lg shadow-material-sm p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Work Items</h3>
-                <Button size="sm" variant="ghost" onClick={() => {
+                {/* <Button size="sm" variant="ghost" onClick={() => {
   setEditingItemId(null);
   setNewItem({
     id: "",
@@ -506,7 +621,15 @@ const handleEditItem = (item: WorkItem) => {
   setItemDialogOpen(true);
 }}>
                   <Plus className="w-4 h-4 mr-1" /> Add
-                </Button>
+                </Button> */}
+                  <Button
+    size="sm"
+    variant="ghost"
+    onClick={() => setSelectorOpen(true)}
+  >
+    <Plus className="w-4 h-4 mr-1" />
+    Add Products
+  </Button>
               </div>
               <div className="space-y-2">
                 {workItems.map((item) => (
@@ -747,6 +870,43 @@ const handleEditItem = (item: WorkItem) => {
 </Dialog>
           </div>
         </div>
+        <Dialog
+  open={selectorOpen}
+  onOpenChange={setSelectorOpen}
+>
+  <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+
+    <DialogHeader>
+      <DialogTitle>
+        Select Products
+      </DialogTitle>
+    </DialogHeader>
+
+    <WorkTypeSelector
+      selected={selectedWork}
+      onToggle={toggleWork}
+      onUpdate={updateWorkType}
+      onSubCategoryChange={handleSubCategoryChange}
+      onProductChange={handleProductChange}
+    />
+
+    <div className="flex justify-end gap-2 mt-4">
+      <Button
+        variant="outline"
+        onClick={() => setSelectorOpen(false)}
+      >
+        Cancel
+      </Button>
+
+      <Button
+        onClick={addSelectedProductsToWorkItems}
+      >
+        Add Selected
+      </Button>
+    </div>
+
+  </DialogContent>
+</Dialog>
       </main>
     </div>
 
