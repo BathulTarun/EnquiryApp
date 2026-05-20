@@ -16,6 +16,7 @@ import { stat } from "fs";
 import { LocationService } from "@/services/location.service";
 import { mapLocationToAddress } from "@/services/AddressPayloadMapper";
 import { toast } from "sonner";
+import WorkTypeService from "@/services/worktype.service";
 interface CustomerDetailsProps {
   addresses: Address[];
   customer: Customer;
@@ -39,6 +40,7 @@ const CustomerDetails = ({ customer, enquiries, addresses, onUpdateCustomer, onS
 const [states, setStates] = useState<any[]>([]);
 // new for address
 const [locations, setLocations] = useState<Address[]>([]);
+const [productMap, setProductMap] = useState<Record<string, string>>({});
 
 const navigate=useNavigate();
 
@@ -60,6 +62,42 @@ useEffect(() => {
     setStates(data);
   });
 }, []);
+
+useEffect(() => {
+  const loadProducts = async () => {
+    if (!enquiries?.length) return;
+
+    try {
+      // get unique sub category ids
+      const subCategoryIds = [
+        ...new Set(
+          enquiries.flatMap((e) =>
+            e.workItems?.map((w) => w.subCategoryID)
+          )
+        ),
+      ].filter(Boolean);
+
+      let map: Record<string, string> = {};
+
+      // fetch products for each sub category
+      for (const subCategoryId of subCategoryIds) {
+        const products =
+          await WorkTypeService.getProductsBySubcategory(subCategoryId);
+
+        products.forEach((p: any) => {
+          map[String(p.UID)] = p.Name;
+        });
+      }
+
+      setProductMap(map);
+    } catch (err) {
+      console.error("Failed loading products", err);
+    }
+  };
+
+  loadProducts();
+}, [enquiries]);
+
 
 // new for address  
 const allAddresses = [
@@ -368,14 +406,18 @@ onUpdateCustomer?.({
         ? ` - ${w.subCategoryName}`
         : "";
 
-      const product = w.productName
-        ? ` (${w.productName})`
+      const productName =
+        productMap[String(w.productsId)];
+
+      const product = productName
+        ? ` (${productName})`
         : "";
 
-      return `${w.name}${subCat}`;
+      return `${product}`;
     })
     .join(", ")}
 </p>
+<p className="text-sm">{enq.description}</p>
 <p className="text-xs text-primary"> {getStatusNote(enq.status)}</p>
   {/* Remarks */}
   {enq.remarks && (

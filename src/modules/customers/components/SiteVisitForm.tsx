@@ -276,7 +276,7 @@ const imageStrings = photos.map((img) => img.url);
  workItems: workTypes.map((w) => {
   return {
     id: w.id,
-    name: w.name,
+    name: "User",
 
     subCategoryID:
       Number(w.selectedSubCategory?.id) ,
