@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { OperatorService } from "@/services/operator.service";
 import { Enquiry } from "@/types/enquiry";
 import WorkTypeService from "@/services/worktype.service";
+import { useProductStore } from "@/stores/productStore";
+import { useOperatorStore } from "@/stores/OperatorStore/operatorStore";
 import { Product } from "@/types/common";
 import Dashboard from "./Dashboard";
 
@@ -15,13 +17,14 @@ const filterMap: Record<string, (s: EnquiryStatus) => boolean> = {
   "My Tasks": () => true,
   Upcoming: (s) => s === "SiteVisitScheduled",
   Completed: (s) => s === "SiteVisitCompleted" || s === "Completed",
-  Pending: (s) => s === "Pending",
+  Pending: (s) => s === "Pending" || s === "ReadyForQuotation",
   Rescheduled: (s) => s === "SiteVisitRescheduled",
 };
 
 const TaskList: React.FC = () => {
 
- const [productNames, setProductNames] = React.useState<Record<string, string>>({});
+//  const [productNames, setProductNames] = React.useState<Record<string, string>>({});
+const { productNames, loadProducts } =useProductStore();
 
   const statusColors: Record<string, string> = {  
   "Pending": "bg-amber-50 text-amber-600 border-amber-200",
@@ -32,44 +35,37 @@ const TaskList: React.FC = () => {
   "Completed": "bg-emerald-50 text-emerald-600 border-emerald-200",
 };
 
-const[tasks,setTasks] =  React.useState<Enquiry[]>([]);
+// const[tasks,setTasks] =  React.useState<Enquiry[]>([]);
 
- useEffect(() => {
-  const enquiries = async()=>{
-    // const res=await OperatorService.getTasksByEngineer(engineerId!);
-    const res=await OperatorService.getEnquriesByOperatorId(Number(engineerId!));
-    setTasks(res);
-    console.log("Enquiries for engineer:", res);
-  };
-  enquiries();
-  }, []);
+const {
+  enquiries,
+  fetchEnquiries,
+} = useOperatorStore();
+
+useEffect(() => {
+  fetchEnquiries(Number(engineerId));
+}, []);
+
+//  useEffect(() => {
+//   const enquiries = async()=>{
+//     // const res=await OperatorService.getTasksByEngineer(engineerId!);
+//     const res=await OperatorService.getEnquriesByOperatorId(Number(engineerId!));
+//     setTasks(res);
+//     console.log("Enquiries for engineer:", res);
+//   };
+//   enquiries();
+//   }, []);
   
-  useEffect(() => {
-  const loadProducts = async () => {
-    const ids = tasks.flatMap(task =>
-      task.workItems?.map(w => w.productsId) || []
-    );
+// useEffect(() => {
+//   const ids = tasks.flatMap(
+//     (task) =>
+//       task.workItems?.map(
+//         (w) => w.productsId
+//       ) || []
+//   );
 
-    const uniqueIds = [...new Set(ids)];
-
-    const productMap: Record<string, string> = {};
-
-    for (const id of uniqueIds) {
-      try {
-        const product = await WorkTypeService.getProductsByID(id);
-        productMap[id] = product?.Name || "";
-      } catch (error) {
-        console.error("Failed to fetch product:", id);
-      }
-    }
-
-    setProductNames(productMap);
-  };
-
-  if (tasks.length > 0) {
-    loadProducts();
-  }
-}, [tasks]);
+//   loadProducts(ids);
+// }, [tasks]);
 
 
   const navigate = useNavigate();
@@ -77,7 +73,7 @@ const[tasks,setTasks] =  React.useState<Enquiry[]>([]);
   const filter = searchParams.get("filter") || "My Tasks";
   const engineerId = searchParams.get("engineerId");
   const fn = filterMap[filter] || filterMap["My Tasks"];
-  const filtered = tasks.filter((t) => fn(t.status));
+  const filtered = enquiries.filter((t) => fn(t.status));
  
 
 

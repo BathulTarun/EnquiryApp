@@ -7,7 +7,7 @@ import { error } from "console";
 const BASE_URL = "http://localhost:7071/api";
 const COMPANY_ID=import.meta.env.VITE_COMPANY_ID;
 const TENANT_ID=import.meta.env.VITE_TENANT_ID;
-const Package_ID=import.meta.env.VITE_Package_ID;
+const Package_ID=import.meta.env.VITE_PACKAGE_ID;
 const FixedURL= import.meta.env.VITE_API_BASE_URL;
 
 class WorkTypeService {

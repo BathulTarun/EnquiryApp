@@ -20,7 +20,7 @@ import { CustomerService } from "@/services/customer.service";
 
 import { OperatorService } from "@/services/operator.service";
 
-
+import { useWorkTypeStore } from "@/stores/ProductDetailsStore";
 import { Enquiry } from "@/types/enquiry";
 import { Engineer } from "@/types/engineer";
 import { LocationService } from "@/services/location.service";
@@ -55,7 +55,17 @@ const [engineers, setEngineers] = useState<Engineer[]>([]);
   const [locations, setLocations] = useState<Address[]>([]);
  const[token,setToken]=useState("");
  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
-
+ const [isLoadingWorkTypes,
+setIsLoadingWorkTypes] =
+useState(false);
+const {
+  categories,
+  subcategories,
+  products,
+  loadCategories,
+  loadSubcategories,
+  loadProducts
+} = useWorkTypeStore();
   const loadLocations = async (customerId: number) => {
     const data = await LocationService.getAllLocationsForCustomer(customerId);
 
@@ -78,16 +88,43 @@ const [engineers, setEngineers] = useState<Engineer[]>([]);
   
 
   
+const preloadWorkTypeData = async () => {
 
-// const [workTypes, setWorkTypes] = useState<WorkType[]>([]);
+  // categories
+  await loadCategories();
 
-// useEffect(() => {
-//   const fetchWorkTypes = async () => {
-//     const data = await WorkTypeService.getAll();
-//     setWorkTypes(data);
-//   };
-//   fetchWorkTypes();
-// }, []);
+  // get categories from store
+  const cats =
+    useWorkTypeStore.getState().categories;
+
+  // load all subcategories
+  await Promise.all(
+    cats.map((cat) =>
+      loadSubcategories(
+        Number(cat.CategoryID)
+      )
+    )
+  );
+
+  // get updated subcategories
+  const allSubcategories =
+    useWorkTypeStore.getState()
+      .subcategories;
+
+  // flatten subcategories
+  const subList =
+    Object.values(allSubcategories)
+      .flat();
+
+  // load all products
+  await Promise.all(
+    subList.map((sub) =>
+      loadProducts(
+        Number(sub.SubCategoryID)
+      )
+    )
+  );
+};
 
 useEffect(() => {
   const fetchEngineers = async () => {
@@ -98,42 +135,13 @@ useEffect(() => {
   fetchEngineers();
 }, []);
 
-// useEffect(() => {
-// const getEnqueriesByCustomerMobile = async ()=> {
-//     const data= await CustomerService.getEnquriesByCustomerId(customer.id);
-//     console.log("Enquiries for mobile", mobile, data);
-//      setCustomerEnquiries(data);
-//   };
-//    getEnqueriesByCustomerMobile();
-// }, []);
-
   const handleMobileSearch = async (num: string) => {
-
-    // TokenManager.clearToken();
-  // const token=   await AuthService.getToken({ username: num, password: num });
-  // TokenManager.setToken(token);    //added in otpverfication.ts 45 line
     setMobile(num);
     setStep("otp"); 
   };
 
   const handleOtpVerified =async  () => {
  
-      // If token is NOT present → customer does not exist
-  // if (TokenManager.getToken()==="null" || !TokenManager.getToken()) {
-  //   toast.error("No customer found. Please create a new customer profile.",{
-  //     duration: 5000,
-  //   });
-  //   // toast({
-  //   //     title: "No customer found.",
-  //   //     description: "Please create a new customer profile.",
-  //   //   });
-  //   setIsNew(true);
-  //   setCustomer(null);
-  //   setStep("form");
-  //   return;
-  // }
-  // console.log("OTP verified, token set:", TokenManager.getToken());
-  // getEnqueriesByCustomerMobile();
 setIsLoadingCustomer(true);
 
     try {
@@ -172,20 +180,6 @@ setIsLoadingCustomer(true);
     // console.log("Enquiries", data);
      setCustomerEnquiries(data);
   }
-
-  // const getEngineerById=async (id:string)=>{
-  //   const data= await OperatorService.getEngineerById(id);
-  //   return data;
-  // }
-
-// const handleSubChange = (id: string, value: SelectedSubOption) => {
-//   // console.log("SubOption changed for WorkType ID:", id, "New Value:", value);
-//   setSelectedWork((prev) =>
-//     prev.map((w) =>
-//       w.id === id ? { ...w, selectedSubOption: value } : w
-//     )
-//   );
-// };
 
 const handleSubCategoryChange = (
   workTypeId: string,
@@ -296,8 +290,18 @@ const reset = () => {
     return true;
   };
 
-  const nextStep = () => {
-    if (step === "form") setStep("worktype");
+  const nextStep =async () => {
+    // if (step === "form") setStep("worktype");
+   if (step === "form") {
+
+  setIsLoadingWorkTypes(true);
+
+  await preloadWorkTypeData();
+
+  setIsLoadingWorkTypes(false);
+
+  setStep("worktype");
+}
     else if (step === "worktype") setStep("visit");
   };
 

@@ -14,7 +14,10 @@ import { Enquiry } from "@/types/enquiry";
 import { UserManager } from "@/services/userManager";
 import { TokenManager } from "@/services/tokenManager.service";
 import WorkTypeService from "@/services/worktype.service";
-
+import { useProductStore } from "@/stores/productStore";
+import { useOperatorStore } from "@/stores/OperatorStore/operatorStore";
+import { useWorkTypeStore } from "@/stores/ProductDetailsStore";
+import { RefreshCw } from "lucide-react";
 const statusIcon: Record<string, React.ReactNode> = {
   "My Tasks": <ClipboardList className="w-5 h-5" />,
   Upcoming: <Clock className="w-5 h-5" />,
@@ -36,7 +39,7 @@ const filterMap: Record<string, (s: EnquiryStatus) => boolean> = {
   "My Tasks": () => true,
   Upcoming: (s) => s === "SiteVisitScheduled",
   Completed: (s) => s === "SiteVisitCompleted" || s === "Completed",
-  Pending: (s) => s === "Pending",
+  Pending: (s) => s === "Pending" || s === "ReadyForQuotation",
   Rescheduled: (s) => s === "SiteVisitRescheduled",
 };
 
@@ -48,22 +51,18 @@ const cardColors: Record<string, string> = {
   Rescheduled: "bg-destructive/10 text-destructive",
 };
 
-
-
 const Dashboard: React.FC = () => {
 
 
-  const [productNames, setProductNames] = React.useState<Record<string, string>>({});
-
- useEffect(() => {
-  const enquiries = async()=>{
-    // const res=await OperatorService.getTasksByEngineer(engineerId!);
-    const res=await OperatorService.getEnquriesByOperatorId(Number(engineerId!));
-    setMyEnquiries(res);
-    console.log("Enquiries for engineer:", res);
-  };
-  enquiries();
-  }, []);
+//  useEffect(() => {
+//   const enquiries = async()=>{
+//     // const res=await OperatorService.getTasksByEngineer(engineerId!);
+//     const res=await OperatorService.getEnquriesByOperatorId(Number(engineerId!));
+//     setMyEnquiries(res);
+//     console.log("Enquiries for engineer:", res);
+//   };
+//   enquiries();
+//   }, []);
 
  useEffect(() => {
   const engineer = async()=>{
@@ -71,9 +70,11 @@ const Dashboard: React.FC = () => {
     const res=UserManager.getUser();
     setEngineer(res);
     console.log("Engineer details:", res);
+     await preloadWorkTypeData();
   };
   engineer();
  },[]);
+
 
  
     
@@ -84,45 +85,87 @@ const Dashboard: React.FC = () => {
   
 console.log("Engineer ID from params:", engineerId);
 
-    
 
   // const sections = ["My Tasks", "Upcoming", "Completed", "Pending", "Rescheduled"];
- const sections = ["Pending", "Rescheduled","My Tasks"];
+ const sections = ["Upcoming" ,"Rescheduled","Pending","Completed","My Tasks"];
  const [engineer, setEngineer] = React.useState<Engineer | null>(null);
- const [myEnquiries,setMyEnquiries] = React.useState<Enquiry[]>([]);
+//  const [myEnquiries,setMyEnquiries] = React.useState<Enquiry[]>([]);
+const {
+  enquiries,
+  fetchEnquiries,
+  loading,
+} = useOperatorStore();
+const {
+  categories,
+  subcategories,
+  products,
+  loadCategories,
+  loadSubcategories,
+  loadProducts
+} = useWorkTypeStore();
 
- useEffect(() => {
-  const loadProducts = async () => {
-    const ids = myEnquiries.flatMap(
-      (task) =>
-        task.workItems?.map((w) => w.productsId) || []
-    );
+const preloadWorkTypeData = async () => {
 
-    const uniqueIds = [...new Set(ids)];
+  // categories
+  await loadCategories();
 
-    const productMap: Record<string, string> = {};
+  // get categories from store
+  const cats =
+    useWorkTypeStore.getState().categories;
 
-    for (const id of uniqueIds) {
-      try {
-        const product =
-          await WorkTypeService.getProductsByID(id);
+  // load all subcategories
+  await Promise.all(
+    cats.map((cat) =>
+      loadSubcategories(
+        Number(cat.CategoryID)
+      )
+    )
+  );
 
-        productMap[id] = product?.Name || "";
-      } catch (error) {
-        console.error(
-          "Failed to fetch product:",
-          id
-        );
-      }
-    }
+  // get updated subcategories
+  const allSubcategories =
+    useWorkTypeStore.getState()
+      .subcategories;
 
-    setProductNames(productMap);
+  // flatten subcategories
+  const subList =
+    Object.values(allSubcategories)
+      .flat();
+
+  // load all products
+  await Promise.all(
+    subList.map((sub) =>
+      loadProducts(
+        Number(sub.SubCategoryID)
+      )
+    )
+  );
+};
+
+useEffect(() => {
+
+  const handleFocus = () => {
+    fetchEnquiries(Number(engineerId), true);
   };
 
-  if (myEnquiries.length > 0) {
-    loadProducts();
-  }
-}, [myEnquiries]);
+  window.addEventListener(
+    "focus",
+    handleFocus
+  );
+
+  return () => {
+    window.removeEventListener(
+      "focus",
+      handleFocus
+    );
+  };
+
+}, []);
+
+useEffect(() => {
+  fetchEnquiries(Number(engineerId));
+}, []);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -132,7 +175,6 @@ console.log("Engineer ID from params:", engineerId);
           <h1 className="text-lg font-semibold text-card-foreground">Welcome,</h1>
           <h1 className="text-s text-muted-foreground">{engineer?.name}</h1>
           </div>
-        
           <Button variant="ghost" size="icon" onClick={() => {navigate("/"),TokenManager.clearToken(),UserManager.clearUser()}}>
             <LogOut className="w-5 h-5" />
           </Button>
@@ -143,7 +185,7 @@ console.log("Engineer ID from params:", engineerId);
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {sections.map((section) => {
-            const count = myEnquiries.filter((t) => filterMap[section](t.status)).length;
+            const count = enquiries.filter((t) => filterMap[section](t.status)).length;
             return (
               <button
                 key={section}
@@ -169,9 +211,19 @@ console.log("Engineer ID from params:", engineerId);
 
         {/* Recent Tasks */}
         <div>
+          {/* <div className="container flex items-center justify-between h-14"> */}
           <h2 className="text-base font-semibold text-foreground mb-3">Recent Tasks</h2>
+                    {/* <Button */}
+  {/* variant="ghost"
+  onClick={() =>
+    fetchEnquiries(Number(engineerId), true)
+  }
+>
+<RefreshCw className="w-4 h-4" />
+</Button>
+</div> */}
           <div className="space-y-2">
-            {myEnquiries.slice(0, 5).map((task) => (
+            {enquiries.slice(0, 5).map((task) => (
               console.log("Task:", task),
               <button
                 key={task.id}
@@ -181,7 +233,10 @@ console.log("Engineer ID from params:", engineerId);
                 className="w-full bg-card rounded-lg shadow-material-sm p-4 text-left hover:shadow-material transition-shadow flex items-center justify-between gap-3"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium text-card-foreground truncate">{task.EnquiryNumber || `ENQ-${task.id}`}</p>
+                   <div className="flex items-start justify-between gap-3 mb-2">
+                                <p className="font-medium text-card-foreground">{task.EnquiryNumber || `ENQ-${task.id}`}</p>
+                                <Badge variant="outline" className={statusColors[task.status]}>{task.status}</Badge>
+                              </div>
                   <p className="text-xs text-muted-foreground mb-1">
   {task.siteVisit?.scheduledDate?.split("T")[0]
   .split("-")
@@ -191,7 +246,6 @@ console.log("Engineer ID from params:", engineerId);
                   {/* <p className="text-sm text-muted-foreground">{task.workItems.map((wt)=>productNames[wt.productsId] ).join(",")}</p> */}
                   <p className="text-sm text-muted-foreground">{task.description}</p>
                 </div>
-                <Badge variant="outline" className={statusColors[task.status]}>{task.status}</Badge>
               </button>
             ))}
           </div>

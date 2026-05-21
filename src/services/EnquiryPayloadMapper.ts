@@ -114,7 +114,7 @@ export const mapEnquiryFromApi = (apiEnquiry: any): Enquiry => {
       measurement: item.Unit
     })) || [],
 
-    description: apiEnquiry.Notes  || "",
+    description: apiEnquiry.Notes  || "No additional notes provided",
     
     
     siteVisit: apiEnquiry.SiteVisit

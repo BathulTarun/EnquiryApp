@@ -13,6 +13,8 @@ import { fileToBase64 } from "@/components/ImageConvertor";
 import WorkTypeSelector from "@/modules/customers/components/WorkTypeSelector";
 import WorkTypeService from "@/services/worktype.service";
 import { WorkType ,SelectedProduct } from "@/types/common";
+import { useProductStore } from "@/stores/productStore";
+import { useOperatorStore } from "@/stores/OperatorStore/operatorStore";
 import {
   ArrowLeft,
   Phone,
@@ -54,28 +56,37 @@ const TaskDetail: React.FC = () => {
 // enquiry();
 // },[]);
 
-const location = useLocation();
-const enquiry = location.state?.enquiry;
+// const location = useLocation();
+// const enquiry = location.state?.enquiry;
+ const { enquiries } = useOperatorStore();
+
 
 const [selectorOpen, setSelectorOpen] = useState(false);
 
 const [selectedWork, setSelectedWork] = useState<WorkType[]>([]);
 
-const [productNames, setProductNames] = React.useState<Record<string, string>>({});
+// const [productNames, setProductNames] = React.useState<Record<string, string>>({});
+const { productNames, loadProducts } =useProductStore();
 
+const { updateLocalEnquiry } =
+  useOperatorStore();
 
+// const[task,setMyTask] =  React.useState<Enquiry | null>(enquiry || null);
 
-
-const[task,setMyTask] =  React.useState<Enquiry | null>(enquiry || null);
   const { taskId } = useParams<{ taskId: string }>();
 
   console.log("Task ID from params:", taskId);
-  useEffect(() => {
-  if (task?.workItems) {
-    setWorkItems(task.workItems);
+const task = useMemo(() => {
+  return enquiries.find(
+    (e) => e.id === (taskId)
+  ) || null;
+}, [enquiries, taskId]);
+
+useEffect(() => {
+  if (task && workItems.length === 0) {
+    setWorkItems(task.workItems || []);
   }
 }, [task]);
-
 
   const navigate = useNavigate();
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
@@ -106,6 +117,11 @@ const [previewImage, setPreviewImage] = useState<{
   workItemId: string;
 } | null>(null);
 
+const isReadOnly =
+  task.status === "ReadyForQuotation" ||
+  task.status === "Completed";
+
+  
 
   const currentStepIndex = useMemo(
     () => (task ? ALL_STATUSES.indexOf(task.status) : 0),
@@ -120,38 +136,15 @@ const [previewImage, setPreviewImage] = useState<{
     );
   }
 
-useEffect(() => {
-  const loadProducts = async () => {
-    const ids =
-      workItems
-        ?.map((w) => w.productsId)
-        .filter(Boolean) || [];
-
-    const uniqueIds = [...new Set(ids)];
-
-    const productMap: Record<string, string> = {};
-
-    for (const id of uniqueIds) {
-      try {
-        const product =
-          await WorkTypeService.getProductsByID(id);
-
-        productMap[id] = product?.Name || "";
-      } catch (error) {
-        console.error(
-          "Failed to fetch product:",
-          id
-        );
-      }
-    }
-
-    setProductNames(productMap);
-  };
-
-  if (workItems.length > 0) {
-    loadProducts();
-  }
+const productIds = useMemo(() => {
+  return workItems
+    .map((w) => w.productsId)
+    .filter(Boolean);
 }, [workItems]);
+
+useEffect(() => {
+  loadProducts(productIds);
+}, [productIds]);
 
 
 
@@ -255,10 +248,12 @@ newItems.push({
   setWorkItems((prev) => {
 
     // prevent duplicates
-    const existingIds = prev.map((i) => i.name);
+    const existingIds = prev.map(
+  (i) => i.productsId
+);
 
     const filtered = newItems.filter(
-      (i) => !existingIds.includes(i.name)
+      (i) => !existingIds.includes(i.productsId)
     );
 
     return [...prev, ...filtered];
@@ -342,7 +337,7 @@ const handleRemoveImage = (id: string) => {
 };
   // helper to get item name by id (for display purposes)
 const getItemName = (id: string) => {
-  return task.workItems.find((item) => item.id === id)?.name || "Item";
+  return workItems.find((item) => item.id === id)?.name || "Item";
 };
 
   const handleStartWork = () => {
@@ -371,6 +366,8 @@ const getItemName = (id: string) => {
 
   const handleReschedule = async () => {
 
+    const newStatus = "SiteVisitRescheduled";
+  setShowReschedule(!showReschedule)
   const updatedTask = {
     ...task,
 
@@ -388,12 +385,29 @@ const getItemName = (id: string) => {
   const payload = mapUpdatedEnquiryToApi(
     updatedTask,
     workItems,
-    "SiteVisitRescheduled"
+    newStatus
   );
 
-  await OperatorService.updateEnquiry(payload);
-
+  const data= await OperatorService.updateEnquiry(payload);
+   if(data){
+    //  setMyTask((prev) =>
+    //   prev
+    //     ? {
+    //         ...prev,
+    //         status: newStatus,
+    //       }
+    //     : prev
+    // );
   toast.success("Task Rescheduled");
+
+  updateLocalEnquiry({
+  ...task,
+  workItems,
+  status: newStatus,
+});
+   }else{
+    toast.error("Try again")
+   }
 };
 const openNavigation = (lat: number, lng: number) => {
   window.open(
@@ -416,6 +430,10 @@ const openNavigation = (lat: number, lng: number) => {
 
   const result =await OperatorService.updateEnquiry(payload);
 if(result){
+  updateLocalEnquiry({
+  ...task,
+  workItems,
+});
   toast.success("Draft saved");
 }else{
   toast.error("Failed to save");
@@ -433,17 +451,35 @@ if(result){
   //    OperatorService.updateTaskStatus(task.id, "ReadyForQuotation");
   //   toast.success("Submitted — quotation created in Admin Panel");
   // };
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
+  const newStatus = "ReadyForQuotation";
 
   const payload = mapUpdatedEnquiryToApi(
     task,
     workItems,
-    "ReadyForQuotation"
+    newStatus
   );
 
-  await OperatorService.updateEnquiry(payload);
+  const result = await OperatorService.updateEnquiry(payload);
 
-  toast.success("Submitted successfully");
+  if (result) {
+    // setMyTask((prev) =>
+    //   prev
+    //     ? {
+    //         ...prev,
+    //         status: newStatus,
+    //       }
+    //     : prev
+    // );
+    updateLocalEnquiry({
+  ...task,
+  workItems,
+  status: newStatus,
+});
+    toast.success("Submitted successfully");
+  } else {
+    toast.error("Failed to submit");
+  }
 };
  console.log(task);
   
@@ -584,7 +620,10 @@ const handleEditItem = (item: WorkItem) => {
                 </div>
                 <div className="flex items-center gap-2 text-card-foreground">
                   <Calendar className="w-4 h-4 text-muted-foreground" />
-                  <span>{task.siteVisit.scheduledDate}</span>
+                  <span>{task.siteVisit?.scheduledDate?.split("T")[0]
+  .split("-")
+  .reverse()
+  .join("-")}, {task.siteVisit?.scheduledTime}</span>
                 </div>
                 <div className="flex items-center gap-2 text-card-foreground">
                   <Clock className="w-4 h-4 text-muted-foreground" />
@@ -606,7 +645,7 @@ const handleEditItem = (item: WorkItem) => {
                 <Button size="sm" variant="secondary" onClick={handleComplete} className="hidden">
                   <Check className="w-4 h-4 mr-1" /> Complete Work
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => setShowReschedule(!showReschedule)}>
+                <Button size="sm" variant="outline" disabled={isReadOnly} onClick={() => setShowReschedule(!showReschedule)}>
                   <RotateCcw className="w-4 h-4 mr-1" /> Reschedule
                 </Button>
               </div>
@@ -661,6 +700,7 @@ const handleEditItem = (item: WorkItem) => {
                   <Button
     size="sm"
     variant="ghost"
+    disabled={isReadOnly}
     onClick={() => setSelectorOpen(true)}
   >
     <Plus className="w-4 h-4 mr-1" />
@@ -707,14 +747,14 @@ const handleEditItem = (item: WorkItem) => {
 
       <div className="flex items-center gap-2">
         {/* EDIT */}
-        <button onClick={() => handleEditItem(item)}>
-          <Pencil className="w-4 h-4 text-blue-500" />
+        <button disabled={isReadOnly} onClick={() => handleEditItem(item)}>
+          <Pencil className={`w-4 h-4 ${ isReadOnly ? "text-gray-400" : "text-blue-500" }`} />
         </button>
 
         {/* DELETE */}
         {item.name == "Operator" && (
-          <button onClick={() => handleRemoveItem(item.id)}>
-            <X className="w-4 h-4 text-red-500" />
+          <button disabled={isReadOnly} onClick={() => handleRemoveItem(item.id)}>
+            <X className={`w-4 h-4 ${ isReadOnly ? "text-gray-400" : "text-red-500" }`}/>
           </button>
         )}
       </div>
@@ -748,6 +788,7 @@ const handleEditItem = (item: WorkItem) => {
   <div className="flex flex-col sm:flex-row gap-2">
     {/* Work Item Select */}
     <select
+       disabled={isReadOnly}
       className="border rounded-md px-2 py-1 text-sm w-full sm:w-48"
       value={selectedItemId}
       onChange={(e) => setSelectedItemId(e.target.value)}
@@ -755,18 +796,19 @@ const handleEditItem = (item: WorkItem) => {
       <option value="">Select Work Item</option>
       {workItems.map((item) => (
         <option key={item.id} value={item.id}>
-          {item.name || "Custom Item"}
+         {productNames[item.productsId]}
         </option>
       ))}
     </select>
 
     {/* Upload */}
-    <label className="flex items-center justify-center gap-2 px-3 py-1 border rounded-md cursor-pointer hover:bg-muted/50 text-sm">
+    <label className={`flex items-center justify-center gap-2 px-3 py-1 border rounded-md text-sm ${isReadOnly ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:bg-muted/50"}`}>
       <Camera className="w-4 h-4" />
       Upload
       <input
         type="file"
         accept="image/*"
+        disabled={isReadOnly}
         multiple
         capture="environment"
         onChange={handleImageUpload}
@@ -805,10 +847,10 @@ const handleEditItem = (item: WorkItem) => {
 
             {/* Submit */}
             <section className="bg-card rounded-lg shadow-material-sm p-4 flex gap-3">
-              <Button variant="outline" className="flex-1" onClick={handleSave}>
+              <Button disabled={isReadOnly} variant="outline" className="flex-1" onClick={handleSave}>
                 Save Draft
               </Button>
-              <Button className="flex-1" onClick={handleSubmit}>
+              <Button disabled={isReadOnly} className="flex-1" onClick={handleSubmit}>
                 Submit
               </Button>   
             </section>
@@ -838,8 +880,6 @@ const handleEditItem = (item: WorkItem) => {
     </div>
   </div>
 )}
-  
-
   <Dialog open={itemDialogOpen} onOpenChange={setItemDialogOpen}>
   <DialogContent>
     <DialogHeader>
