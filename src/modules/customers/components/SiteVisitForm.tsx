@@ -571,7 +571,7 @@ onSubmit(enquiryId);
     ))}
   </div>
 </div>
-          <Button type="submit" className="w-full sm:w-auto" size="lg" disabled={!date || !timeSlot}>
+          <Button type="submit" className="w-full sm:w-auto" size="lg" disabled={!date || !timeSlot ||!remarks}>
             Submit Enquiry
           </Button>
         </form>
