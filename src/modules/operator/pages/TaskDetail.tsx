@@ -57,7 +57,6 @@ const TaskDetail: React.FC = () => {
 
   const {taskId} = useParams<{taskId: string}>();
 
-  console.log("Task ID from params:", taskId);
   const task = useMemo(() => {
     return enquiries.find((e) => e.id === taskId) || null;
   }, [enquiries, taskId]);
@@ -339,7 +338,6 @@ const TaskDetail: React.FC = () => {
       toast.error("Failed to submit");
     }
   };
-  console.log(task);
 
   const saveItem = () => {
     if (!newItem.name.trim()) return;

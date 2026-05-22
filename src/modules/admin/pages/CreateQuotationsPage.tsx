@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { useState, useEffect } from "react";
+import {Button} from "@/components/ui/button";
+import {Label} from "@/components/ui/label";
+import {useState, useEffect} from "react";
 
 import {
   Select,
@@ -9,34 +9,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, ArrowLeft, Pencil } from "lucide-react";
+import {Input} from "@/components/ui/input";
+import {Textarea} from "@/components/ui/textarea";
+import {Plus, Trash2, ArrowLeft, Pencil} from "lucide-react";
 
-import { useNavigate ,useSearchParams} from "react-router-dom";
-import { useAppStore } from "@/services/appStore";
-import { QuotationItem } from "@/types/quotation";
-import { Enquiry } from "@/types/enquiry";
-import { EnquiryService } from "@/services/enquiry.service";
+import {useNavigate, useSearchParams} from "react-router-dom";
+import {useAppStore} from "@/services/appStore";
+import {QuotationItem} from "@/types/quotation";
+import {Enquiry} from "@/types/enquiry";
+import {EnquiryService} from "@/services/enquiry.service";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Customer } from "@/types/customer";
-import { CustomerService } from "@/services/customer.service";
-import { QuotationService } from "@/services/quotation.service";
+import {Customer} from "@/types/customer";
+import {CustomerService} from "@/services/customer.service";
+import {QuotationService} from "@/services/quotation.service";
 
 export default function CreateQuotationPage() {
-  
-   const [searchParams] = useSearchParams();
-const enquiryId = searchParams.get("enquiryId");
+  const [searchParams] = useSearchParams();
+  const enquiryId = searchParams.get("enquiryId");
 
-
-
-  const[enquiriesList,setEnquriesList]=useState<Enquiry[]|null>([]);
-  const[customersList,setCustomersList]=useState<Customer[]|null>([]);
+  const [enquiriesList, setEnquriesList] = useState<Enquiry[] | null>([]);
+  const [customersList, setCustomersList] = useState<Customer[] | null>([]);
 
   const navigate = useNavigate();
 
@@ -50,48 +47,44 @@ const enquiryId = searchParams.get("enquiryId");
 
   const [newItem, setNewItem] = useState({
     description: "",
-    quantity:"1",
+    quantity: "1",
     unitPrice: 0,
   });
 
-  useEffect(() =>{
-   const enquiries = async()=>{
-       const res=await EnquiryService.getAllEnquiries();
-       setEnquriesList(res);
-       console.log("Enquiries for admin:", res);
-  };
-  enquiries();
-  const customers=async()=>{
-     const res=await CustomerService.getAllCustomers();
-     setCustomersList(res);
-     console.log("Customer for admin:",res);
-  };
-  customers();
-
-}, []);
   useEffect(() => {
-  if (!enquiryId) return;
+    const enquiries = async () => {
+      const res = await EnquiryService.getAllEnquiries();
+      setEnquriesList(res);
+    };
+    enquiries();
+    const customers = async () => {
+      const res = await CustomerService.getAllCustomers();
+      setCustomersList(res);
+    };
+    customers();
+  }, []);
+  useEffect(() => {
+    if (!enquiryId) return;
 
-  // 👉 prevent re-running if already set
-  if (selectedEnquiry) return;
+    // 👉 prevent re-running if already set
+    if (selectedEnquiry) return;
 
-  setSelectedEnquiry(enquiryId);
+    setSelectedEnquiry(enquiryId);
 
-  const enq = enquiriesList.find((e) => e.id === enquiryId);
-  if (!enq) return;
+    const enq = enquiriesList.find((e) => e.id === enquiryId);
+    if (!enq) return;
 
-  if (enq.workItems && enq.workItems.length > 0) {
-    const autoItems = enq.workItems.map((w: any, index: number) => ({
-      id: w.id ,
-      description: enq.workTypes ? `${enq.workTypes} - ${w.name}` : w.name,
-      quantity: w.quantity || "1",
-      unitPrice: w.unitPrice || w.rate || 0,
-    }));
+    if (enq.workItems && enq.workItems.length > 0) {
+      const autoItems = enq.workItems.map((w: any, index: number) => ({
+        id: w.id,
+        description: enq.workTypes ? `${enq.workTypes} - ${w.name}` : w.name,
+        quantity: w.quantity || "1",
+        unitPrice: w.unitPrice || w.rate || 0,
+      }));
 
-    setItems(autoItems);
-    console.log("Auto-filled items from enquiry:", autoItems);
-  }
-}, [enquiryId, enquiriesList]);
+      setItems(autoItems);
+    }
+  }, [enquiryId, enquiriesList]);
 
   // ✅ Add item
   const addItem = (item: QuotationItem) => {
@@ -109,9 +102,7 @@ const enquiryId = searchParams.get("enquiryId");
 
     if (editingItemId) {
       setItems((prev) =>
-        prev.map((i) =>
-          i.id === editingItemId ? { ...i, ...newItem } : i
-        )
+        prev.map((i) => (i.id === editingItemId ? {...i, ...newItem} : i)),
       );
     } else {
       addItem({
@@ -145,11 +136,11 @@ const enquiryId = searchParams.get("enquiryId");
   const subtotal = items.reduce(
     // (s, i) => s + i.quantity * i.unitPrice,
     // 0
-   (s, i) => s +  i.unitPrice,
-    0
+    (s, i) => s + i.unitPrice,
+    0,
   );
- 
-  const handleCreate =async () => {
+
+  const handleCreate = async () => {
     if (!selectedEnquiry || items.length === 0) return;
 
     // addQuotation({
@@ -158,7 +149,7 @@ const enquiryId = searchParams.get("enquiryId");
     //   notes,
     // });
 
-   await QuotationService.create({enquiryId: selectedEnquiry,items,notes,});
+    await QuotationService.create({enquiryId: selectedEnquiry, items, notes});
 
     navigate("/admin/quotations");
   };
@@ -175,13 +166,8 @@ const enquiryId = searchParams.get("enquiryId");
     <div className="space-y-4 p-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-medium">
-          Create Quotation
-        </h2>
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/admin/quotations")}
-        >
+        <h2 className="text-2xl font-medium">Create Quotation</h2>
+        <Button variant="ghost" onClick={() => navigate("/admin/quotations")}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
       </div>
@@ -203,8 +189,6 @@ const enquiryId = searchParams.get("enquiryId");
           ))}
         </SelectContent>
       </Select>
-
-
 
       {/* Work Items */}
       <div>
@@ -230,9 +214,7 @@ const enquiryId = searchParams.get("enquiryId");
 
         <div className="space-y-2">
           {items.length === 0 && (
-            <p className="text-sm text-muted-foreground">
-              No items added yet
-            </p>
+            <p className="text-sm text-muted-foreground">No items added yet</p>
           )}
 
           {items.map((item) => (
@@ -241,18 +223,14 @@ const enquiryId = searchParams.get("enquiryId");
               className="flex justify-between items-center border rounded-lg p-3"
             >
               <div>
-                <p className="font-medium break-words">
-                  {item.description}
-                </p>
+                <p className="font-medium break-words">{item.description}</p>
                 <p className="text-sm text-muted-foreground">
                   {item.quantity} × ₹{item.unitPrice}
                 </p>
               </div>
 
               <div className="flex items-center gap-3">
-                <p className="font-medium">
-                  ₹{item.unitPrice}
-                </p>
+                <p className="font-medium">₹{item.unitPrice}</p>
 
                 <button onClick={() => handleEdit(item)}>
                   <Pencil className="h-4 w-4 text-blue-500" />
@@ -288,10 +266,7 @@ const enquiryId = searchParams.get("enquiryId");
       </Button>
 
       {/* Modal */}
-      <Dialog
-        open={itemDialogOpen}
-        onOpenChange={setItemDialogOpen}
-      >
+      <Dialog open={itemDialogOpen} onOpenChange={setItemDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -335,10 +310,7 @@ const enquiryId = searchParams.get("enquiryId");
               }
             />
 
-            <p className="text-right text-sm">
-              Total: ₹
-              { newItem.unitPrice}
-            </p>
+            <p className="text-right text-sm">Total: ₹{newItem.unitPrice}</p>
 
             <div className="flex justify-end gap-2">
               <Button

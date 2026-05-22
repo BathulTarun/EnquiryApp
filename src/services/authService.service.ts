@@ -89,7 +89,6 @@ export class AuthService {
       const result = await response.json();
       if (result.Status === "Success") {
         UserManager.setUser(mapOperatorFromApi(result));
-        console.log("Local storage data", UserManager.getUser());
         return mapOperatorFromApi(result);
       }
       return null;

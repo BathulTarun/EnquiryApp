@@ -33,12 +33,6 @@ const LoginPage = () => {
       navigate("/admin/dashboard");
     } else if (result.role === "operator") {
       navigate(`/operator/dashboard/${result.id}`);
-
-      console.log("Logged in as operator with ID:", result.id);
-      console.log(
-        "Operator Name:",
-        engineers.find((e) => e.id === result.id)?.name,
-      );
     }
   };
 

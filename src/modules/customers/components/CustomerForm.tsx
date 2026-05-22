@@ -110,9 +110,9 @@ const CustomerForm = ({mobile, onSave}: CustomerFormProps) => {
             address,
           );
           if (res.Status === "Success") {
-            console.log("Address added successfully");
+            toast.success("Welcome" + newCustomer.name);
           } else {
-            console.error("Failed to add address:", res.ErrorMessage);
+            toast.error("Something Went Wrong");
           }
         }
 

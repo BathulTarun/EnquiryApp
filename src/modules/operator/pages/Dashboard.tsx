@@ -56,7 +56,6 @@ const Dashboard: React.FC = () => {
     const engineer = async () => {
       const res = UserManager.getUser();
       setEngineer(res);
-      console.log("Engineer details:", res);
       await preloadWorkTypeData();
     };
     engineer();
@@ -65,10 +64,6 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   const {engineerId} = useParams();
-  const id = Number(engineerId);
-
-  console.log("Engineer ID from params:", engineerId);
-
   const sections = [
     "Upcoming",
     "Rescheduled",
@@ -198,47 +193,42 @@ const Dashboard: React.FC = () => {
             Recent Tasks
           </h2>
           <div className="space-y-2">
-            {enquiries.slice(0, 5).map(
-              (task) => (
-                console.log("Task:", task),
-                (
-                  <button
-                    key={task.id}
-                    onClick={() =>
-                      navigate(`/operator/tasks/${task.id}`, {
-                        state: {enquiry: task},
-                      })
-                    }
-                    className="w-full bg-card rounded-lg shadow-material-sm p-4 text-left hover:shadow-material transition-shadow flex items-center justify-between gap-3"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-3 mb-2">
-                        <p className="font-medium text-card-foreground">
-                          {task.EnquiryNumber || `ENQ-${task.id}`}
-                        </p>
-                        <Badge
-                          variant="outline"
-                          className={statusColors[task.status]}
-                        >
-                          {task.status}
-                        </Badge>
-                      </div>
-                      <p className="text-xs text-muted-foreground mb-1">
-                        {task.siteVisit?.scheduledDate
-                          ?.split("T")[0]
-                          .split("-")
-                          .reverse()
-                          .join("-")}
-                        , {task.siteVisit?.scheduledTime}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {task.description}
-                      </p>
-                    </div>
-                  </button>
-                )
-              ),
-            )}
+            {enquiries.slice(0, 5).map((task) => (
+              <button
+                key={task.id}
+                onClick={() =>
+                  navigate(`/operator/tasks/${task.id}`, {
+                    state: {enquiry: task},
+                  })
+                }
+                className="w-full bg-card rounded-lg shadow-material-sm p-4 text-left hover:shadow-material transition-shadow flex items-center justify-between gap-3"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <p className="font-medium text-card-foreground">
+                      {task.EnquiryNumber || `ENQ-${task.id}`}
+                    </p>
+                    <Badge
+                      variant="outline"
+                      className={statusColors[task.status]}
+                    >
+                      {task.status}
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    {task.siteVisit?.scheduledDate
+                      ?.split("T")[0]
+                      .split("-")
+                      .reverse()
+                      .join("-")}
+                    , {task.siteVisit?.scheduledTime}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {task.description}
+                  </p>
+                </div>
+              </button>
+            ))}
           </div>
         </div>
       </main>

@@ -119,7 +119,7 @@
 //       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 //         {quotations.map((q) => {
 //           const sub = q.items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
-         
+
 //           return (
 //             <Card key={q.id} className="material-shadow cursor-pointer hover:material-shadow-lg transition-shadow" onClick={() => navigate(`/admin/quotations/${q.id}`)}>
 //               <CardContent className="p-4 space-y-2">
@@ -143,26 +143,25 @@
 //       {quotations.length === 0 && <div className="text-center py-12 text-muted-foreground">No quotations yet.</div>}
 
 //       {/* View Dialog */}
-      
+
 //     </div>
 //   );
 // };
 
 // export default QuotationsPage;
 
-
 // new file: src/modules/admin/pages/QuotationsPage.tsx
-import { useState,useEffect } from "react";
+import {useState, useEffect} from "react";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Customer } from "@/types/customer";
-import { Enquiry } from "@/types/enquiry";
-import { Quotation } from "@/types/quotation";
-import { EnquiryService } from "@/services/enquiry.service";
-import { CustomerService } from "@/services/customer.service";
-import { QuotationService } from "@/services/quotation.service";
+import {Card, CardContent} from "@/components/ui/card";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Customer} from "@/types/customer";
+import {Enquiry} from "@/types/enquiry";
+import {Quotation} from "@/types/quotation";
+import {EnquiryService} from "@/services/enquiry.service";
+import {CustomerService} from "@/services/customer.service";
+import {QuotationService} from "@/services/quotation.service";
 
 import {
   Select,
@@ -171,42 +170,36 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, FileText, ArrowLeft } from "lucide-react";
-import { format } from "date-fns";
-import { useNavigate } from "react-router-dom";
+import {Plus, FileText, ArrowLeft} from "lucide-react";
+import {format} from "date-fns";
+import {useNavigate} from "react-router-dom";
 
 const QuotationsPage = () => {
- 
-   const[enquiriesList,setEnquriesList]=useState<Enquiry[]|null>([]);
-    const[customersList,setCustomersList]=useState<Customer[]|null>([]);
-    const[quotationsList,setQuotationsList]=useState<Quotation[]|null>([]);
+  const [enquiriesList, setEnquriesList] = useState<Enquiry[] | null>([]);
+  const [customersList, setCustomersList] = useState<Customer[] | null>([]);
+  const [quotationsList, setQuotationsList] = useState<Quotation[] | null>([]);
 
-    useEffect(() =>{
-       const enquiries = async()=>{
-           const res=await EnquiryService.getAllEnquiries();
-           setEnquriesList(res);
-           console.log("Enquiries for admin:", res);
-      };
-      enquiries();
-      const customers=async()=>{
-         const res=await CustomerService.getAllCustomers();
-         setCustomersList(res);
-         console.log("Customer for admin:",res);
-      };
-      customers();
-      const quotations=async()=>{
-        const res=await QuotationService.getAll();
-        setQuotationsList(res);
-      };
-      quotations();
-    
-    }, []);
-
+  useEffect(() => {
+    const enquiries = async () => {
+      const res = await EnquiryService.getAllEnquiries();
+      setEnquriesList(res);
+    };
+    enquiries();
+    const customers = async () => {
+      const res = await CustomerService.getAllCustomers();
+      setCustomersList(res);
+    };
+    customers();
+    const quotations = async () => {
+      const res = await QuotationService.getAll();
+      setQuotationsList(res);
+    };
+    quotations();
+  }, []);
 
   const navigate = useNavigate();
 
   const [search, setSearch] = useState("");
-
 
   //  Get customer + enquiry label
   const getEnquiryLabel = (eId: string) => {
@@ -215,35 +208,36 @@ const QuotationsPage = () => {
       ? customersList.find((c) => c.id === enq.customer.id)
       : undefined;
 
-    return cust ? `${cust.name} – ${enq?.workTypes.map((wt)=> wt.name).join(", ")}` : eId;
+    return cust
+      ? `${cust.name} – ${enq?.workTypes.map((wt) => wt.name).join(", ")}`
+      : eId;
   };
 
   // Ready enquiries
   const readyEnquiries = enquiriesList.filter((e) => {
-  const hasQuotation = quotationsList.some(
-    (q) => q.enquiryId === e.id
-  );
-  return e.status === "ReadyForQuotation" && !hasQuotation;
-});
+    const hasQuotation = quotationsList.some((q) => q.enquiryId === e.id);
+    return e.status === "ReadyForQuotation" && !hasQuotation;
+  });
 
   //  Filter quotations
   const filteredQuotations = quotationsList.filter((q) => {
     const label = getEnquiryLabel(q.enquiryId).toLowerCase();
 
     if (search && !label.includes(search.toLowerCase())) return false;
-   
 
     return true;
   });
 
   return (
     <div className=" space-y-4">
-      
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold"><Button variant="ghost" onClick={() => navigate("/admin/dashboard")}>
-          <ArrowLeft className="mr-2 h-4 w-4" />
-        </Button>Quotations</h2>
+        <h2 className="text-2xl font-bold">
+          <Button variant="ghost" onClick={() => navigate("/admin/dashboard")}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+          </Button>
+          Quotations
+        </h2>
         <Button onClick={() => navigate("/admin/quotations/create")}>
           <Plus className="h-4 w-4 mr-1" />
           New Quotation
@@ -253,47 +247,45 @@ const QuotationsPage = () => {
       {/*  ENQUIRIES READY FOR QUOTATION */}
       {readyEnquiries.length > 0 && (
         <Card>
-  <CardContent className="pt-4 pb-4">
-    <h3 className="text-sm font-semibold mb-2">
-      Enquiries Ready for Quotation
-    </h3>
+          <CardContent className="pt-4 pb-4">
+            <h3 className="text-sm font-semibold mb-2">
+              Enquiries Ready for Quotation
+            </h3>
 
-    {readyEnquiries.length === 0 ? (
-      <p className="text-sm text-muted-foreground text-center py-4">
-        No enquiries are ready for quotation
-      </p>
-    ) : (
-      <div className="space-y-2">
-        {readyEnquiries.map((enq) => (
-          <div
-            key={enq.id}
-            className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50"
-          >
-            <div>
-              <p className="text-sm font-medium">
-                {getEnquiryLabel(enq.id)}
+            {readyEnquiries.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No enquiries are ready for quotation
               </p>
-              <p className="text-xs text-muted-foreground">
-                {enq.workTypes.map((wt)=> wt.name).join(",")}
-              </p>
-            </div>
+            ) : (
+              <div className="space-y-2">
+                {readyEnquiries.map((enq) => (
+                  <div
+                    key={enq.id}
+                    className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">
+                        {getEnquiryLabel(enq.id)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {enq.workTypes.map((wt) => wt.name).join(",")}
+                      </p>
+                    </div>
 
-            <Button
-              size="sm"
-              onClick={() =>
-                navigate(
-                  `/admin/quotations/create?enquiryId=${enq.id}`
-                )
-              }
-            >
-              Create
-            </Button>
-          </div>
-        ))}
-      </div>
-    )}
-  </CardContent>
-</Card>
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        navigate(`/admin/quotations/create?enquiryId=${enq.id}`)
+                      }
+                    >
+                      Create
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       )}
 
       {/* SEARCH + FILTER */}
@@ -305,8 +297,6 @@ const QuotationsPage = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-
-          
           </div>
         </CardContent>
       </Card>
@@ -320,25 +310,20 @@ const QuotationsPage = () => {
                 <th className="text-left py-3 px-2">Customer</th>
                 <th className="text-left py-3 px-2">Enquiry</th>
                 <th className="text-right py-3 px-2">Amount</th>
-              
+
                 <th className="text-left py-3 px-2">Date</th>
               </tr>
             </thead>
 
             <tbody>
               {filteredQuotations.map((q) => {
-                const sub = q.items.reduce( 
-                  (s, i) => s +  i.unitPrice,
-                  0
-                );
+                const sub = q.items.reduce((s, i) => s + i.unitPrice, 0);
 
                 return (
                   <tr
                     key={q.id}
                     className="border-b hover:bg-muted/50 cursor-pointer"
-                    onClick={() =>
-                      navigate(`/admin/quotations/${q.id}`)
-                    }
+                    onClick={() => navigate(`/admin/quotations/${q.id}`)}
                   >
                     <td className="py-3 px-2 font-medium">
                       {getEnquiryLabel(q.enquiryId)}
@@ -349,7 +334,7 @@ const QuotationsPage = () => {
                     <td className="py-3 px-2 text-right font-medium">
                       ₹{sub.toLocaleString()}
                     </td>
-                   
+
                     <td className="py-3 px-2 text-muted-foreground">
                       {format(new Date(q.createdAt), "dd MMM yyyy")}
                     </td>
