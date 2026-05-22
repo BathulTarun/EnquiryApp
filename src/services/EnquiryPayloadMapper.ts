@@ -1,15 +1,12 @@
-import { Enquiry } from "@/types/enquiry";
-import { Customer } from "@/types/customer";
-import { Address } from "@/types/common";
-import { WorkItem } from "@/types/enquiry";
-import { Sub } from "@radix-ui/react-context-menu";
-import { mapCustomerFromApi } from "./CustomerPayloadMapper";
-
+import {Enquiry} from "@/types/enquiry";
+import {Customer} from "@/types/customer";
+import {Address} from "@/types/common";
+import {WorkItem} from "@/types/enquiry";
 export const mapEnquiryToApi = (enquiry: Enquiry) => {
   return {
     Ledger: {
       // CustomerID: Number(enquiry.customer?.id),
-    CustomerID:enquiry.customer?.id,
+      CustomerID: enquiry.customer?.id,
       FirmName: enquiry.customer?.name,
       ContactPerson: enquiry.customer?.name,
       MobileFirst: enquiry.customer?.mobile,
@@ -24,7 +21,7 @@ export const mapEnquiryToApi = (enquiry: Enquiry) => {
 
     Location: {
       // LocationID:Number(enquiry.address?.id) || 0,
-       LocationID: enquiry.addressId ,
+      LocationID: enquiry.addressId,
       label: null,
       AddressLine1: enquiry.address?.address1,
       AddressLine2: enquiry.address?.address2 || "",
@@ -41,90 +38,90 @@ export const mapEnquiryToApi = (enquiry: Enquiry) => {
 
     Remarks: enquiry.description || "",
 
-    ProblemDescription: enquiry.workItems?.map((item) => ({
-      CategoryID: Number(item.id), 
-      SubCategoryID: Number(item.subCategoryID), 
-      ProductID: item.productsId, 
-      Description: item.name,
-      Images: item.images || [],
-      Price: item.unitPrice || 0,
-    })) || [],
+    ProblemDescription:
+      enquiry.workItems?.map((item) => ({
+        CategoryID: Number(item.id),
+        SubCategoryID: Number(item.subCategoryID),
+        ProductID: item.productsId,
+        Description: item.name,
+        Images: item.images || [],
+        Price: item.unitPrice || 0,
+      })) || [],
 
-    StatusHistory: enquiry.statusHistory?.map((s) => ({
-      Status: s.status,
-      Timestamp: s.timestamp,
-      Remarks: s.remarks || "",
-    })) || [],
+    StatusHistory:
+      enquiry.statusHistory?.map((s) => ({
+        Status: s.status,
+        Timestamp: s.timestamp,
+        Remarks: s.remarks || "",
+      })) || [],
 
     SiteVisit: {
       ScheduledDate: enquiry.siteVisit?.scheduledDate,
       ScheduledSlots: enquiry.siteVisit?.scheduledTime,
       // LocationID: Number(enquiry.address?.id) || 0,
-      LocationID: enquiry.address?.id ,
+      LocationID: enquiry.address?.id,
       AssignedTo: Number(enquiry.assignedEngineerId) || 0,
       Notes: enquiry.siteVisit?.remarks || "",
     },
   };
 };
 
-
 export const mapEnquiryFromApi = (apiEnquiry: any): Enquiry => {
-
   const customer: Customer = {
     id: apiEnquiry.Ledger?.CustomerID,
     name: apiEnquiry.Ledger?.ContactPerson || "",
     mobile: apiEnquiry.Ledger?.MobileFirst || "",
     email: apiEnquiry.Ledger?.Email || "",
-    mobile2:apiEnquiry.Ledger?.MobileSecond || "",
+    mobile2: apiEnquiry.Ledger?.MobileSecond || "",
   };
 
-  const address:Address={
+  const address: Address = {
     id: apiEnquiry.Location.LocationID, // backend ID
-  address1: apiEnquiry.Location.AddressLine1,
-  address2: apiEnquiry.Location.AddressLine2 || "",
-  customerID:apiEnquiry.Location.LedgerID,
-  city: apiEnquiry.Location.City,
-  state: apiEnquiry.Location.StateName,
-  stateId: apiEnquiry.Location.StateID,
-  pincode: apiEnquiry.Location.PostalCode,
-  landmark: apiEnquiry.Location.LandMark || "",
-  lat:  apiEnquiry.Location.Latitude, // not provided
-  lng:  apiEnquiry.Location.Longitude,
-  addressType: apiEnquiry.Location.Name || "Home",
-  verified: true, // sin
-  }
+    address1: apiEnquiry.Location.AddressLine1,
+    address2: apiEnquiry.Location.AddressLine2 || "",
+    customerID: apiEnquiry.Location.LedgerID,
+    city: apiEnquiry.Location.City,
+    state: apiEnquiry.Location.StateName,
+    stateId: apiEnquiry.Location.StateID,
+    pincode: apiEnquiry.Location.PostalCode,
+    landmark: apiEnquiry.Location.LandMark || "",
+    lat: apiEnquiry.Location.Latitude, // not provided
+    lng: apiEnquiry.Location.Longitude,
+    addressType: apiEnquiry.Location.Name || "Home",
+    verified: true, // sin
+  };
 
   return {
     id: apiEnquiry.ID?.toString(),
-    EnquiryNumber:apiEnquiry.EnquiryNumber, 
-    customer:customer, // not provided
-    customerId:apiEnquiry.LedgerID,
-    address:address,
+    EnquiryNumber: apiEnquiry.EnquiryNumber,
+    customer: customer, // not provided
+    customerId: apiEnquiry.LedgerID,
+    address: address,
 
-    workItems: apiEnquiry.ProblemDescription?.map((item: any, i: number) => ({
-      id: i.toString(),
-      name: item.Description || "",
-      productsId:item.ProductID,
-      CategoryID:item.CategoryID,
-      subCategoryID:item.SubCategoryID,
-      quantity: item.Quantity,
-      unitPrice: item.Price,
-      images: item.Images || [],
-      notes: item.Notes,
-      measurement: item.Unit
-    })) || [],
+    workItems:
+      apiEnquiry.ProblemDescription?.map((item: any, i: number) => ({
+        id: i.toString(),
+        name: item.Description || "",
+        productsId: item.ProductID,
+        CategoryID: item.CategoryID,
+        subCategoryID: item.SubCategoryID,
+        quantity: item.Quantity,
+        unitPrice: item.Price,
+        images: item.Images || [],
+        notes: item.Notes,
+        measurement: item.Unit,
+      })) || [],
 
-    description: apiEnquiry.Notes  || "No additional notes provided",
-    
-    
+    description: apiEnquiry.Notes || "No additional notes provided",
+
     siteVisit: apiEnquiry.SiteVisit
       ? {
-          id:apiEnquiry.SiteVisit.ID,
+          id: apiEnquiry.SiteVisit.ID,
           scheduledDate: apiEnquiry.SiteVisit.ScheduledDate,
           scheduledTime: apiEnquiry.SiteVisit.ScheduledSlots,
           engineerId: apiEnquiry.SiteVisit.AssignedTo,
           contactNumber: "",
-          rescheduleReason: apiEnquiry.SiteVisit.Notes
+          rescheduleReason: apiEnquiry.SiteVisit.Notes,
         }
       : undefined,
 
@@ -138,17 +135,14 @@ export const mapEnquiryFromApi = (apiEnquiry: any): Enquiry => {
 
     images:
       apiEnquiry.ProblemDescription?.flatMap((x: any) => x.Images || []) || [],
-      
   };
 };
-
 
 export const mapUpdatedEnquiryToApi = (
   enquiry: Enquiry,
   workItems: WorkItem[],
-  status?: string
+  status?: string,
 ) => {
-
   return {
     ID: Number(enquiry.id),
 
@@ -207,7 +201,7 @@ export const mapUpdatedEnquiryToApi = (
       },
     ],
 
-   Notes: enquiry.description || "",
+    Notes: enquiry.description || "",
     Status: status || enquiry.status,
   };
 };

@@ -1,28 +1,24 @@
-import { useState,useEffect } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Address } from "@/types/common";
-import { Customer } from "@/types/customer";
-import { UserPlus } from "lucide-react";
-import LocationSearch, { LocationResult } from "@/modules/customers/components/LocationSearch";
-import { CustomerService } from "@/services/customer.service";
-import { stat } from "fs";
-import { LocationService } from "@/services/location.service";
-import { AuthService } from "@/services/authService.service";
-import { TokenManager } from "@/services/tokenManager.service";
-// import { toast } from "@/hooks/use-toast";
-import { toast } from "sonner";
+import {useState, useEffect} from "react";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Address} from "@/types/common";
+import {Customer} from "@/types/customer";
+import {UserPlus} from "lucide-react";
+import LocationSearch, {
+  LocationResult,
+} from "@/modules/customers/components/LocationSearch";
+import {CustomerService} from "@/services/customer.service";
+import {LocationService} from "@/services/location.service";
+import {toast} from "sonner";
 interface CustomerFormProps {
   mobile: string;
   onSave: (customer: Customer) => void;
 }
 
-const CustomerForm = ({ mobile, onSave }: CustomerFormProps) => {
-
-
-const [error,setError] = useState("");
+const CustomerForm = ({mobile, onSave}: CustomerFormProps) => {
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -40,8 +36,7 @@ const [error,setError] = useState("");
   });
 
   const [states, setStates] = useState<any[]>([]);
-  
-  
+
   useEffect(() => {
     LocationService.getStates().then((data) => {
       setStates(data);
@@ -49,18 +44,16 @@ const [error,setError] = useState("");
   }, []);
 
   const update = (key: string, value: string) =>
-    setForm((p) => ({ ...p, [key]: value, ...(key !== "landmark" ? { verified: false } : {}) }));
+    setForm((p) => ({
+      ...p,
+      [key]: value,
+      ...(key !== "landmark" ? {verified: false} : {}),
+    }));
 
   const handleLocationSelect = (loc: LocationResult) => {
-
-  //    if (!states.length) {
-  //   console.warn("States not loaded yet");
-  //   return;
-  // }
-
-  const matchedState = states.find(
-    (s) => s.Name.toLowerCase() === loc.state.toLowerCase()
-  );
+    const matchedState = states.find(
+      (s) => s.Name.toLowerCase() === loc.state.toLowerCase(),
+    );
     setForm((p) => ({
       ...p,
       address1: loc.address1,
@@ -74,98 +67,85 @@ const [error,setError] = useState("");
       lng: loc.lng,
       verified: loc.verified,
     }));
-     if (!matchedState) {
-    console.warn("State not matched:", loc.state);
-  }
+    if (!matchedState) {
+      console.warn("State not matched:", loc.state);
+    }
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const address: Address = {
-    address1: form.address1,
-    address2: form.address2,
-    city: form.city,
-    state: form.state,
-    stateId: form.stateId,
-    pincode: form.pincode,
-    landmark: form.landmark,
-    lat: form.lat,
-    lng: form.lng,
-    verified: form.verified,
-     addressType: form.addressType,
-  };
+    const address: Address = {
+      address1: form.address1,
+      address2: form.address2,
+      city: form.city,
+      state: form.state,
+      stateId: form.stateId,
+      pincode: form.pincode,
+      landmark: form.landmark,
+      lat: form.lat,
+      lng: form.lng,
+      verified: form.verified,
+      addressType: form.addressType,
+    };
 
-  const newCustomer: Customer = {
-    name: form.name,
-    mobile,
-    mobile2:"",
-    email: form.email,
-    addresses: [address],
-  };
+    const newCustomer: Customer = {
+      name: form.name,
+      mobile,
+      mobile2: "",
+      email: form.email,
+      addresses: [address],
+    };
 
-  try {
-    const res = await CustomerService.createCustomer(newCustomer);
+    try {
+      const res = await CustomerService.createCustomer(newCustomer);
+      if (res.Status === "Success") {
+        toast.success("Customer saved successfully.", {
+          duration: 5000,
+        });
+        newCustomer.id = res.Data;
+        if (newCustomer.id) {
+          const res = await CustomerService.addAddress(
+            newCustomer.id!,
+            address,
+          );
+          if (res.Status === "Success") {
+            console.log("Address added successfully");
+          } else {
+            console.error("Failed to add address:", res.ErrorMessage);
+          }
+        }
 
-    // console.log("Customer saved:", res);
-
-    if (res.Status === "Success") {
-      toast.success("Customer saved successfully.",{
+        onSave(newCustomer);
+      } else {
+        setError(res.ErrorMessage);
+        toast.error(
+          res.ErrorMessage + " Failed to save customer. Please try again.",
+          {
+            duration: 5000,
+          },
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong. Please try again.", {
         duration: 5000,
       });
-      newCustomer.id = res.Data;
-
-      // const token = await AuthService.getToken({
-      //   username: newCustomer.mobile,
-      //   password: newCustomer.mobile,
-      // });
-
-      // TokenManager.setToken(token);
-      // if(TokenManager.getToken()){
-      if(newCustomer.id){
-        const res= await CustomerService.addAddress(newCustomer.id!, address);
-        if(res.Status === "Success"){
-          console.log("Address added successfully");
-        } else {
-          console.error("Failed to add address:", res.ErrorMessage);
-        }
-      }
-
-      onSave(newCustomer);
-    } else {
-      setError(res.ErrorMessage);
-           toast.error(res.ErrorMessage + " Failed to save customer. Please try again.",{
-              duration: 5000,
-           });
-      // toast({
-      //   title: "Failed to save customer.",
-      //   description: res.ErrorMessage || "Please try again.",
-      // });
     }
-  } catch (err) {
-    console.error(err);
-    toast.error("Something went wrong. Please try again.",{
-      duration: 5000,
-    });
-    // toast({
-    //   title: "Error",
-    //   description: "Something went wrong.",
-    // });
-  }
-};
+  };
 
   const personalFields = [
-    { key: "name", label: "Full Name", required: true },
-    { key: "email", label: "Email", type: "email" },
+    {key: "name", label: "Full Name", required: true},
+    {key: "email", label: "Email", type: "email"},
   ];
 
   const addressFields = [
-    { key: "address1", label: "Address Line 1", required: true, wide: true },
-    { key: "address2", label: "Address Line 2" },
-    { key: "city", label: "City", required: true },
-    { key: "state", label: "State" },
-    { key: "pincode", label: "Pincode", required: true },
-    { key: "landmark", label: "Landmark" },
+    {key: "address1", label: "Address Line 1", required: true, wide: true},
+    {key: "address2", label: "Address Line 2"},
+    {key: "city", label: "City", required: true},
+    {key: "state", label: "State"},
+    {key: "pincode", label: "Pincode", required: true},
+    {key: "landmark", label: "Landmark"},
   ];
 
   return (
@@ -187,7 +167,8 @@ const handleSubmit = async (e: React.FormEvent) => {
             {personalFields.map((f) => (
               <div key={f.key}>
                 <Label>
-                  {f.label} {f.required && <span className="text-destructive">*</span>}
+                  {f.label}{" "}
+                  {f.required && <span className="text-destructive">*</span>}
                 </Label>
                 <Input
                   type={f.type || "text"}
@@ -208,79 +189,68 @@ const handleSubmit = async (e: React.FormEvent) => {
 
             <LocationSearch onSelect={handleLocationSelect} />
             <div className="space-y-1">
-  <Label className="text-xs">
-    Address Type
-  </Label>
+              <Label className="text-xs">Address Type</Label>
 
-  <div className="flex gap-2">
-    {["Home", "Office", "Other"].map((type) => (
-      <Button
-        key={type}
-        type="button"
-        size="sm"
-        variant={
-          form.addressType === type
-            ? "default"
-            : "outline"
-        }
-        onClick={() =>
-          setForm((p) => ({
-            ...p,
-            addressType: type,
-          }))
-        }
-        className="h-8 px-3 text-xs"
-      >
-        {type}
-      </Button>
-    ))}
-  </div>
-</div>
+              <div className="flex gap-2">
+                {["Home", "Office", "Other"].map((type) => (
+                  <Button
+                    key={type}
+                    type="button"
+                    size="sm"
+                    variant={form.addressType === type ? "default" : "outline"}
+                    onClick={() =>
+                      setForm((p) => ({
+                        ...p,
+                        addressType: type,
+                      }))
+                    }
+                    className="h-8 px-3 text-xs"
+                  >
+                    {type}
+                  </Button>
+                ))}
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {addressFields.map((f) => (
                 <div key={f.key} className={f.wide ? "md:col-span-2" : ""}>
                   <Label>
-                    {f.label} {f.required && <span className="text-destructive">*</span>}
+                    {f.label}{" "}
+                    {f.required && <span className="text-destructive">*</span>}
                   </Label>
-                  {/* <Input
-                    value={(form as any)[f.key]}
-                    onChange={(e) => update(f.key, e.target.value)}
-                    required={f.required}
-                    className="mt-1"
-                  /> */}
                   {f.key === "state" ? (
-  <select
-    value={form.state}
-    onChange={(e) => {
-      const selected = states.find(
-        (s) => s.Name === e.target.value
-      );
+                    <select
+                      value={form.state}
+                      onChange={(e) => {
+                        const selected = states.find(
+                          (s) => s.Name === e.target.value,
+                        );
 
-      setForm((p) => ({
-        ...p,
-        state: selected?.Name || "",
-        stateId: Number(selected?.ID || 0),
-        verified: false,
-      }));
-    }}
-    className="mt-1 w-full border rounded px-2 py-2 text-sm"
-  >
-    <option value="">Select State</option>
-    {states.map((s) => (
-      <option key={s.ID} value={s.Name}>
-        {s.Name}
-      </option>
-    ))}
-  </select>
-) : (
-  <Input
-    value={(form as any)[f.key]}
-    onChange={(e) => update(f.key, e.target.value)}
-    required={f.required}
-    className="mt-1"
-  />
-)}
+                        setForm((p) => ({
+                          ...p,
+                          state: selected?.Name || "",
+                          stateId: Number(selected?.ID || 0),
+                          verified: false,
+                        }));
+                      }}
+                      className="mt-1 w-full border rounded px-2 py-2 text-sm"
+                    >
+                      <option value="">Select State</option>
+                      {states.map((s) => (
+                        <option key={s.ID} value={s.Name}>
+                          {s.Name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <Input
+                      value={(form as any)[f.key]}
+                      onChange={(e) => update(f.key, e.target.value)}
+                      required={f.required}
+                      className="mt-1"
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -292,8 +262,13 @@ const handleSubmit = async (e: React.FormEvent) => {
             )}
           </div>
 
-          <Button type="submit" className="w-full md:w-auto"
-           disabled={!form.name || !form.address1 || !form.city || !form.pincode }>
+          <Button
+            type="submit"
+            className="w-full md:w-auto"
+            disabled={
+              !form.name || !form.address1 || !form.city || !form.pincode
+            }
+          >
             Save Customer
           </Button>
         </form>

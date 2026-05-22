@@ -1,5 +1,5 @@
-import { QuotationItem } from "@/types/quotation";
-import { quotations } from "@/data/quotation.mock";
+import {QuotationItem} from "@/types/quotation";
+import {quotations} from "@/data/quotation.mock";
 
 export interface Quotation {
   id: string;
@@ -11,9 +11,7 @@ export interface Quotation {
 
 //  Mock DB (you can move this to separate file later)
 
-
 export class QuotationService {
-  
   //  Create quotation
   static async create(data: {
     enquiryId: string;
@@ -51,7 +49,7 @@ export class QuotationService {
   // Update quotation
   static async update(
     id: string,
-    data: Partial<Quotation>
+    data: Partial<Quotation>,
   ): Promise<Quotation | null> {
     const index = quotations.findIndex((q) => q.id === id);
     if (index === -1) return null;
@@ -67,7 +65,7 @@ export class QuotationService {
   // Delete quotation
   static async delete(id: string): Promise<boolean> {
     const before = quotations.length;
-      quotations.filter((q) => q.id !== id);
+    quotations.filter((q) => q.id !== id);
     return quotations.length < before;
   }
 }

@@ -1,59 +1,47 @@
+import {Enquiry, EnquiryStatus, WorkItem} from "@/types/enquiry";
+import {Remark} from "@/types/common";
+import {enquiries} from "@/data/enquiry.mock";
+import {promises} from "dns";
 
-import {
-  Enquiry,
-  EnquiryStatus,
-  WorkItem,
-} from "@/types/enquiry";
-import {Remark } from "@/types/common";
-import { enquiries } from "@/data/enquiry.mock";
-import { promises } from "dns";
-
-import {mapEnquiryToApi} from "./EnquiryPayloadMapper"
-import { TokenManager } from "./tokenManager.service";
+import {mapEnquiryToApi} from "./EnquiryPayloadMapper";
+import {TokenManager} from "./tokenManager.service";
 
 // simulate API delay
 
-const BASE_URL= "http://localhost:7071/api";
-const COMPANY_ID=import.meta.env.VITE_COMPANY_ID;
-const TENANT_ID=import.meta.env.VITE_TENANT_ID;
+const BASE_URL = "http://localhost:7071/api";
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
+const TENANT_ID = import.meta.env.VITE_TENANT_ID;
+const Package_ID = import.meta.env.VITE_PACKAGE_ID;
 
-
-
-const FixedURL= import.meta.env.VITE_API_BASE_URL;
+const FixedURL = import.meta.env.VITE_API_BASE_URL;
 
 export class EnquiryService {
-
   //Get All enquiries
   static async getAllEnquiries(): Promise<Enquiry[]> {
     return enquiries;
   }
 
-
   //  Get enquiry by ID
   static async getById(id: string): Promise<Enquiry | null> {
-   
     const enquiry = enquiries.find((e) => e.id === id);
     return enquiry || null;
   }
 
   //  Get enquiries by customer ID
   // static async getByCustomer(customerId: string): Promise<Enquiry[]> {
-   
+
   //   return enquiries.filter((e) => e.customer.id === customerId);
   // }
 
   //  Get enquiries by mobile
   static async getByMobile(mobile: string): Promise<Enquiry[]> {
-    
     return enquiries.filter((e) => e.customer.mobile === mobile);
   }
 
   //  Get enquiries by engineer
   static async getByEngineer(engineerId: number): Promise<Enquiry[]> {
-   
     return enquiries.filter((e) => e.assignedEngineerId === engineerId);
   }
-
 
   //Get enquiries by status
   static async getByStatus(status: EnquiryStatus): Promise<Enquiry[]> {
@@ -62,58 +50,54 @@ export class EnquiryService {
 
   // Create enquiry (based on addEnquiry)
   static async create(enquiry: Enquiry): Promise<string | null> {
-   
     try {
       // const token = TokenManager.getToken();
-    // const response = await fetch(`${BASE_URL}/CreateEnquiry`, {
-    //   method: "POST",
-    //   headers: {
-    //    "Content-Type":"application/json",
-    //         "company":`${COMPANY_ID}`,
-    //         "tenant":`${TENANT_ID}`,
-    //   },
-    //   body: JSON.stringify({
-    //     ...enquiry,
-    //     createdAt: enquiry.createdAt || new Date().toISOString(),
-    //     updatedAt: new Date().toISOString(),
-    //   }),
-    // });
-    const payload = mapEnquiryToApi(enquiry);
-    // console.log("FINAL PAYLOAD:", payload); //  MUST CHECK
-    const response = await fetch(`${FixedURL}/api/enquiry/create`, {
-      
-      method: "POST",
-      headers: {
-       "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true",
-            "company":`${COMPANY_ID}`,
-            "tenant":`${TENANT_ID}`,
-            // "Authorization": `Bearer ${token}`,
-            "Package":`ecommerce.mobile.andhrakitchenwares.com`,
-      },
-      body: JSON.stringify(payload),
-    });
+      // const response = await fetch(`${BASE_URL}/CreateEnquiry`, {
+      //   method: "POST",
+      //   headers: {
+      //    "Content-Type":"application/json",
+      //         "company":`${COMPANY_ID}`,
+      //         "tenant":`${TENANT_ID}`,
+      //   },
+      //   body: JSON.stringify({
+      //     ...enquiry,
+      //     createdAt: enquiry.createdAt || new Date().toISOString(),
+      //     updatedAt: new Date().toISOString(),
+      //   }),
+      // });
+      const payload = mapEnquiryToApi(enquiry);
+      // console.log("FINAL PAYLOAD:", payload); //  MUST CHECK
+      const response = await fetch(`${FixedURL}/api/enquiry/create`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+          company: `${COMPANY_ID}`,
+          tenant: `${TENANT_ID}`,
+          // "Authorization": `Bearer ${token}`,
+          Package: `${Package_ID}`,
+        },
+        body: JSON.stringify(payload),
+      });
 
-    if (!response.ok) {
-      throw new Error("Failed to create enquiry");
+      if (!response.ok) {
+        throw new Error("Failed to create enquiry");
+      }
+
+      const result = await response.json();
+
+      return result.Data; //  important
+    } catch (error) {
+      console.error("Error creating enquiry:", error);
+      return null;
     }
-
-    const result = await response.json();
-
-    return result.Data; //  important
-  } catch (error) {
-    console.error("Error creating enquiry:", error);
-    return null;
-  }
   }
 
   //  Update enquiry (based on updateEnquiry)
   static async update(
     id: string,
-    updates: Partial<Enquiry>
+    updates: Partial<Enquiry>,
   ): Promise<Enquiry | null> {
-   
-
     const index = enquiries.findIndex((e) => e.id === id);
     if (index === -1) return null;
 
@@ -130,10 +114,8 @@ export class EnquiryService {
   static async updateStatus(
     enquiryId: string,
     status: EnquiryStatus,
-    note?: string
+    note?: string,
   ): Promise<void> {
-    
-
     const enquiry = enquiries.find((e) => e.id === enquiryId);
     if (!enquiry) return;
 
@@ -151,10 +133,8 @@ export class EnquiryService {
   //  Assign engineer
   static async assignEngineer(
     enquiryId: string,
-    engineerId: number
+    engineerId: number,
   ): Promise<void> {
-    
-
     const enquiry = enquiries.find((e) => e.id === enquiryId);
     if (!enquiry) return;
 
@@ -163,12 +143,7 @@ export class EnquiryService {
   }
 
   //  Add remark
-  static async addRemark(
-    enquiryId: string,
-    text: string
-  ): Promise<void> {
-    
-
+  static async addRemark(enquiryId: string, text: string): Promise<void> {
     const enquiry = enquiries.find((e) => e.id === enquiryId);
     if (!enquiry) return;
 
@@ -185,10 +160,8 @@ export class EnquiryService {
   //  Update work items (moved from task logic)
   static async updateWorkItems(
     enquiryId: string,
-    items: WorkItem[]
+    items: WorkItem[],
   ): Promise<void> {
-   
-
     const enquiry = enquiries.find((e) => e.id === enquiryId);
     if (!enquiry) return;
 
@@ -196,10 +169,7 @@ export class EnquiryService {
   }
 
   //  Add images
-  static async addImages(
-    enquiryId: string,
-    images: string[]
-  ): Promise<void> {
+  static async addImages(enquiryId: string, images: string[]): Promise<void> {
     const enquiry = enquiries.find((e) => e.id === enquiryId);
     if (!enquiry) return;
 
@@ -207,80 +177,72 @@ export class EnquiryService {
   }
 
   //Add images To Work
-  static async addWorkItemsImage(enquiryId: string,workitemId:string,images:string[]):Promise<void>{
-       const enquiry = enquiries.find((e) => e.id === enquiryId);
+  static async addWorkItemsImage(
+    enquiryId: string,
+    workitemId: string,
+    images: string[],
+  ): Promise<void> {
+    const enquiry = enquiries.find((e) => e.id === enquiryId);
     if (!enquiry) return;
-    const workItem=enquiry.workItems.find((e)=>e.id === workitemId);
-    if(!workItem) return;
+    const workItem = enquiry.workItems.find((e) => e.id === workitemId);
+    if (!workItem) return;
 
-     if (!workItem.images) {
-    workItem.images = [];
-  }
-   workItem.images.push(...images);
+    if (!workItem.images) {
+      workItem.images = [];
+    }
+    workItem.images.push(...images);
   }
 
   //  Submit task (site visit completed)
   static async submitTask(enquiryId: string): Promise<void> {
-   
-
     const enquiry = enquiries.find((e) => e.id === enquiryId);
     if (!enquiry) return;
 
     enquiry.status = "SiteVisitCompleted";
     enquiry.updatedAt = new Date().toISOString();
   }
-   
+
   //Save task (draft)
-  static async saveTask(enquiryId: string): Promise<void> { 
+  static async saveTask(enquiryId: string): Promise<void> {
     const enquiry = enquiries.find((e) => e.id === enquiryId);
     if (!enquiry) return;
     enquiry.updatedAt = new Date().toISOString();
-    }
+  }
 
   //  Generate enquiry ID (from your store)
   static generateEnquiryId(): string {
     return `ENQ-${Date.now()}`;
   }
 
-
-
-
   static async updateEnquiry(payload: any) {
-
-  try {
-
-    const response = await fetch(
-      `${FixedURL}/api/enquiry/update`,
-      {
+    try {
+      const response = await fetch(`${FixedURL}/api/enquiry/update`, {
         method: "PUT",
 
         headers: {
           "Content-Type": "application/json",
           "ngrok-skip-browser-warning": "true",
-          "company": `${COMPANY_ID}`,
-          "tenant": `${TENANT_ID}`,
-          "Package": "ecommerce.mobile.andhrakitchenwares.com",
+          company: `${COMPANY_ID}`,
+          tenant: `${TENANT_ID}`,
+          Package: `${Package_ID}`,
         },
 
         body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update enquiry");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to update enquiry");
+      const result = await response.json();
+      if (result.Status === "Success") {
+        return result;
+      }
+      return "";
+    } catch (error) {
+      console.error("Update enquiry error:", error);
+
+      throw error;
     }
-
-     const result = await response.json();
-     if(result.Status === "Success"){
-       return result;
-     }
-     return "";
-
-  } catch (error) {
-
-    console.error("Update enquiry error:", error);
-
-    throw error;
   }
-}
 }

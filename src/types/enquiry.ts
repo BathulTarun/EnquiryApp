@@ -1,21 +1,21 @@
-import { Customer } from "./customer";
-import { Address, Remark, WorkType } from "./common";
+import {Customer} from "./customer";
+import {Address, Remark, WorkType} from "./common";
 
 export type EnquiryStatus =
-  | 'Pending'
-  | 'SiteVisitScheduled'
-  | 'SiteVisitRescheduled'
-  | 'SiteVisitCompleted'
-  | 'ReadyForQuotation'
-  | 'Completed';
+  | "Pending"
+  | "SiteVisitScheduled"
+  | "SiteVisitRescheduled"
+  | "SiteVisitCompleted"
+  | "ReadyForQuotation"
+  | "Completed";
 
 export const ALL_STATUSES: EnquiryStatus[] = [
-  'Pending',
-  'SiteVisitScheduled',
-  'SiteVisitRescheduled',
-  'SiteVisitCompleted',
-  'ReadyForQuotation',
-  'Completed',
+  "Pending",
+  "SiteVisitScheduled",
+  "SiteVisitRescheduled",
+  "SiteVisitCompleted",
+  "ReadyForQuotation",
+  "Completed",
 ];
 
 export interface StatusEntry {
@@ -42,7 +42,7 @@ export interface WorkItem {
 }
 
 export interface SiteVisit {
-  id?:number;
+  id?: number;
   scheduledDate: string;
   scheduledTime: string;
   contactNumber?: string;
@@ -54,21 +54,20 @@ export interface SiteVisit {
   remarks?: string;
 }
 
-
 export interface Enquiry {
   id?: string;
-  EnquiryNumber?:string;
+  EnquiryNumber?: string;
   customer?: Customer;
-  customerId?:string;
+  customerId?: string;
   addressId?: number;
   address: Address;
   workItems?: WorkItem[];
   workTypes?: WorkType[];
-  description?: string; // user 
+  description?: string; // user
   siteVisit?: SiteVisit;
   statusHistory: StatusEntry[];
   status?: EnquiryStatus;
-  remarks?: Remark[];   // admin 
+  remarks?: Remark[]; // admin
   assignedEngineerId?: number;
   images?: string[];
   createdAt?: string;

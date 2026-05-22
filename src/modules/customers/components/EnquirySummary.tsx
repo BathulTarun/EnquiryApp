@@ -1,9 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {  Address } from "@/types/common";
-import { Customer } from "@/types/customer";
-import { WorkType } from "@/types/common";
-import { ClipboardList } from "lucide-react";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Address} from "@/types/common";
+import {Customer} from "@/types/customer";
+import {WorkType} from "@/types/common";
+import {ClipboardList} from "lucide-react";
 
 interface EnquirySummaryProps {
   customer: Customer | null;
@@ -14,7 +13,14 @@ interface EnquirySummaryProps {
   remarks?: string;
 }
 
-const EnquirySummary = ({ customer, workTypes, visitDate, visitTime, address, remarks }: EnquirySummaryProps) => {
+const EnquirySummary = ({
+  customer,
+  workTypes,
+  visitDate,
+  visitTime,
+  address,
+  remarks,
+}: EnquirySummaryProps) => {
   if (!customer && workTypes.length === 0) return null;
 
   return (
@@ -28,7 +34,9 @@ const EnquirySummary = ({ customer, workTypes, visitDate, visitTime, address, re
       <CardContent className="space-y-4 text-sm">
         {customer && (
           <div>
-            <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider mb-1">Customer</h4>
+            <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              Customer
+            </h4>
             <p className="font-medium">{customer.name}</p>
             <p className="text-muted-foreground">{customer.mobile}</p>
           </div>
@@ -36,70 +44,58 @@ const EnquirySummary = ({ customer, workTypes, visitDate, visitTime, address, re
 
         {workTypes.length > 0 && (
           <div>
-            <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider mb-2">Work Types</h4>
-            {/* <div className="flex flex-wrap gap-1.5">
+            <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider mb-2">
+              Work Types
+            </h4>
+            <div className="flex flex-wrap gap-1.5">
               {workTypes.map((w) => (
-                <Badge key={w.id} variant="secondary" className="text-xs">{w.name}</Badge>
+                <div
+                  key={w.id}
+                  className="rounded-md border bg-secondary px-2 py-1"
+                >
+                  <p className="text-xs ">{w.name}</p>
+
+                  <p className="text-xs text-muted-foreground">
+                    {w.selectedSubCategory?.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {w.selectedProduct?.name}
+                  </p>
+                </div>
               ))}
             </div>
-{workTypes.map((w) => (
-  <div key={w.id}>
-    <p className="text-xs font-medium">
-      {w.name}
-    </p>
-
-    {w.selectedSubCategory && (
-      <p className="text-xs text-muted-foreground">
-        {w.selectedSubCategory.name}
-      </p>
-    )}
-
-    {w.selectedProduct && (
-      <p className="text-xs text-primary">
-        {w.selectedProduct.name}
-      </p>
-    )}
-  </div>
-))} */}
-<div className="flex flex-wrap gap-1.5">
-  {workTypes.map((w) => (
-    <div
-      key={w.id}
-      className="rounded-md border bg-secondary px-2 py-1"
-    >
-      <p className="text-xs ">
-        {w.name}
-      </p>
-
-       <p className="text-xs text-muted-foreground">
-        {w.selectedSubCategory?.name}
-      </p>
-      <p className="text-xs text-muted-foreground">
-        {w.selectedProduct?.name}
-      </p>
-    </div>
-  ))}
-</div>
           </div>
         )}
 
         {visitDate && (
           <div>
-            <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider mb-1">Site Visit</h4>
-            <p>{visitDate} at {visitTime}</p>
+            <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              Site Visit
+            </h4>
+            <p>
+              {visitDate} at {visitTime}
+            </p>
           </div>
         )}
 
         {address && (
           <div>
-            <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider mb-1">Address</h4>
-            <p className="text-muted-foreground">{[address.address1, address.city, address.pincode].filter(Boolean).join(", ")}</p>
+            <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              Address
+            </h4>
+            <p className="text-muted-foreground">
+              {[address.address1, address.city, address.pincode]
+                .filter(Boolean)
+                .join(", ")}
+            </p>
           </div>
         )}
 
         {remarks && (
           <div>
-            <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider mb-1">Remarks</h4>
+            <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider mb-1">
+              Remarks
+            </h4>
             <p className="text-muted-foreground">{remarks}</p>
           </div>
         )}

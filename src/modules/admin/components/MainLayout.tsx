@@ -1,23 +1,37 @@
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useAppStore } from "@/services/appStore";
-import { Button } from "@/components/ui/button";
+import {Outlet, useNavigate, useLocation} from "react-router-dom";
+import {useAppStore} from "@/services/appStore";
+import {Button} from "@/components/ui/button";
 import {
-  Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
-  SidebarMenu, SidebarMenuButton, SidebarMenuItem,
-  SidebarProvider, SidebarTrigger, useSidebar,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { NavLink } from "@/components/NavLink";
-import { LayoutDashboard, ClipboardList, Users, FileText, LogOut, Menu } from "lucide-react";
+import {NavLink} from "@/components/NavLink";
+import {
+  LayoutDashboard,
+  ClipboardList,
+  Users,
+  FileText,
+  LogOut,
+  Menu,
+} from "lucide-react";
 
 const navItems = [
-  { title: "Dashboard", url: "dashboard", icon: LayoutDashboard },
-  { title: "Enquiries", url: "enquiries", icon: ClipboardList },
-  { title: "Engineers", url: "engineers", icon: Users },
-  { title: "Quotations", url: "quotations", icon: FileText },
+  {title: "Dashboard", url: "dashboard", icon: LayoutDashboard},
+  {title: "Enquiries", url: "enquiries", icon: ClipboardList},
+  {title: "Engineers", url: "engineers", icon: Users},
+  {title: "Quotations", url: "quotations", icon: FileText},
 ];
 
 function AppSidebar() {
-  const { state, isMobile, setOpenMobile } = useSidebar();
+  const {state, isMobile, setOpenMobile} = useSidebar();
   const collapsed = state === "collapsed";
 
   const handleNavClick = () => {
@@ -73,10 +87,17 @@ const MainLayout = () => {
               <SidebarTrigger>
                 <Menu className="h-5 w-5" />
               </SidebarTrigger>
-              <h1 className="text-base font-medium hidden sm:block">Customer Enquiry & Site Visit System</h1>
+              <h1 className="text-base font-medium hidden sm:block">
+                Customer Enquiry & Site Visit System
+              </h1>
               <h1 className="text-base font-medium sm:hidden">CESV Admin</h1>
             </div>
-            <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2 text-muted-foreground">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleLogout}
+              className="gap-2 text-muted-foreground"
+            >
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Logout</span>
             </Button>

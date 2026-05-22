@@ -1,5 +1,5 @@
-import { Customer } from "@/types/customer";
-import { Address } from "@/types/common";
+import {Customer} from "@/types/customer";
+import {Address} from "@/types/common";
 
 export const mapCustomerFromApi = (apiResponse: any): Customer | null => {
   if (!apiResponse || !apiResponse.Data) return null;
@@ -19,8 +19,8 @@ export const mapCustomerFromApi = (apiResponse: any): Customer | null => {
     country: data.Country?.Name || "",
     lat: undefined,
     lng: undefined,
-    addressType:data.Name || "",
-    verified: true
+    addressType: data.Name || "",
+    verified: true,
   };
 
   const customer: Customer = {
@@ -28,13 +28,12 @@ export const mapCustomerFromApi = (apiResponse: any): Customer | null => {
     name: data.ContactPerson || "",
     mobile: data.MobileFirst || "",
     email: data.Email || "",
-    mobile2:data.MobileSecond || "",
+    mobile2: data.MobileSecond || "",
     // addresses: [address]
   };
 
   return customer;
 };
-
 
 export const mapCustomerToApi = (customer: Omit<Customer, "id">) => {
   const address = customer.addresses?.[0];
@@ -42,35 +41,25 @@ export const mapCustomerToApi = (customer: Omit<Customer, "id">) => {
   return {
     // BasicDetails:
     //  {
-      FirmName: customer.name,
-      ContactPerson: customer.name,
-      Email: customer.email,
-      MobileFirst: customer.mobile,
-      City: address?.city || "",
-      PostalCode: address?.pincode || "",
+    FirmName: customer.name,
+    ContactPerson: customer.name,
+    Email: customer.email,
+    MobileFirst: customer.mobile,
+    City: address?.city || "",
+    PostalCode: address?.pincode || "",
 
-      State: {
-        ID: address?.stateId || 0,   //  IMPORTANT
-        Name: address?.state // optional (backend usually ignores or fills)
-      },
+    State: {
+      ID: address?.stateId || 0, //  IMPORTANT
+      Name: address?.state, // optional (backend usually ignores or fills)
+    },
 
-      Country: {
-        ID: 1,
-        Name: "India"
-      },
+    Country: {
+      ID: 1,
+      Name: "India",
+    },
 
-
-
-      AddressLine1: address?.address1 || "",
-      AddressLine2: address?.address2 || "",
-      LandMark: address?.landmark || "",
-
-    // },
-
-  //    IdentityInformation: {
-  //   Username: customer.mobile,
-  //   Password: customer.mobile,
-  //   ConfirmPassword: customer.mobile
-  // }
+    AddressLine1: address?.address1 || "",
+    AddressLine2: address?.address2 || "",
+    LandMark: address?.landmark || "",
   };
 };

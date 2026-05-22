@@ -13,7 +13,7 @@ export default function Index() {
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative">
       
-      {/* 🔥 TOP RIGHT BUTTON */}
+      {/* TOP RIGHT BUTTON */}
       <div className="absolute top-4 right-4">
        
           <Button onClick={() => navigate("/globalLogin")}>
@@ -22,7 +22,7 @@ export default function Index() {
        
       </div>
 
-      {/* 🔹 HEADER */}
+      {/* HEADER */}
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold mb-2">
           Service Management Portal
@@ -32,7 +32,7 @@ export default function Index() {
         </p>
       </div>
 
-      {/* 🔥 ONLY CUSTOMER CARD */}
+      {/*  ONLY CUSTOMER CARD */}
       <div className="flex justify-center w-full">
         <Card
           className="cursor-pointer hover:shadow-lg transition-shadow w-full max-w-sm"

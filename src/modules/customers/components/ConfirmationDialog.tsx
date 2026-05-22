@@ -1,6 +1,12 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {Button} from "@/components/ui/button";
+import {CheckCircle} from "lucide-react";
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -8,7 +14,11 @@ interface ConfirmationDialogProps {
   onClose: () => void;
 }
 
-const ConfirmationDialog = ({ open, enquiryId, onClose }: ConfirmationDialogProps) => (
+const ConfirmationDialog = ({
+  open,
+  enquiryId,
+  onClose,
+}: ConfirmationDialogProps) => (
   <Dialog open={open} onOpenChange={onClose}>
     <DialogContent className="text-center max-w-sm">
       <DialogHeader className="items-center">

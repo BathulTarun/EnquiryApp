@@ -1,11 +1,8 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
-import { Loader2, ShieldCheck } from "lucide-react";
-import  OtpService  from "@/services/otp.service";
-import { AuthService } from "@/services/authService.service";
-import { TokenManager } from "@/services/tokenManager.service";
-import { toast } from "sonner";
+import {useState, useEffect} from "react";
+import {InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
+import {ShieldCheck} from "lucide-react";
+import OtpService from "@/services/otp.service";
+import {toast} from "sonner";
 import PageLoader from "@/components/PageLoader";
 interface OTPVerificationProps {
   mobile: string;
@@ -13,10 +10,13 @@ interface OTPVerificationProps {
   isLoading?: boolean;
 }
 
-
 const RESEND_TIMER = 30;
 
-const OTPVerification = ({ mobile, onVerified,isLoading, }: OTPVerificationProps) => {
+const OTPVerification = ({
+  mobile,
+  onVerified,
+  isLoading,
+}: OTPVerificationProps) => {
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
@@ -25,11 +25,11 @@ const OTPVerification = ({ mobile, onVerified,isLoading, }: OTPVerificationProps
   const [canResend, setCanResend] = useState(false);
 
   useEffect(() => {
-  if (otp.length === 5 && !isVerifying) {
-    handleVerify();
-  }
-}, [otp]);
-  
+    if (otp.length === 5 && !isVerifying) {
+      handleVerify();
+    }
+  }, [otp]);
+
   useEffect(() => {
     if (timer <= 0) {
       setCanResend(true);
@@ -44,49 +44,43 @@ const OTPVerification = ({ mobile, onVerified,isLoading, }: OTPVerificationProps
     setIsVerifying(true);
     setError("");
 
-   try {
-    const res = await OtpService.verifyOtp(mobile, otp);
-    
-    if (res.verified) {
-      toast.success("OTP verified successfully!",{
-        duration: 5000,
-      });
-  //       const token=   await AuthService.getToken({ username: mobile, password: mobile });
-  // TokenManager.setToken(token);
+    try {
+      const res = await OtpService.verifyOtp(mobile, otp);
 
-      onVerified(); // success
-     
-    } else {
-      toast.error("Invalid OTP. Please try again.",{
+      if (res.verified) {
+        toast.success("OTP verified successfully!", {
+          duration: 5000,
+        });
+        onVerified(); // success
+      } else {
+        toast.error("Invalid OTP. Please try again.", {
+          duration: 5000,
+        });
+        setOtp("");
+        setError("Invalid OTP");
+      }
+    } catch (err) {
+      toast.error("Something went wrong. Please try again.", {
         duration: 5000,
       });
-      setOtp("");
-      setError("Invalid OTP");
+      setError("Something went wrong");
+    } finally {
+      setIsVerifying(false);
     }
-  } catch (err) {
-    toast.error("Something went wrong. Please try again.",{
-      duration: 5000,
-    });
-    setError("Something went wrong");
-  }finally {
-    setIsVerifying(false);
-  }
   };
 
   const handleResend = async () => {
-     OtpService.sendOtp(mobile).then((res) => {
-          if (res.success) {
-            toast.success("OTP sent successfully",{
-              duration: 5000,
-            });
-            // console.log("OTP sent successfully");
-          } else {
-            toast.error("Failed to send OTP try again",{
-              duration: 5000,
-            });
-            // console.log("Failed to send OTP");
-          }
+    OtpService.sendOtp(mobile).then((res) => {
+      if (res.success) {
+        toast.success("OTP sent successfully", {
+          duration: 5000,
         });
+      } else {
+        toast.error("Failed to send OTP try again", {
+          duration: 5000,
+        });
+      }
+    });
     setIsSending(true);
     setError("");
     setOtp("");
@@ -96,7 +90,7 @@ const OTPVerification = ({ mobile, onVerified,isLoading, }: OTPVerificationProps
     setTimer(RESEND_TIMER);
   };
 
-   if (isLoading) {
+  if (isLoading) {
     return <PageLoader />;
   }
 
@@ -110,16 +104,25 @@ const OTPVerification = ({ mobile, onVerified,isLoading, }: OTPVerificationProps
       <div>
         <h2 className="text-xl font-semibold mb-1">Verify OTP</h2>
         <p className="text-sm text-muted-foreground">
-          A 5-digit code has been sent to <span className="font-medium text-foreground">{mobile}</span>
+          A 5-digit code has been sent to{" "}
+          <span className="font-medium text-foreground">{mobile}</span>
         </p>
       </div>
 
       <div className="flex justify-center">
-        <InputOTP maxLength={5} value={otp} onChange={(val) => { setOtp(val); setError(""); }}  onKeyDown={(e) => {
-    if (e.key === "Enter" && otp.length === 5) {
-      handleVerify();
-    }
-  }}>
+        <InputOTP
+          maxLength={5}
+          value={otp}
+          onChange={(val) => {
+            setOtp(val);
+            setError("");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && otp.length === 5) {
+              handleVerify();
+            }
+          }}
+        >
           <InputOTPGroup>
             <InputOTPSlot index={0} />
             <InputOTPSlot index={1} />
@@ -132,17 +135,6 @@ const OTPVerification = ({ mobile, onVerified,isLoading, }: OTPVerificationProps
       </div>
 
       {error && <p className="text-sm text-destructive font-medium">{error}</p>}
-
-      {/* <Button
-        onClick={handleVerify}
-        disabled={otp.length !== 5 || isVerifying}
-        className="w-full max-w-xs mx-auto"
-        size="lg"
-      >
-        {isVerifying && <Loader2 className="animate-spin" />}
-        Verify OTP
-      </Button> */}
-
       <div className="text-sm text-muted-foreground">
         {canResend ? (
           <button
@@ -153,11 +145,12 @@ const OTPVerification = ({ mobile, onVerified,isLoading, }: OTPVerificationProps
             {isSending ? "Sending..." : "Resend OTP"}
           </button>
         ) : (
-          <span>Resend OTP in <span className="font-medium text-foreground">{timer}s</span></span>
+          <span>
+            Resend OTP in{" "}
+            <span className="font-medium text-foreground">{timer}s</span>
+          </span>
         )}
       </div>
-
-      
     </div>
   );
 };

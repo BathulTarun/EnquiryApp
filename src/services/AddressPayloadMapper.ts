@@ -1,8 +1,8 @@
-import { Address } from "@/types/common";
+import {Address} from "@/types/common";
 
 export const mapAddressToApi = (address: Address, customerId: Number) => {
   return {
-    Name: address.addressType ,
+    Name: address.addressType,
 
     AddressLine1: address.address1,
     AddressLine2: address.address2 || "",
@@ -12,22 +12,19 @@ export const mapAddressToApi = (address: Address, customerId: Number) => {
     City: address.city,
     PostalCode: address.pincode,
 
-    State: address.stateId || 0,   // ⚠️ must be ID
+    State: address.stateId || 0, //  must be ID
     Country: 1, // or Number(address.countryId) later
 
     Latitude: address.lat ? String(address.lat) : "",
-    Longitude: address.lng ? String(address.lng) : ""
+    Longitude: address.lng ? String(address.lng) : "",
   };
 };
-
-
-
 
 export const mapLocationToAddress = (loc: any): Address => ({
   id: loc.LocationID, // backend ID
   address1: loc.AddressLine1,
   address2: loc.AddressLine2 || "",
-  customerID:loc.LedgerID,
+  customerID: loc.LedgerID,
   city: loc.City,
   state: loc.StateName,
   stateId: loc.StateID,

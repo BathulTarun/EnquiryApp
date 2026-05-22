@@ -1,7 +1,7 @@
 export interface Address {
   id?: number;
   placeId?: string; // For Google Places API
-  customerID?:number;
+  customerID?: number;
   label?: string;
   address1: string;
   address2: string;
@@ -30,22 +30,20 @@ export interface ProductOption {
   price?: number;
 }
 
-
-export interface Product{
-  UID?:string;
-  Name?:string;
-  Price:string;
+export interface Product {
+  UID?: string;
+  Name?: string;
+  Price: string;
 }
 
-export interface SubCategory  {
-  id: string;   // product UID
+export interface SubCategory {
+  id: string; // product UID
   name: string; // product Name
   products?: ProductOption[];
   price?: number; // optional, can be fetched from backend if not provided
 }
 
-
-export interface SelectedProduct  {
+export interface SelectedProduct {
   id: string;
   name: string;
   price?: number;
@@ -56,7 +54,7 @@ export interface WorkType {
   name: string;
   // subOptions?: SubCategory[];
   subCategories?: SubCategory[];
-   selectedSubCategory?: {
+  selectedSubCategory?: {
     id: string;
     name: string;
   };

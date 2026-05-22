@@ -1,14 +1,10 @@
-
-
-import { TokenManager } from "./tokenManager.service";
-import { AuthService } from "./authService.service";
-
+import {AuthService} from "./authService.service";
 
 export class ApiService {
   static async request(url: string, options: RequestInit = {}) {
     let token = localStorage.getItem("auth_token");
 
-    // 🔁 If no token → get using stored user
+    //  If no token → get using stored user
     if (!token) {
       const user = JSON.parse(localStorage.getItem("auth_user") || "{}");
 
@@ -19,9 +15,9 @@ export class ApiService {
 
     const headers = {
       "Content-Type": "application/json",
-      "company": import.meta.env.VITE_COMPANY_ID,
-      "tenant": import.meta.env.VITE_TENANT_ID,
-      ...(token && { Authorization: `Bearer ${token}` }),
+      company: import.meta.env.VITE_COMPANY_ID,
+      tenant: import.meta.env.VITE_TENANT_ID,
+      ...(token && {Authorization: `Bearer ${token}`}),
       ...options.headers,
     };
 
@@ -30,7 +26,7 @@ export class ApiService {
       headers,
     });
 
-    // 🔁 Retry if token expired
+    //  Retry if token expired
     if (response.status === 401) {
       const user = JSON.parse(localStorage.getItem("auth_user") || "{}");
 

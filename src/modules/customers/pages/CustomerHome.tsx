@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import {useEffect, useState} from "react";
+import {Button} from "@/components/ui/button";
 import MobileInput from "@/modules/customers/components/MobileInput";
 import OTPVerification from "@/modules/customers/components/OTPVerification";
 import CustomerDetails from "@/modules/customers/components/CustomerDetails";
@@ -8,34 +8,26 @@ import WorkTypeSelector from "@/modules/customers/components/WorkTypeSelector";
 import SiteVisitForm from "@/modules/customers/components/SiteVisitForm";
 import EnquirySummary from "@/modules/customers/components/EnquirySummary";
 import ConfirmationDialog from "@/modules/customers/components/ConfirmationDialog";
-import {  Address ,SelectedProduct} from "@/types/common";
-import { WorkType } from "@/types/common";
-import { Customer } from "@/types/customer";
+import {Address, SelectedProduct} from "@/types/common";
+import {WorkType} from "@/types/common";
+import {Customer} from "@/types/customer";
 
-import { Plus, ArrowLeft } from "lucide-react";
-import {  useNavigate } from "react-router-dom";
-import WorkTypeService from "@/services/worktype.service";
+import {Plus, ArrowLeft} from "lucide-react";
+import {useNavigate} from "react-router-dom";
 
-import { CustomerService } from "@/services/customer.service";
+import {CustomerService} from "@/services/customer.service";
 
-import { OperatorService } from "@/services/operator.service";
+import {OperatorService} from "@/services/operator.service";
 
-import { useWorkTypeStore } from "@/stores/ProductDetailsStore";
-import { Enquiry } from "@/types/enquiry";
-import { Engineer } from "@/types/engineer";
-import { LocationService } from "@/services/location.service";
-import { TokenManager } from "@/services/tokenManager.service";
-import { AuthService } from "@/services/authService.service";
-// import { toast } from "@/hooks/use-toast";
-import { toast } from "sonner";
-
-import { title } from "process";
-import { a } from "vitest/dist/chunks/suite.d.FvehnV49.js";
+import {useWorkTypeStore} from "@/stores/ProductDetailsStore";
+import {Enquiry} from "@/types/enquiry";
+import {Engineer} from "@/types/engineer";
+import {LocationService} from "@/services/location.service";
+import {toast} from "sonner";
 
 type Step = "home" | "mobile" | "otp" | "form" | "worktype" | "visit";
 
 const Index = () => {
-
   const [step, setStep] = useState<Step>("home");
   const navigate = useNavigate();
   const [customer, setCustomer] = useState<Customer | null>(null);
@@ -49,28 +41,26 @@ const Index = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [enquiryId, setEnquiryId] = useState("");
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
-const [detailsOpen, setDetailsOpen] = useState(false);
-const [customerEnquiries, setCustomerEnquiries] = useState<Enquiry[]>([]);
-const [engineers, setEngineers] = useState<Engineer[]>([]);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [customerEnquiries, setCustomerEnquiries] = useState<Enquiry[]>([]);
+  const [engineers, setEngineers] = useState<Engineer[]>([]);
   const [locations, setLocations] = useState<Address[]>([]);
- const[token,setToken]=useState("");
- const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
- const [isLoadingWorkTypes,
-setIsLoadingWorkTypes] =
-useState(false);
-const {
-  categories,
-  subcategories,
-  products,
-  loadCategories,
-  loadSubcategories,
-  loadProducts
-} = useWorkTypeStore();
+  const [token, setToken] = useState("");
+  const [isLoadingCustomer, setIsLoadingCustomer] = useState(false);
+  const [isLoadingWorkTypes, setIsLoadingWorkTypes] = useState(false);
+  const {
+    categories,
+    subcategories,
+    products,
+    loadCategories,
+    loadSubcategories,
+    loadProducts,
+  } = useWorkTypeStore();
   const loadLocations = async (customerId: number) => {
     const data = await LocationService.getAllLocationsForCustomer(customerId);
 
     const mapped = data.map((loc: any) => ({
-      id:loc.LocationID,
+      id: loc.LocationID,
       address1: loc.AddressLine1,
       address2: loc.AddressLine2 || "",
       city: loc.City,
@@ -81,252 +71,200 @@ const {
       lat: 0,
       lng: 0,
       verified: true,
-      addressType: loc.Name ,
+      addressType: loc.Name,
     }));
     setLocations(mapped);
   };
-  
 
-  
-const preloadWorkTypeData = async () => {
+  const preloadWorkTypeData = async () => {
+    // categories
+    await loadCategories();
 
-  // categories
-  await loadCategories();
+    // get categories from store
+    const cats = useWorkTypeStore.getState().categories;
 
-  // get categories from store
-  const cats =
-    useWorkTypeStore.getState().categories;
+    // load all subcategories
+    await Promise.all(
+      cats.map((cat) => loadSubcategories(Number(cat.CategoryID))),
+    );
 
-  // load all subcategories
-  await Promise.all(
-    cats.map((cat) =>
-      loadSubcategories(
-        Number(cat.CategoryID)
-      )
-    )
-  );
+    // get updated subcategories
+    const allSubcategories = useWorkTypeStore.getState().subcategories;
 
-  // get updated subcategories
-  const allSubcategories =
-    useWorkTypeStore.getState()
-      .subcategories;
+    // flatten subcategories
+    const subList = Object.values(allSubcategories).flat();
 
-  // flatten subcategories
-  const subList =
-    Object.values(allSubcategories)
-      .flat();
-
-  // load all products
-  await Promise.all(
-    subList.map((sub) =>
-      loadProducts(
-        Number(sub.SubCategoryID)
-      )
-    )
-  );
-};
-
-useEffect(() => {
-  const fetchEngineers = async () => {
-    const data = await OperatorService.getAllOperators();
-    setEngineers(data);
-    // console.log("Engineers"+engineers);
+    // load all products
+    await Promise.all(
+      subList.map((sub) => loadProducts(Number(sub.SubCategoryID))),
+    );
   };
-  fetchEngineers();
-}, []);
 
   const handleMobileSearch = async (num: string) => {
     setMobile(num);
-    setStep("otp"); 
+    setStep("otp");
   };
 
-  const handleOtpVerified =async  () => {
- 
-setIsLoadingCustomer(true);
+  const handleOtpVerified = async () => {
+    setIsLoadingCustomer(true);
 
     try {
-    const found = await CustomerService.getByMobile(mobile);
+      const found = await CustomerService.getByMobile(mobile);
 
-    if (found) {
-      await loadLocations(found.id);
+      if (found) {
+        await loadLocations(found.id);
 
-      setCustomer(found);
-      setIsNew(false);
+        setCustomer(found);
+        setIsNew(false);
 
-      await getEnqueriesByCustomerId(found.id);
-    } else {
-      toast.error("No customer found. Please create a new customer profile.", {
-        duration: 5000,
-      });
+        await getEnqueriesByCustomerId(found.id);
+      } else {
+        toast.error(
+          "No customer found. Please create a new customer profile.",
+          {
+            duration: 5000,
+          },
+        );
 
-      setIsNew(true);
-      setCustomer(null);
-      setLocations([]); // CLEAR OLD LOCATIONS
-      setCustomerEnquiries([]); // optional
+        setIsNew(true);
+        setCustomer(null);
+        setLocations([]); // CLEAR OLD LOCATIONS
+        setCustomerEnquiries([]); // optional
+      }
+
+      setStep("form");
+    } catch (error) {
+      toast.error("Failed to load customer details");
+    } finally {
+      setIsLoadingCustomer(false);
     }
-
-    setStep("form");
-  } catch (error) {
-    toast.error("Failed to load customer details");
-  } finally {
-    setIsLoadingCustomer(false);
-  }
-     
   };
- 
-// console.log(customer);
-  const getEnqueriesByCustomerId = async (customerId: number)=> {
-    const data= await CustomerService.getEnquriesByCustomerId(customerId);
-    // console.log("Enquiries", data);
-     setCustomerEnquiries(data);
-  }
 
-const handleSubCategoryChange = (
-  workTypeId: string,
-  subCategory: { id: string; name: string }
-) => {
-  setSelectedWork((prev) =>
-    prev.map((w) =>
-      w.id === workTypeId
-        ? {
-            ...w,
-            selectedSubCategory: subCategory,
-          }
-        : w
-    )
-  );
-};
+  const getEnqueriesByCustomerId = async (customerId: number) => {
+    const data = await CustomerService.getEnquriesByCustomerId(customerId);
+    setCustomerEnquiries(data);
+  };
 
-const handleProductChange = (
-  workTypeId: string,
-  product: SelectedProduct
-) => {
-  setSelectedWork((prev) =>
-    prev.map((w) =>
-      w.id === workTypeId
-        ? {
-            ...w,
-            selectedProduct: product,
-          }
-        : w
-    )
-  );
-};
-const updateWorkType = (updated: WorkType) => {
-  setSelectedWork((prev) =>
-    prev.map((w) =>
-      w.id === updated.id ? updated : w
-    )
-  );
-};
+  const handleSubCategoryChange = (
+    workTypeId: string,
+    subCategory: {id: string; name: string},
+  ) => {
+    setSelectedWork((prev) =>
+      prev.map((w) =>
+        w.id === workTypeId
+          ? {
+              ...w,
+              selectedSubCategory: subCategory,
+            }
+          : w,
+      ),
+    );
+  };
 
+  const handleProductChange = (
+    workTypeId: string,
+    product: SelectedProduct,
+  ) => {
+    setSelectedWork((prev) =>
+      prev.map((w) =>
+        w.id === workTypeId
+          ? {
+              ...w,
+              selectedProduct: product,
+            }
+          : w,
+      ),
+    );
+  };
+  const updateWorkType = (updated: WorkType) => {
+    setSelectedWork((prev) =>
+      prev.map((w) => (w.id === updated.id ? updated : w)),
+    );
+  };
 
- 
   const handleCustomerSave = async (c: Customer) => {
-   
     setCustomer(c);
-    if(!c.id){
+    if (!c.id) {
       setIsNew(true);
-     }
-
-   
-  //   if(c.id){
-  //  const token=   await AuthService.getToken({ username: c.mobile, password: c.mobile });
-  //  TokenManager.setToken(token);
-  //   }
+    }
     setIsNew(false);
   };
 
   const toggleWork = (type: WorkType) => {
-    // setSelectedWork((prev) => prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]);
-  setSelectedWork((prev) => {
-    const exists = prev.find((t) => t.id === type.id);
+    setSelectedWork((prev) => {
+      const exists = prev.find((t) => t.id === type.id);
 
-    if (exists) {
-      return prev.filter((t) => t.id !== type.id); // remove
-    }
+      if (exists) {
+        return prev.filter((t) => t.id !== type.id); // remove
+      }
 
-    return [...prev, { ...type, selectedSubOption: undefined}];
-  });
+      return [...prev, {...type, selectedSubOption: undefined}];
+    });
   };
 
- 
+  const reset = () => {
+    setStep("home");
 
-const reset = () => {
-  setStep("home");
+    setCustomer(null);
+    setIsNew(false);
 
-  setCustomer(null);
-  setIsNew(false);
+    setMobile("");
 
-  setMobile("");
+    setSelectedWork([]);
 
-  setSelectedWork([]);
+    setVisitDate("");
+    setVisitTime("");
+    setVisitAddress(null);
 
-  setVisitDate("");
-  setVisitTime("");
-  setVisitAddress(null);
+    setRemarks("");
 
-  setRemarks("");
+    setLocations([]); // IMPORTANT
+    setCustomerEnquiries([]); // IMPORTANT
 
-  setLocations([]); // IMPORTANT
-  setCustomerEnquiries([]); // IMPORTANT
-
-  setSelectedEnquiry(null); // optional
-};
-
-
-
+    setSelectedEnquiry(null); // optional
+  };
 
   const canGoNext = () => {
     if (step === "form") return !!customer;
-    if (step === "worktype")return (
-      selectedWork.length > 0 &&
-      selectedWork.every(
-        (item) =>
-          item.selectedSubCategory &&
-          item.selectedProduct
-      )
-    );
+    if (step === "worktype")
+      return (
+        selectedWork.length > 0 &&
+        selectedWork.every(
+          (item) => item.selectedSubCategory && item.selectedProduct,
+        )
+      );
     return true;
   };
 
-  const nextStep =async () => {
-    // if (step === "form") setStep("worktype");
-   if (step === "form") {
+  const nextStep = async () => {
+    if (step === "form") {
+      setIsLoadingWorkTypes(true);
 
-  setIsLoadingWorkTypes(true);
+      await preloadWorkTypeData();
 
-  await preloadWorkTypeData();
+      setIsLoadingWorkTypes(false);
 
-  setIsLoadingWorkTypes(false);
-
-  setStep("worktype");
-}
-    else if (step === "worktype") setStep("visit");
+      setStep("worktype");
+    } else if (step === "worktype") setStep("visit");
   };
 
   const prevStep = () => {
-    if (step === "otp"){
-      //  TokenManager.clearToken();
-       setStep("mobile");
-      
-      }
-    else if (step === "form"){
-    // TokenManager.clearToken();
-     setStep("otp");
-    }
-    else if (step === "worktype") setStep("form");
+    if (step === "otp") {
+      setStep("mobile");
+    } else if (step === "form") {
+      setStep("otp");
+    } else if (step === "worktype") setStep("form");
     else if (step === "visit") setStep("worktype");
     else if (step === "mobile") setStep("home");
   };
 
   // Step indicators
   const steps = [
-    { key: "mobile", label: "Mobile" },
-    { key: "otp", label: "Verify" },
-    { key: "form", label: "Customer" },
-    { key: "worktype", label: "Work Type" },
-    { key: "visit", label: "Site Visit" },
+    {key: "mobile", label: "Mobile"},
+    {key: "otp", label: "Verify"},
+    {key: "form", label: "Customer"},
+    {key: "worktype", label: "Work Type"},
+    {key: "visit", label: "Site Visit"},
   ];
   const currentStepIdx = steps.findIndex((s) => s.key === step);
 
@@ -345,8 +283,8 @@ const reset = () => {
             </Button>
           )}
           {step === "home" && (
-            <Button variant="ghost" size="sm" onClick={() => navigate("/")} >
-            <ArrowLeft size={16} />
+            <Button variant="ghost" size="sm" onClick={() => navigate("/")}>
+              <ArrowLeft size={16} />
             </Button>
           )}
         </div>
@@ -358,18 +296,28 @@ const reset = () => {
           <div className="flex items-center gap-1 mb-6">
             {steps.map((s, i) => (
               <div key={s.key} className="flex items-center flex-1">
-                <div className={`flex items-center gap-2 ${i <= currentStepIdx ? "text-primary" : "text-muted-foreground"}`}>
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
-                    i < currentStepIdx ? "bg-primary text-primary-foreground" :
-                    i === currentStepIdx ? "bg-primary text-primary-foreground" :
-                    "bg-muted text-muted-foreground"
-                  }`}>
+                <div
+                  className={`flex items-center gap-2 ${i <= currentStepIdx ? "text-primary" : "text-muted-foreground"}`}
+                >
+                  <div
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${
+                      i < currentStepIdx
+                        ? "bg-primary text-primary-foreground"
+                        : i === currentStepIdx
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
                     {i + 1}
                   </div>
-                  <span className="text-xs font-medium hidden sm:inline">{s.label}</span>
+                  <span className="text-xs font-medium hidden sm:inline">
+                    {s.label}
+                  </span>
                 </div>
                 {i < steps.length - 1 && (
-                  <div className={`flex-1 h-0.5 mx-2 ${i < currentStepIdx ? "bg-primary" : "bg-border"}`} />
+                  <div
+                    className={`flex-1 h-0.5 mx-2 ${i < currentStepIdx ? "bg-primary" : "bg-border"}`}
+                  />
                 )}
               </div>
             ))}
@@ -382,12 +330,19 @@ const reset = () => {
         {step === "home" && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
             <div className="text-center space-y-2">
-              <h2 className="text-3xl md:text-4xl font-bold text-foreground">Welcome</h2>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+                Welcome
+              </h2>
               <p className="text-muted-foreground max-w-md">
-                Manage customer enquiries, schedule site visits, and track work requests efficiently.
+                Manage customer enquiries, schedule site visits, and track work
+                requests efficiently.
               </p>
             </div>
-            <Button size="lg" onClick={() => setStep("mobile")} className="gap-2 text-base px-8 py-6">
+            <Button
+              size="lg"
+              onClick={() => setStep("mobile")}
+              className="gap-2 text-base px-8 py-6"
+            >
               <Plus size={20} />
               New Enquiry
             </Button>
@@ -399,7 +354,9 @@ const reset = () => {
           <div className="max-w-lg mx-auto space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-1">Search Customer</h2>
-              <p className="text-sm text-muted-foreground">Enter customer mobile number to search or create new</p>
+              <p className="text-sm text-muted-foreground">
+                Enter customer mobile number to search or create new
+              </p>
             </div>
             <MobileInput onSearch={handleMobileSearch} />
           </div>
@@ -408,7 +365,11 @@ const reset = () => {
         {/* OTP Verification */}
         {step === "otp" && (
           <div className="max-w-md mx-auto">
-            <OTPVerification mobile={mobile} onVerified={handleOtpVerified} isLoading={isLoadingCustomer} />
+            <OTPVerification
+              mobile={mobile}
+              onVerified={handleOtpVerified}
+              isLoading={isLoadingCustomer}
+            />
             <div className="mt-6 text-center">
               <Button variant="outline" onClick={prevStep}>
                 <ArrowLeft size={16} /> Change Number
@@ -422,7 +383,16 @@ const reset = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               {step === "form" && !isNew && customer && (
-                <CustomerDetails customer={customer} enquiries={customerEnquiries} addresses={locations} onUpdateCustomer={setCustomer}  onSelectEnquiry={(enq) => {setSelectedEnquiry(enq);setDetailsOpen(false);}}  /> //make this setDetailsOpen(false); to true to check the status detils in customer details tab
+                <CustomerDetails
+                  customer={customer}
+                  enquiries={customerEnquiries}
+                  addresses={locations}
+                  onUpdateCustomer={setCustomer}
+                  onSelectEnquiry={(enq) => {
+                    setSelectedEnquiry(enq);
+                    setDetailsOpen(false);
+                  }}
+                /> //make this setDetailsOpen(false); to true to check the status detils in customer details tab
               )}
               {step === "form" && isNew && (
                 <CustomerForm mobile={mobile} onSave={handleCustomerSave} />
@@ -439,8 +409,7 @@ const reset = () => {
               )}
             </div>
             <div className="hidden lg:block">
-              <EnquirySummary customer={customer} workTypes={selectedWork} 
-               />
+              <EnquirySummary customer={customer} workTypes={selectedWork} />
             </div>
           </div>
         )}
@@ -450,14 +419,13 @@ const reset = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               <WorkTypeSelector
-              // workTypes={workTypes}
+                // workTypes={workTypes}
                 selected={selectedWork}
                 onToggle={toggleWork}
                 onUpdate={updateWorkType}
                 //  onSubChange={handleSubChange}
-                onSubCategoryChange={handleSubCategoryChange }
-              onProductChange={handleProductChange }
-                 
+                onSubCategoryChange={handleSubCategoryChange}
+                onProductChange={handleProductChange}
               />
               <div className="flex justify-between">
                 <Button variant="outline" onClick={prevStep}>
@@ -469,8 +437,7 @@ const reset = () => {
               </div>
             </div>
             <div className="hidden lg:block">
-              <EnquirySummary customer={customer} workTypes={selectedWork} 
-              />
+              <EnquirySummary customer={customer} workTypes={selectedWork} />
             </div>
           </div>
         )}
@@ -481,11 +448,10 @@ const reset = () => {
             <div className="lg:col-span-2 space-y-4">
               <SiteVisitForm
                 workTypes={selectedWork}
-                customerId={customer?.id }
-                // addresses={customer?.addresses || []}
+                customerId={customer?.id}
                 addresses={locations}
                 contactNumber={customer?.mobile || mobile}
-                onSubmit={(id)=>{
+                onSubmit={(id) => {
                   setEnquiryId(id);
                   setConfirmOpen(true);
                 }}
@@ -512,19 +478,11 @@ const reset = () => {
       <ConfirmationDialog
         open={confirmOpen}
         enquiryId={enquiryId}
-        onClose={() => { setConfirmOpen(false); reset();
-          // TokenManager.clearToken();
-         }}
+        onClose={() => {
+          setConfirmOpen(false);
+          reset();
+        }}
       />
-
-{/* {selectedEnquiry && (
-//       <EnquiryDetailsPage
-//  enquiry={selectedEnquiry}
-//   engineers={engineers}
-//   onBack={() => navigate(-1)}
-// />
-)} */}
-
     </div>
   );
 };

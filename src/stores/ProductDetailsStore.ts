@@ -1,97 +1,62 @@
-import { create } from "zustand";
+import {create} from "zustand";
 import WorkTypeService from "@/services/worktype.service";
 
 type WorkTypeStore = {
   categories: any[];
 
-  subcategories: Record<
-    number,
-    any[]
-  >;
+  subcategories: Record<number, any[]>;
 
-  products: Record<
-    number,
-    any[]
-  >;
+  products: Record<number, any[]>;
 
   loadCategories: () => Promise<void>;
 
-  loadSubcategories: (
-    categoryId: number
-  ) => Promise<void>;
+  loadSubcategories: (categoryId: number) => Promise<void>;
 
-  loadProducts: (
-    subcategoryId: number
-  ) => Promise<void>;
+  loadProducts: (subcategoryId: number) => Promise<void>;
 };
 
-export const useWorkTypeStore =
-  create<WorkTypeStore>((set, get) => ({
+export const useWorkTypeStore = create<WorkTypeStore>((set, get) => ({
+  categories: [],
 
-    categories: [],
+  subcategories: {},
 
-    subcategories: {},
+  products: {},
 
-    products: {},
+  loadCategories: async () => {
+    if (get().categories.length) return;
 
-    loadCategories: async () => {
+    const data = await WorkTypeService.getCategores();
 
-      if (get().categories.length)
-        return;
+    set({categories: data});
+  },
 
-      const data =
-        await WorkTypeService.getCategores();
+  loadSubcategories: async (categoryId) => {
+    const existing = get().subcategories[categoryId];
 
-      set({ categories: data });
-    },
+    if (existing) return;
 
-    loadSubcategories: async (
-      categoryId
-    ) => {
+    const data = await WorkTypeService.getSubCategories(categoryId);
 
-      const existing =
-        get().subcategories[
-          categoryId
-        ];
+    set((state) => ({
+      subcategories: {
+        ...state.subcategories,
+        [categoryId]: data,
+      },
+    }));
+  },
 
-      if (existing) return;
+  loadProducts: async (subcategoryId) => {
+    const existing = get().products[subcategoryId];
 
-      const data =
-        await WorkTypeService
-          .getSubCategories(
-            categoryId
-          );
+    if (existing) return;
 
-      set((state) => ({
-        subcategories: {
-          ...state.subcategories,
-          [categoryId]: data,
-        },
-      }));
-    },
+    const data = await WorkTypeService.getProductsBySubcategory(subcategoryId);
 
-    loadProducts: async (
-      subcategoryId
-    ) => {
-
-      const existing =
-        get().products[
-          subcategoryId
-        ];
-
-      if (existing) return;
-
-      const data =
-        await WorkTypeService
-          .getProductsBySubcategory(
-            subcategoryId
-          );
-
-      set((state) => ({
-        products: {
-          ...state.products,
-          [subcategoryId]: data,
-        },
-      }));
-    },
+    set((state) => ({
+      products: {
+        ...state.products,
+        [subcategoryId]: data,
+      },
+    }));
+  },
 }));

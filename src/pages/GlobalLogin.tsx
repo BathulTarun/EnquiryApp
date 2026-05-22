@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppStore } from "@/services/appStore";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowLeft } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { ClipboardList } from "lucide-react";
-import { engineers } from "@/data/adminMockData";
+import {useState} from "react";
+import {useNavigate} from "react-router-dom";
+import {useAppStore} from "@/services/appStore";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {ArrowLeft} from "lucide-react";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Label} from "@/components/ui/label";
+import {ClipboardList} from "lucide-react";
+import {engineers} from "@/data/adminMockData";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -18,38 +18,41 @@ const LoginPage = () => {
 
   const login = useAppStore((s) => s.login);
 
- const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setError("");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
 
-  const result = await login(username, password); 
+    const result = await login(username, password);
 
-  if (!result) {
-    setError("Invalid username or password");
-    return;
-  }
+    if (!result) {
+      setError("Invalid username or password");
+      return;
+    }
 
-  if (result.role === "admin") {
-    navigate("/admin/dashboard");
-  } else if (result.role === "operator") {
-    navigate(`/operator/dashboard/${result.id}`);
+    if (result.role === "admin") {
+      navigate("/admin/dashboard");
+    } else if (result.role === "operator") {
+      navigate(`/operator/dashboard/${result.id}`);
 
-    console.log("Logged in as operator with ID:", result.id);
-    console.log(
-      "Operator Name:",
-      engineers.find((e) => e.id === result.id)?.name
-    );
-  }
-};
+      console.log("Logged in as operator with ID:", result.id);
+      console.log(
+        "Operator Name:",
+        engineers.find((e) => e.id === result.id)?.name,
+      );
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-     
       <Card className="w-full max-w-sm material-shadow-lg animate-fade-in relative">
-        <Button  variant="ghost" onClick={() => navigate("/")}  className="absolute top-2 right-2 p-2 rounded-full hover:bg-muted" >
-        <ArrowLeft size={16} />
-         Go Back
-      </Button>
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/")}
+          className="absolute top-2 right-2 p-2 rounded-full hover:bg-muted"
+        >
+          <ArrowLeft size={16} />
+          Go Back
+        </Button>
         <CardHeader className="text-center space-y-2">
           <div className="mx-auto w-12 h-12 bg-primary rounded-full flex items-center justify-center">
             <ClipboardList className="h-6 w-6 text-primary-foreground" />
@@ -63,7 +66,6 @@ const LoginPage = () => {
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            
             {/* USERNAME */}
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
@@ -88,9 +90,7 @@ const LoginPage = () => {
             </div>
 
             {/* ERROR */}
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
+            {error && <p className="text-sm text-destructive">{error}</p>}
 
             {/* LOGIN BUTTON */}
             <Button type="submit" className="w-full">
@@ -101,7 +101,6 @@ const LoginPage = () => {
             <p className="text-xs text-muted-foreground text-center">
               Use admin / operator credentials
             </p>
-
           </form>
         </CardContent>
       </Card>

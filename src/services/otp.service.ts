@@ -1,13 +1,14 @@
 const BASE_URL = "http://localhost:7071/api";
-const COMPANY_ID=import.meta.env.VITE_COMPANY_ID;
-const TENANT_ID=import.meta.env.VITE_TENANT_ID;
-const FixedURL= import.meta.env.VITE_API_BASE_URL;
+const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
+const TENANT_ID = import.meta.env.VITE_TENANT_ID;
+const FixedURL = import.meta.env.VITE_API_BASE_URL;
+const Package_ID = import.meta.env.VITE_PACKAGE_ID;
 
 class OtpService {
-  static async sendOtp(mobile: string): Promise<{ success: boolean }> {
+  static async sendOtp(mobile: string): Promise<{success: boolean}> {
     // console.log("Sending OTP to", mobile);
     // return Promise.resolve({ success: true });
-     try {
+    try {
       // const response = await fetch(
       //   `${BASE_URL}/SendOtp?mobile=${mobile}`,
       //   {
@@ -18,19 +19,16 @@ class OtpService {
       //     },
       //   }
       // );
-      const response = await fetch(
-        `${FixedURL}/api/user/generateOTP`,
-        {
-          method: "POST",
-          headers:{
+      const response = await fetch(`${FixedURL}/api/user/generateOTP`, {
+        method: "POST",
+        headers: {
           "Content-Type": "application/json",
-            "company":`${COMPANY_ID}`,
-            "tenant":`${TENANT_ID}`,
-          "package":"ecommerce.mobile.andhrakitchenwares.com",
-          },
-          body: JSON.stringify({Username: mobile})
-        }
-      );
+          company: `${COMPANY_ID}`,
+          tenant: `${TENANT_ID}`,
+          package: `${Package_ID}`,
+        },
+        body: JSON.stringify({Username: mobile}),
+      });
       const data = await response.json();
       // console.log(data);
       return {
@@ -38,16 +36,14 @@ class OtpService {
       };
     } catch (error) {
       console.error("Send OTP error:", error);
-      return { success: false };
+      return {success: false};
     }
   }
 
-
   static async verifyOtp(
     mobile: string,
-    otp: string
-  ): Promise<{ verified: boolean }> {
-    
+    otp: string,
+  ): Promise<{verified: boolean}> {
     try {
       // const response = await fetch(
       //   `${BASE_URL}/VerifyOtp?mobile=${mobile}&otp=${otp}`,
@@ -59,19 +55,16 @@ class OtpService {
       //     },
       //   }
       // );
-        const response = await fetch(
-        `${FixedURL}/api/user/validateOTP`,
-        {
-          method: "POST",
-          headers:{
+      const response = await fetch(`${FixedURL}/api/user/validateOTP`, {
+        method: "POST",
+        headers: {
           "Content-Type": "application/json",
-            "company":`${COMPANY_ID}`,
-            "tenant":`${TENANT_ID}`,
-          "package":"ecommerce.mobile.andhrakitchenwares.com",
-          },
-          body: JSON.stringify({Username: mobile,Code:otp})
-        }
-      );
+          company: `${COMPANY_ID}`,
+          tenant: `${TENANT_ID}`,
+          package: `${Package_ID}`,
+        },
+        body: JSON.stringify({Username: mobile, Code: otp}),
+      });
 
       const data = await response.json();
       return {
@@ -80,7 +73,7 @@ class OtpService {
       };
     } catch (error) {
       console.error("Verify OTP error:", error);
-      return { verified: false };
+      return {verified: false};
     }
   }
 }

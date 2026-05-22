@@ -1,6 +1,5 @@
 // services/userManager.ts
-import { Engineer } from "@/types/engineer";
-
+import {Engineer} from "@/types/engineer";
 
 const USER_KEY = "logged_user";
 

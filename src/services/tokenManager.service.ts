@@ -1,5 +1,3 @@
-
-
 export class TokenManager {
   static getToken(): string | null {
     return localStorage.getItem("auth_token");
