@@ -4,6 +4,7 @@ import WorkTypeService from "@/services/worktype.service";
 type ProductStore = {
   productNames: Record<string, string>;
   loadProducts: (ids: string[]) => Promise<void>;
+  clearProducts: () => void;
 };
 
 export const useProductStore = create<ProductStore>((set, get) => ({
@@ -36,6 +37,12 @@ export const useProductStore = create<ProductStore>((set, get) => ({
         ...existing,
         ...newProducts,
       },
+    });
+  },
+
+  clearProducts: () => {
+    set({
+      productNames: {},
     });
   },
 }));

@@ -30,7 +30,7 @@ const TaskList: React.FC = () => {
   const {enquiries, fetchEnquiries} = useOperatorStore();
 
   useEffect(() => {
-    fetchEnquiries(Number(engineerId));
+    fetchEnquiries(engineerId);
   }, []);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

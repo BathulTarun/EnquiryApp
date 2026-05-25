@@ -11,7 +11,7 @@ const Package_ID = import.meta.env.VITE_PACKAGE_ID;
 const FixedURL = import.meta.env.VITE_API_BASE_URL;
 
 export class OperatorService {
-  static async getTasksByEngineer(engineerId: number) {
+  static async getTasksByEngineer(engineerId: string) {
     return EnquiryService.getByEngineer(engineerId);
     // return CustomerService.getEnquriesByCustomerId(19693);
   }
@@ -23,7 +23,7 @@ export class OperatorService {
     return engineers.find((e) => e.id === enquiry.assignedEngineerId) || null;
   }
 
-  static async getEngineerById(engineerId: number): Promise<Engineer | null> {
+  static async getEngineerById(engineerId: string): Promise<Engineer | null> {
     return engineers.find((e) => e.id === engineerId) || null;
   }
 
@@ -67,7 +67,7 @@ export class OperatorService {
     return engineers;
   }
 
-  static async getEnquriesByOperatorId(operatorID: number) {
+  static async getEnquriesByOperatorId(operatorID: string) {
     try {
       const response = await fetch(
         `${FixedURL}/api/enquiry/getbyoperatorid?id=${operatorID}`,
@@ -88,9 +88,13 @@ export class OperatorService {
       }
 
       const result = await response.json();
-      const enquiries: Enquiry[] =
-        result.Data?.map((item: any) => mapEnquiryFromApi(item)) || [];
-      return enquiries;
+      if (result.Status === "Success") {
+        const enquiries: Enquiry[] =
+          result.Data?.map((item: any) => mapEnquiryFromApi(item)) || [];
+        return enquiries;
+      } else {
+        return null;
+      }
     } catch (error) {
       console.error("failed to get customer", error);
       return null;

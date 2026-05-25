@@ -65,6 +65,8 @@ export class AuthService {
         localStorage.setItem("tenant_guids", result.Data.tenant_guids);
         localStorage.setItem("company_guids", result.Data.company_guids);
       }
+      console.log("Tenant", localStorage.getItem("tenant_guids"));
+      console.log("company", localStorage.getItem("company_guids"));
       return result;
     } catch (error) {
       console.error("Package info error:", error);
@@ -74,7 +76,7 @@ export class AuthService {
 
   static async getUserDetails(token: string): Promise<Engineer | null> {
     try {
-      const response = await fetch(`${FixedURL}/api/user/profile`, {
+      const response = await fetch(`${FixedURL}/api/operator/profile`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

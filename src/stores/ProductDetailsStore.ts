@@ -13,6 +13,8 @@ type WorkTypeStore = {
   loadSubcategories: (categoryId: number) => Promise<void>;
 
   loadProducts: (subcategoryId: number) => Promise<void>;
+
+  clearWorkTypes: () => void;
 };
 
 export const useWorkTypeStore = create<WorkTypeStore>((set, get) => ({
@@ -58,5 +60,13 @@ export const useWorkTypeStore = create<WorkTypeStore>((set, get) => ({
         [subcategoryId]: data,
       },
     }));
+  },
+
+  clearWorkTypes: () => {
+    set({
+      categories: [],
+      subcategories: {},
+      products: {},
+    });
   },
 }));

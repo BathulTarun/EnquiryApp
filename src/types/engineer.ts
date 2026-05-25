@@ -1,5 +1,5 @@
 export interface Engineer {
-  id: number;
+  id: string;
   name: string;
   username?: string;
   password?: string;
@@ -7,4 +7,5 @@ export interface Engineer {
   email: string;
   status?: "Available" | "Busy";
   specialization?: string;
+  role?: string;
 }

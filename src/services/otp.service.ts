@@ -9,16 +9,13 @@ class OtpService {
     // console.log("Sending OTP to", mobile);
     // return Promise.resolve({ success: true });
     try {
-      // const response = await fetch(
-      //   `${BASE_URL}/SendOtp?mobile=${mobile}`,
-      //   {
-      //     method: "GET",
-      //     headers: {
-      //       "company":`${COMPANY_ID}`,
-      //       "tenant":`${TENANT_ID}`,
-      //     },
-      //   }
-      // );
+      // const response = await fetch(`${BASE_URL}/SendOtp?mobile=${mobile}`, {
+      //   method: "GET",
+      //   headers: {
+      //     company: `${COMPANY_ID}`,
+      //     tenant: `${TENANT_ID}`,
+      //   },
+      // });
       const response = await fetch(`${FixedURL}/api/user/generateOTP`, {
         method: "POST",
         headers: {
@@ -50,10 +47,10 @@ class OtpService {
       //   {
       //     method: "GET",
       //     headers: {
-      //      "company":`${COMPANY_ID}`,
-      //       "tenant":`${TENANT_ID}`,
+      //       company: `${COMPANY_ID}`,
+      //       tenant: `${TENANT_ID}`,
       //     },
-      //   }
+      //   },
       // );
       const response = await fetch(`${FixedURL}/api/user/validateOTP`, {
         method: "POST",
@@ -69,7 +66,7 @@ class OtpService {
       const data = await response.json();
       return {
         verified: data?.Status?.toLowerCase() === "success",
-        //  verified: data.success || false,
+        // verified: data.success || false,
       };
     } catch (error) {
       console.error("Verify OTP error:", error);

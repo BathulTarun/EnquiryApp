@@ -39,7 +39,7 @@ export class EnquiryService {
   }
 
   //  Get enquiries by engineer
-  static async getByEngineer(engineerId: number): Promise<Enquiry[]> {
+  static async getByEngineer(engineerId: string): Promise<Enquiry[]> {
     return enquiries.filter((e) => e.assignedEngineerId === engineerId);
   }
 
@@ -133,7 +133,7 @@ export class EnquiryService {
   //  Assign engineer
   static async assignEngineer(
     enquiryId: string,
-    engineerId: number,
+    engineerId: string,
   ): Promise<void> {
     const enquiry = enquiries.find((e) => e.id === enquiryId);
     if (!enquiry) return;

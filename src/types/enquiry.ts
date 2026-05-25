@@ -68,7 +68,7 @@ export interface Enquiry {
   statusHistory: StatusEntry[];
   status?: EnquiryStatus;
   remarks?: Remark[]; // admin
-  assignedEngineerId?: number;
+  assignedEngineerId?: string;
   images?: string[];
   createdAt?: string;
   updatedAt?: string;

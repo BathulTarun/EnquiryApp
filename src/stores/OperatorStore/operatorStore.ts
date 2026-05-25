@@ -9,7 +9,7 @@ interface OperatorStore {
 
   loaded: boolean;
 
-  fetchEnquiries: (engineerId: number, force?: boolean) => Promise<void>;
+  fetchEnquiries: (engineerId: string, force?: boolean) => Promise<void>;
 
   updateLocalEnquiry: (updated: Enquiry) => void;
 
@@ -32,12 +32,17 @@ export const useOperatorStore = create<OperatorStore>((set, get) => ({
 
     try {
       const res = await OperatorService.getEnquriesByOperatorId(engineerId);
-
-      set({
-        enquiries: res,
-        loaded: true,
-        loading: false,
-      });
+      if (res) {
+        set({
+          enquiries: res,
+          loaded: true,
+          loading: false,
+        });
+      } else {
+        set({
+          loading: false,
+        });
+      }
     } catch (err) {
       set({
         loading: false,

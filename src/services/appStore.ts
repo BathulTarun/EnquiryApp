@@ -4,12 +4,12 @@ import {TokenManager} from "./tokenManager.service";
 
 interface AppState {
   isLoggedIn: boolean;
-  role: "admin" | "operator" | "id";
+  role: string;
 
   login: (
     username: string,
     password: string,
-  ) => Promise<{role: "admin" | "operator"; id: number; name: string} | null>;
+  ) => Promise<{role: string; id: string; name: string} | null>;
   logout: () => void;
 }
 
@@ -20,7 +20,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   login: async (username: string, password: string) => {
     if (username === "admin" && password === "admin123") {
       set({isLoggedIn: true, role: "admin"});
-      return {role: "admin", id: 1, name: ""};
+      return {role: "admin", id: "1", name: ""};
     }
 
     const user = await AuthService.getToken({
@@ -28,6 +28,9 @@ export const useAppStore = create<AppState>((set, get) => ({
       password: password,
     });
     if (user) {
+      // const token = TokenManager.getToken();
+      // const data = await AuthService.getUserDetails(token);
+      // set({isLoggedIn: true, role: data.role});
       set({isLoggedIn: true, role: "operator"});
       const token = TokenManager.getToken();
       const data = await AuthService.getUserDetails(token);

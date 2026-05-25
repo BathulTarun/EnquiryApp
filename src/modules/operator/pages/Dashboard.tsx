@@ -1,6 +1,6 @@
 import React, {useEffect} from "react";
 import {useParams, useNavigate} from "react-router-dom";
-
+import PageLoader from "@/components/PageLoader";
 import {EnquiryStatus} from "@/types/enquiry";
 import {
   ClipboardList,
@@ -18,6 +18,8 @@ import {UserManager} from "@/services/userManager";
 import {TokenManager} from "@/services/tokenManager.service";
 import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
 import {useWorkTypeStore} from "@/stores/ProductDetailsStore";
+import {useProductStore} from "@/stores/productStore";
+import {toast} from "sonner";
 const statusIcon: Record<string, React.ReactNode> = {
   "My Tasks": <ClipboardList className="w-5 h-5" />,
   Upcoming: <Clock className="w-5 h-5" />,
@@ -72,7 +74,8 @@ const Dashboard: React.FC = () => {
     "My Tasks",
   ];
   const [engineer, setEngineer] = React.useState<Engineer | null>(null);
-  const {enquiries, fetchEnquiries, loading} = useOperatorStore();
+  const {enquiries, fetchEnquiries, loading, clearStore} = useOperatorStore();
+  const {clearProducts} = useProductStore();
   const {
     categories,
     subcategories,
@@ -80,35 +83,40 @@ const Dashboard: React.FC = () => {
     loadCategories,
     loadSubcategories,
     loadProducts,
+    clearWorkTypes,
   } = useWorkTypeStore();
 
   const preloadWorkTypeData = async () => {
-    // categories
-    await loadCategories();
+    if (loading) {
+      // categories
+      await loadCategories();
 
-    // get categories from store
-    const cats = useWorkTypeStore.getState().categories;
+      // get categories from store
+      const cats = useWorkTypeStore.getState().categories;
 
-    // load all subcategories
-    await Promise.all(
-      cats.map((cat) => loadSubcategories(Number(cat.CategoryID))),
-    );
+      // load all subcategories
+      await Promise.all(
+        cats.map((cat) => loadSubcategories(Number(cat.CategoryID))),
+      );
 
-    // get updated subcategories
-    const allSubcategories = useWorkTypeStore.getState().subcategories;
+      // get updated subcategories
+      const allSubcategories = useWorkTypeStore.getState().subcategories;
 
-    // flatten subcategories
-    const subList = Object.values(allSubcategories).flat();
+      // flatten subcategories
+      const subList = Object.values(allSubcategories).flat();
 
-    // load all products
-    await Promise.all(
-      subList.map((sub) => loadProducts(Number(sub.SubCategoryID))),
-    );
+      // load all products
+      await Promise.all(
+        subList.map((sub) => loadProducts(Number(sub.SubCategoryID))),
+      );
+    } else {
+      console.log("No Tasks No Api calling");
+    }
   };
 
   useEffect(() => {
     const handleFocus = () => {
-      fetchEnquiries(Number(engineerId), true);
+      fetchEnquiries(engineerId, true);
     };
 
     window.addEventListener("focus", handleFocus);
@@ -119,7 +127,7 @@ const Dashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchEnquiries(Number(engineerId));
+    fetchEnquiries(engineerId);
   }, []);
 
   return (
@@ -140,20 +148,23 @@ const Dashboard: React.FC = () => {
               (navigate("/"),
                 TokenManager.clearToken(),
                 UserManager.clearUser());
+              clearStore();
+              clearWorkTypes();
+              clearProducts();
             }}
           >
             <LogOut className="w-5 h-5" />
           </Button>
         </div>
       </header>
-
       <main className="container py-6 space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {sections.map((section) => {
-            const count = enquiries.filter((t) =>
-              filterMap[section](t.status),
-            ).length;
+            const count =
+              enquiries?.filter((t) => filterMap[section](t.status)).length ||
+              0;
+
             return (
               <button
                 key={section}
@@ -165,18 +176,17 @@ const Dashboard: React.FC = () => {
                 className="bg-card rounded-lg shadow-material p-2 text-left hover:shadow-material-lg transition-shadow"
               >
                 <div className="flex items-center gap-3">
-                  {/* Icon */}
                   <div
                     className={`w-9 h-9 rounded-lg flex items-center justify-center ${cardColors[section]}`}
                   >
                     {statusIcon[section]}
                   </div>
 
-                  {/* Text */}
                   <div className="flex items-center gap-2 min-w-0">
                     <p className="text-lg font-bold text-card-foreground">
                       {count}
                     </p>
+
                     <p className="text-xs text-muted-foreground truncate">
                       {section}
                     </p>
@@ -192,43 +202,69 @@ const Dashboard: React.FC = () => {
           <h2 className="text-base font-semibold text-foreground mb-3">
             Recent Tasks
           </h2>
+
           <div className="space-y-2">
-            {enquiries.slice(0, 5).map((task) => (
-              <button
-                key={task.id}
-                onClick={() =>
-                  navigate(`/operator/tasks/${task.id}`, {
-                    state: {enquiry: task},
-                  })
-                }
-                className="w-full bg-card rounded-lg shadow-material-sm p-4 text-left hover:shadow-material transition-shadow flex items-center justify-between gap-3"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <p className="font-medium text-card-foreground">
-                      {task.EnquiryNumber || `ENQ-${task.id}`}
-                    </p>
-                    <Badge
-                      variant="outline"
-                      className={statusColors[task.status]}
-                    >
-                      {task.status}
-                    </Badge>
+            {loading ? (
+              // Skeleton Loader
+              Array.from({length: 5}).map((_, index) => (
+                <div
+                  key={index}
+                  className="w-full bg-card rounded-lg shadow-material-sm p-4 animate-pulse"
+                >
+                  <div className="flex justify-between mb-3">
+                    <div className="h-4 w-24 bg-muted rounded" />
+                    <div className="h-5 w-20 bg-muted rounded" />
                   </div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    {task.siteVisit?.scheduledDate
-                      ?.split("T")[0]
-                      .split("-")
-                      .reverse()
-                      .join("-")}
-                    , {task.siteVisit?.scheduledTime}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {task.description}
-                  </p>
+
+                  <div className="h-3 w-40 bg-muted rounded mb-2" />
+                  <div className="h-3 w-full bg-muted rounded" />
                 </div>
-              </button>
-            ))}
+              ))
+            ) : enquiries?.length > 0 ? (
+              enquiries.slice(0, 5).map((task) => (
+                <button
+                  key={task.id}
+                  onClick={() =>
+                    navigate(`/operator/tasks/${task.id}`, {
+                      state: {enquiry: task},
+                    })
+                  }
+                  className="w-full bg-card rounded-lg shadow-material-sm p-4 text-left hover:shadow-material transition-shadow flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <p className="font-medium text-card-foreground">
+                        {task.EnquiryNumber || `ENQ-${task.id}`}
+                      </p>
+
+                      <Badge
+                        variant="outline"
+                        className={statusColors[task.status]}
+                      >
+                        {task.status}
+                      </Badge>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {task.siteVisit?.scheduledDate
+                        ?.split("T")[0]
+                        .split("-")
+                        .reverse()
+                        .join("-")}
+                      , {task.siteVisit?.scheduledTime}
+                    </p>
+
+                    <p className="text-sm text-muted-foreground">
+                      {task.description}
+                    </p>
+                  </div>
+                </button>
+              ))
+            ) : (
+              <div className="text-center text-muted-foreground py-6">
+                No tasks assigned yet
+              </div>
+            )}
           </div>
         </div>
       </main>

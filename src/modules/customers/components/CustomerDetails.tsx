@@ -426,7 +426,7 @@ const CustomerDetails = ({
                             ? ` - ${w.subCategoryName}`
                             : "";
 
-                          const productName = productMap[String(w.productsId)];
+                          const productName = w.productName;
 
                           const product = productName
                             ? ` (${productName})`

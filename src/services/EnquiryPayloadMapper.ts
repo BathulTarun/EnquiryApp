@@ -43,6 +43,7 @@ export const mapEnquiryToApi = (enquiry: Enquiry) => {
         CategoryID: Number(item.id),
         SubCategoryID: Number(item.subCategoryID),
         ProductID: item.productsId,
+        ProductName: item.productName || "",
         Description: item.name,
         Images: item.images || [],
         Price: item.unitPrice || 0,
@@ -104,6 +105,7 @@ export const mapEnquiryFromApi = (apiEnquiry: any): Enquiry => {
         name: item.Description || "",
         productsId: item.ProductID,
         CategoryID: item.CategoryID,
+        productName: item.ProductName,
         subCategoryID: item.SubCategoryID,
         quantity: item.Quantity,
         unitPrice: item.Price,
@@ -174,6 +176,8 @@ export const mapUpdatedEnquiryToApi = (
 
       ProductID: item.productsId || "",
 
+      ProductName: item.productName || "",
+
       Description: item.name || "",
 
       Images: item.images || [],
@@ -195,9 +199,9 @@ export const mapUpdatedEnquiryToApi = (
 
         Timestamp: new Date().toISOString(),
 
-        UpdatedBy: enquiry.assignedEngineerId || null,
+        UpdatedBy: enquiry.siteVisit.engineerId || null,
 
-        Remarks: "Updated by operator",
+        Remarks: enquiry.siteVisit?.remarks || "",
       },
     ],
 

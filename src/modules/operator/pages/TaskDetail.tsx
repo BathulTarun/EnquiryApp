@@ -113,9 +113,9 @@ const TaskDetail: React.FC = () => {
     return workItems.map((w) => w.productsId).filter(Boolean);
   }, [workItems]);
 
-  useEffect(() => {
-    loadProducts(productIds);
-  }, [productIds]);
+  // useEffect(() => {
+  //   loadProducts(productIds);
+  // }, [productIds]);
 
   const handleRemoveItem = (id: string) => {
     setWorkItems((prev) => prev.filter((i) => i.id !== id));
@@ -279,7 +279,7 @@ const TaskDetail: React.FC = () => {
       siteVisit: {
         ...task.siteVisit,
 
-        notes:
+        remarks:
           rescheduleReason + (rescheduleNote ? ` - ${rescheduleNote}` : ""),
       },
     };
@@ -612,9 +612,7 @@ const TaskDetail: React.FC = () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 text-sm">
                         <span className="text-muted-foreground">Name:</span>
-                        <span className="font-medium">
-                          {productNames[item.productsId]}
-                        </span>
+                        <span className="font-medium">{item.productName}</span>
                       </div>
 
                       <div className="flex items-center gap-2 text-sm">
