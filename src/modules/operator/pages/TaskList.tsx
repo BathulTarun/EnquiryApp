@@ -6,7 +6,7 @@ import {ArrowLeft, Phone, MapPin} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useProductStore} from "@/stores/productStore";
 import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
-
+import StatusConvertor from "@/components/StatusConvertor";
 const filterMap: Record<string, (s: EnquiryStatus) => boolean> = {
   "My Tasks": () => true,
   Upcoming: (s) => s === "SiteVisitScheduled",
@@ -80,7 +80,7 @@ const TaskList: React.FC = () => {
                 {task.customer.name}
               </p>
               <Badge variant="outline" className={statusColors[task.status]}>
-                {task.status}
+                {StatusConvertor(task.status)}
               </Badge>
             </div>
             <div className="space-y-1 text-sm text-muted-foreground">

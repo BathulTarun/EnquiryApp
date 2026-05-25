@@ -13,6 +13,7 @@ import WorkTypeSelector from "@/modules/customers/components/WorkTypeSelector";
 import {WorkType, SelectedProduct} from "@/types/common";
 import {useProductStore} from "@/stores/productStore";
 import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
+import StatusConvertor from "@/components/StatusConvertor";
 import {
   ArrowLeft,
   Phone,
@@ -190,6 +191,8 @@ const TaskDetail: React.FC = () => {
         subCategoryID: Number(work.selectedSubCategory?.id),
 
         productsId: work.selectedProduct.id,
+
+        productName: work.selectedProduct.name,
 
         name: "Operator",
 
@@ -387,7 +390,7 @@ const TaskDetail: React.FC = () => {
             </p>
           </div>
           <Badge variant="outline" className={statusColors[task.status]}>
-            {task.status}
+            {StatusConvertor(task.status)}
           </Badge>
         </div>
       </header>
@@ -793,7 +796,7 @@ const TaskDetail: React.FC = () => {
                   {/* Name */}
                   <Input
                     placeholder="Item Name"
-                    value={productNames[newItem.productsId]}
+                    value={newItem.productName}
                     disabled={!!editingItemId && !newItem.isCustom}
                     onChange={(e) =>
                       setNewItem({...newItem, name: e.target.value})

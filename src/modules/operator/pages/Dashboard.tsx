@@ -19,6 +19,7 @@ import {TokenManager} from "@/services/tokenManager.service";
 import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
 import {useWorkTypeStore} from "@/stores/ProductDetailsStore";
 import {useProductStore} from "@/stores/productStore";
+import StatusConvertor from "@/components/StatusConvertor";
 import {toast} from "sonner";
 const statusIcon: Record<string, React.ReactNode> = {
   "My Tasks": <ClipboardList className="w-5 h-5" />,
@@ -241,7 +242,7 @@ const Dashboard: React.FC = () => {
                         variant="outline"
                         className={statusColors[task.status]}
                       >
-                        {task.status}
+                        {StatusConvertor(task.status)}
                       </Badge>
                     </div>
 
