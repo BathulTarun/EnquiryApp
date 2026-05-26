@@ -2,11 +2,12 @@ import React, {useEffect} from "react";
 import {useNavigate, useSearchParams} from "react-router-dom";
 import {EnquiryStatus} from "@/types/enquiry";
 import {Badge} from "@/components/ui/badge";
-import {ArrowLeft, Phone, MapPin} from "lucide-react";
+import {ArrowLeft, Phone, MapPin, Clock, Calendar} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useProductStore} from "@/stores/productStore";
 import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
 import StatusConvertor from "@/components/StatusConvertor";
+import getVisitDateStatus from "@/components/VisitDateConvertor";
 const filterMap: Record<string, (s: EnquiryStatus) => boolean> = {
   "My Tasks": () => true,
   Upcoming: (s) => s === "SiteVisitScheduled",
@@ -95,14 +96,32 @@ const TaskList: React.FC = () => {
                   {task.address.state}
                 </span>
               </div>
-              <p className="text-xs">
-                {task.siteVisit?.scheduledDate
-                  ?.split("T")[0]
-                  .split("-")
-                  .reverse()
-                  .join("-") || "Not scheduled"}
-                , {task.siteVisit?.scheduledTime || ""}
-              </p>
+              <div className="flex items-center gap-2 text-card-foreground">
+                <Calendar className="w-3 h-3 text-muted-foreground" />
+                <span className="text-xs">
+                  {task.siteVisit?.scheduledDate
+                    ?.split("T")[0]
+                    .split("-")
+                    .reverse()
+                    .join("-")}
+                </span>
+                <Badge
+                  variant="outline"
+                  className={`border-0 h-4 ${getVisitDateStatus(task).badge}`}
+                >
+                  <div
+                    className={`h-1.5 w-1.5 rounded-full ${getVisitDateStatus(task).dot}`}
+                  />
+
+                  <p className={` pl-2  ${getVisitDateStatus(task).color}`}>
+                    {getVisitDateStatus(task).text}
+                  </p>
+                </Badge>
+              </div>
+              <div className="flex items-center gap-2 text-card-foreground">
+                <Clock className="w-3 h-3 text-muted-foreground" />
+                <span className="text-xs">{task.siteVisit.scheduledTime}</span>
+              </div>
             </div>
           </button>
         ))}

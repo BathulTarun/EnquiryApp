@@ -14,6 +14,7 @@ import {WorkType, SelectedProduct} from "@/types/common";
 import {useProductStore} from "@/stores/productStore";
 import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
 import StatusConvertor from "@/components/StatusConvertor";
+import getVisitDateStatus from "@/components/VisitDateConvertor";
 import {
   ArrowLeft,
   Phone,
@@ -310,6 +311,18 @@ const TaskDetail: React.FC = () => {
   };
 
   const handleSave = async () => {
+    const invalidItem = workItems.find(
+      (item) =>
+        !item.measurement?.toString().trim() ||
+        !item.quantity?.toString().trim(),
+    );
+
+    if (invalidItem) {
+      toast.warning(
+        `Please fill quantity and measurement for ${invalidItem.productName}`,
+      );
+      return;
+    }
     const payload = mapUpdatedEnquiryToApi(task, workItems, task.status);
 
     const result = await OperatorService.updateEnquiry(payload);
@@ -324,6 +337,19 @@ const TaskDetail: React.FC = () => {
     }
   };
   const handleSubmit = async () => {
+    const invalidItem = workItems.find(
+      (item) =>
+        !item.measurement?.toString().trim() ||
+        !item.quantity?.toString().trim(),
+    );
+
+    if (invalidItem) {
+      toast.warning(
+        `Please fill quantity and measurement for ${invalidItem.productName}`,
+      );
+      return;
+    }
+
     const newStatus = "ReadyForQuotation";
 
     const payload = mapUpdatedEnquiryToApi(task, workItems, newStatus);
@@ -525,6 +551,18 @@ const TaskDetail: React.FC = () => {
                       .reverse()
                       .join("-")}
                   </span>
+                  <Badge
+                    variant="outline"
+                    className={`border-0 h-4 ${getVisitDateStatus(task).badge}`}
+                  >
+                    <div
+                      className={`h-1.5 w-1.5 rounded-full ${getVisitDateStatus(task).dot}`}
+                    />
+
+                    <p className={`pl-1  ${getVisitDateStatus(task).color}`}>
+                      {getVisitDateStatus(task).text}
+                    </p>
+                  </Badge>
                 </div>
                 <div className="flex items-center gap-2 text-card-foreground">
                   <Clock className="w-4 h-4 text-muted-foreground" />
@@ -741,7 +779,7 @@ const TaskDetail: React.FC = () => {
             </section>
 
             {/* Submit */}
-            <section className="bg-card rounded-lg shadow-material-sm p-4 flex gap-3">
+            <section className="sticky bottom-0 bg-background border-t p-4 flex gap-3">
               <Button
                 disabled={isReadOnly}
                 variant="outline"

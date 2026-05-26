@@ -1,5 +1,5 @@
-import { EnquiryStatus } from "@/lib/types";
-import { CheckCircle2, Circle } from "lucide-react";
+import {EnquiryStatus} from "@/types/enquiry";
+import {CheckCircle2, Circle} from "lucide-react";
 
 interface TimelineItem {
   status: EnquiryStatus;
@@ -7,7 +7,7 @@ interface TimelineItem {
   note?: string;
 }
 
-export function StatusTimeline({ history }: { history: TimelineItem[] }) {
+export function StatusTimeline({history}: {history: TimelineItem[]}) {
   return (
     <div className="relative pl-6 space-y-4">
       <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-border" />
@@ -23,7 +23,11 @@ export function StatusTimeline({ history }: { history: TimelineItem[] }) {
           <div>
             <p className="text-sm font-medium">{item.status}</p>
             <p className="text-xs text-muted-foreground">{item.date}</p>
-            {item.note && <p className="text-xs text-muted-foreground mt-0.5">{item.note}</p>}
+            {item.note && (
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {item.note}
+              </p>
+            )}
           </div>
         </div>
       ))}

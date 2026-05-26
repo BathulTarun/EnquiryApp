@@ -9,6 +9,7 @@ import {
   AlertCircle,
   RotateCcw,
   LogOut,
+  Calendar,
 } from "lucide-react";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
 import {useWorkTypeStore} from "@/stores/ProductDetailsStore";
 import {useProductStore} from "@/stores/productStore";
 import StatusConvertor from "@/components/StatusConvertor";
+import getVisitDateStatus from "@/components/VisitDateConvertor";
 import {toast} from "sonner";
 const statusIcon: Record<string, React.ReactNode> = {
   "My Tasks": <ClipboardList className="w-5 h-5" />,
@@ -246,17 +248,39 @@ const Dashboard: React.FC = () => {
                       </Badge>
                     </div>
 
-                    <p className="text-xs text-muted-foreground mb-1">
-                      {task.siteVisit?.scheduledDate
-                        ?.split("T")[0]
-                        .split("-")
-                        .reverse()
-                        .join("-")}
-                      , {task.siteVisit?.scheduledTime}
-                    </p>
+                    <div className="flex items-center gap-2 text-card-foreground">
+                      <Calendar className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-xs">
+                        {task.siteVisit?.scheduledDate
+                          ?.split("T")[0]
+                          .split("-")
+                          .reverse()
+                          .join("-")}
+                      </span>
+                      <Badge
+                        variant="outline"
+                        className={`border-0 h-4 ${getVisitDateStatus(task).badge}`}
+                      >
+                        <div
+                          className={`h-1.5 w-1.5 rounded-full ${getVisitDateStatus(task).dot}`}
+                        />
 
-                    <p className="text-sm text-muted-foreground">
-                      {task.description}
+                        <p
+                          className={`pl-2  ${getVisitDateStatus(task).color}`}
+                        >
+                          {getVisitDateStatus(task).text}
+                        </p>
+                      </Badge>
+                    </div>
+                    <div className="flex items-center gap-2 text-card-foreground">
+                      <Clock className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-xs">
+                        {task.siteVisit.scheduledTime}
+                      </span>
+                    </div>
+
+                    <p className="text-xs italic leading-relaxed text-muted-foreground">
+                      "{task.description}"
                     </p>
                   </div>
                 </button>
