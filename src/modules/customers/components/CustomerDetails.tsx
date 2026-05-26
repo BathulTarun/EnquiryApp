@@ -16,6 +16,7 @@ import {LocationService} from "@/services/location.service";
 import {mapLocationToAddress} from "@/services/AddressPayloadMapper";
 import {toast} from "sonner";
 import WorkTypeService from "@/services/worktype.service";
+import StatusConvertor from "@/components/StatusConvertor";
 interface CustomerDetailsProps {
   addresses: Address[];
   customer: Customer;
@@ -407,7 +408,7 @@ const CustomerDetails = ({
                         {enq.EnquiryNumber || `ENQ-${enq.id}`}
                       </span>
                       <Badge className={statusColor[enq.status]}>
-                        {enq.status}
+                        {StatusConvertor(enq.status)}
                       </Badge>
                     </div>
 
@@ -419,25 +420,17 @@ const CustomerDetails = ({
                         .join("-") || "Not scheduled"}
                       , {enq.siteVisit?.scheduledTime || ""}
                     </p>
-                    <p className="text-sm">
-                      {enq.workItems
-                        ?.map((w) => {
-                          const subCat = w.subCategoryName
-                            ? ` - ${w.subCategoryName}`
-                            : "";
-
-                          const productName = w.productName;
-
-                          const product = productName
-                            ? ` (${productName})`
-                            : "";
-
-                          return `${product}`;
-                        })
-                        .join(", ")}
+                    <div className="flex flex-wrap gap-2">
+                      {enq.workItems?.map((w, idx) => (
+                        <Badge key={idx} className={statusColor.Completed}>
+                          {w.productName || "Product"}
+                        </Badge>
+                      ))}
+                    </div>
+                    <p className="text-xs italic leading-relaxed text-muted-foreground">
+                      "{enq.description}"
                     </p>
-                    <p className="text-sm">{enq.description}</p>
-                    <p className="text-xs text-primary">
+                    <p className="text-xs text-primary font-medium">
                       {" "}
                       {getStatusNote(enq.status)}
                     </p>
