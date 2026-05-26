@@ -524,7 +524,6 @@ const TaskDetail: React.FC = () => {
                       .split("-")
                       .reverse()
                       .join("-")}
-                    , {task.siteVisit?.scheduledTime}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-card-foreground">
@@ -685,7 +684,7 @@ const TaskDetail: React.FC = () => {
                   <option value="">Select Work Item</option>
                   {workItems.map((item) => (
                     <option key={item.id} value={item.id}>
-                      {productNames[item.productsId]}
+                      {item.productName}
                     </option>
                   ))}
                 </select>

@@ -87,22 +87,6 @@ const TaskList: React.FC = () => {
               <div className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5" />
                 <span>{task.customer.mobile}</span>
-                <span className="ml-auto">
-                  {" "}
-                  {task.workItems
-                    ?.map((w) => {
-                      const subCat = w.subCategoryName
-                        ? ` - ${w.subCategoryName}`
-                        : "";
-
-                      const product = productNames[w.productsId]
-                        ? ` (${productNames[w.productsId]})`
-                        : "";
-
-                      return `${product}`;
-                    })
-                    .join(", ")}
-                </span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="w-3.5 h-3.5 shrink-0" />
