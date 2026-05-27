@@ -2,6 +2,7 @@ import React, {useState, useMemo, useEffect} from "react";
 import {useNavigate, useParams, useLocation} from "react-router-dom";
 import {ALL_STATUSES, WorkItem, Enquiry} from "@/types/enquiry";
 import {Button} from "@/components/ui/button";
+import {Label} from "recharts";
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
 import {toast} from "sonner";
@@ -15,6 +16,13 @@ import {useProductStore} from "@/stores/productStore";
 import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
 import StatusConvertor from "@/components/StatusConvertor";
 import getVisitDateStatus from "@/components/VisitDateConvertor";
+import {EnquiryStatus} from "@/types/enquiry";
+import {timeSlots} from "@/data/timeslot.mock";
+import {UserManager} from "@/services/userManager";
+import {Engineer} from "@/types/engineer";
+import {useWorkTypeStore} from "@/stores/ProductDetailsStore";
+import {preloadWorkTypeData} from "@/stores/ProductPreload";
+import Index from "@/modules/customers/pages/CustomerHome";
 import {
   ArrowLeft,
   Phone,
@@ -53,7 +61,9 @@ const TaskDetail: React.FC = () => {
   const [selectorOpen, setSelectorOpen] = useState(false);
 
   const [selectedWork, setSelectedWork] = useState<WorkType[]>([]);
-  const {productNames, loadProducts} = useProductStore();
+  // const {productNames, loadProducts} = useProductStore();
+
+  const {loadCategories, loadSubcategories, loadProducts} = useWorkTypeStore();
 
   const {updateLocalEnquiry} = useOperatorStore();
 
@@ -87,6 +97,8 @@ const TaskDetail: React.FC = () => {
   const [rescheduleReason, setRescheduleReason] = useState<string>("");
   const [rescheduleNote, setRescheduleNote] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string>("");
+  const [rescheduleDate, setRescheduleDate] = useState("");
+  const [rescheduleTime, setRescheduleTime] = useState("");
   const [images, setImages] = useState<
     {id: string; url: string; workItemId: string}[]
   >([]);
@@ -110,6 +122,23 @@ const TaskDetail: React.FC = () => {
       </div>
     );
   }
+
+  const availableSlots = useMemo(() => {
+    if (!rescheduleDate) return timeSlots;
+
+    // all scheduled tasks for selected date
+    const bookedSlots = enquiries
+      .filter(
+        (e) =>
+          e.id !== task.id &&
+          ["SiteVisitScheduled", "SiteVisitRescheduled"].includes(e.status) &&
+          e.siteVisit?.scheduledDate?.split("T")[0] === rescheduleDate,
+      )
+      .map((e) => e.siteVisit?.scheduledTime);
+
+    // return only free slots
+    return timeSlots.filter((slot) => !bookedSlots.includes(slot.label));
+  }, [rescheduleDate, enquiries, task.id]);
 
   const productIds = useMemo(() => {
     return workItems.map((w) => w.productsId).filter(Boolean);
@@ -275,32 +304,89 @@ const TaskDetail: React.FC = () => {
   };
 
   const handleReschedule = async () => {
-    const newStatus = "SiteVisitRescheduled";
-    setShowReschedule(!showReschedule);
-    const updatedTask = {
+    if (!rescheduleDate || !rescheduleTime) {
+      toast.warning("Please select date and time slot");
+      return;
+    }
+    if (!rescheduleReason) {
+      toast.warning("Please select reschedule reason");
+      return;
+    }
+    if (rescheduleReason === "Other" && !rescheduleNote.trim()) {
+      toast.warning("Please enter reschedule note");
+      return;
+    }
+
+    const alreadyBooked = enquiries.some(
+      (e) =>
+        e.id !== task.id &&
+        ["SiteVisitScheduled", "SiteVisitRescheduled"].includes(e.status) &&
+        e.siteVisit?.scheduledDate?.split("T")[0] === rescheduleDate &&
+        e.siteVisit?.scheduledTime === rescheduleTime,
+    );
+
+    if (alreadyBooked) {
+      toast.error("Selected slot already booked");
+      return;
+    }
+
+    const RescheduledStatus: EnquiryStatus = "SiteVisitRescheduled";
+    const scheduledStatus: EnquiryStatus = "SiteVisitScheduled";
+
+    const remarks =
+      rescheduleReason + (rescheduleNote ? ` - ${rescheduleNote}` : "");
+
+    const EngineerDetails: Engineer = UserManager.getUser();
+
+    const updatedTask: Enquiry = {
       ...task,
+
+      status: scheduledStatus,
 
       siteVisit: {
         ...task.siteVisit,
 
-        remarks:
-          rescheduleReason + (rescheduleNote ? ` - ${rescheduleNote}` : ""),
+        scheduledDate: new Date(rescheduleDate).toISOString(),
+
+        scheduledTime: rescheduleTime,
       },
+
+      statusHistory: [
+        ...(task.statusHistory || []),
+
+        {
+          status: RescheduledStatus,
+
+          updatedBy: EngineerDetails.name,
+
+          remarks,
+
+          timestamp: new Date().toISOString(),
+        },
+      ],
     };
 
-    const payload = mapUpdatedEnquiryToApi(updatedTask, workItems, newStatus);
+    const payload = mapUpdatedEnquiryToApi(
+      updatedTask,
+      workItems,
+      scheduledStatus,
+    );
 
     const data = await OperatorService.updateEnquiry(payload);
-    if (data) {
-      toast.success("Task Rescheduled");
 
-      updateLocalEnquiry({
-        ...task,
-        workItems,
-        status: newStatus,
-      });
+    if (data) {
+      updateLocalEnquiry(updatedTask);
+
+      setShowReschedule(false);
+
+      toast.success("Visit rescheduled successfully");
+
+      setRescheduleReason("");
+      setRescheduleNote("");
+      setRescheduleDate("");
+      setRescheduleTime("");
     } else {
-      toast.error("Try again");
+      toast.error("Failed to reschedule task");
     }
   };
   const openNavigation = (lat: number, lng: number) => {
@@ -350,9 +436,25 @@ const TaskDetail: React.FC = () => {
       return;
     }
 
-    const newStatus = "ReadyForQuotation";
+    const newStatus: EnquiryStatus = "ReadyForQuotation";
+    const updatedTask = {
+      ...task,
 
-    const payload = mapUpdatedEnquiryToApi(task, workItems, newStatus);
+      status: newStatus,
+
+      statusHistory: [
+        ...(task.statusHistory || []),
+
+        {
+          status: newStatus,
+
+          remarks: "Operator submitted work items",
+
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    };
+    const payload = mapUpdatedEnquiryToApi(updatedTask, workItems, newStatus);
 
     const result = await OperatorService.updateEnquiry(payload);
 
@@ -584,7 +686,15 @@ const TaskDetail: React.FC = () => {
                   size="sm"
                   variant="outline"
                   disabled={isReadOnly}
-                  onClick={() => setShowReschedule(!showReschedule)}
+                  onClick={() => {
+                    setShowReschedule(!showReschedule);
+                    if (showReschedule) {
+                      setRescheduleDate("");
+                      setRescheduleTime("");
+                      setRescheduleReason("");
+                      setRescheduleNote("");
+                    }
+                  }}
                 >
                   <RotateCcw className="w-4 h-4 mr-1" /> Reschedule
                 </Button>
@@ -594,6 +704,39 @@ const TaskDetail: React.FC = () => {
                   <p className="text-sm font-medium text-card-foreground">
                     Reschedule Reason
                   </p>
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">
+                      Tap to select a date
+                    </p>
+                    <Input
+                      type="date"
+                      value={rescheduleDate}
+                      min={new Date().toISOString().split("T")[0]}
+                      className="text-foreground"
+                      onChange={(e) => {
+                        setRescheduleDate(e.target.value);
+                        setRescheduleTime("");
+                      }}
+                    />
+                  </div>
+                  <select
+                    value={rescheduleTime}
+                    onChange={(e) => setRescheduleTime(e.target.value)}
+                    className="border rounded-md px-2 py-2 text-sm w-full"
+                  >
+                    <option value="">Select Time Slot</option>
+
+                    {availableSlots.map((slot) => (
+                      <option key={slot.id} value={slot.label}>
+                        {slot.label}
+                      </option>
+                    ))}
+                    {availableSlots.length === 0 && (
+                      <p className="text-xs text-red-500">
+                        No slots available for selected date
+                      </p>
+                    )}
+                  </select>
                   {["Wrong Address", "Customer Not Available", "Other"].map(
                     (r) => (
                       <label
@@ -637,7 +780,9 @@ const TaskDetail: React.FC = () => {
                   size="sm"
                   variant="ghost"
                   disabled={isReadOnly}
-                  onClick={() => setSelectorOpen(true)}
+                  onClick={async () => {
+                    setSelectorOpen(true);
+                  }}
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   Add Products

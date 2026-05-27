@@ -3,7 +3,7 @@ import {BrowserRouter, Route, Routes, Navigate, Outlet} from "react-router-dom";
 import {Toaster as Sonner} from "@/components/ui/sonner";
 import {Toaster} from "@/components/ui/toaster";
 import {TooltipProvider} from "@/components/ui/tooltip";
-
+import {useEffect} from "react";
 import CustomerHome from "./modules/customers/pages/CustomerHome.tsx";
 
 import Index from "./pages/Index.tsx";
@@ -26,6 +26,7 @@ import EngineerDetailPage from "./modules/admin/pages/EnginnerDetailPasge.tsx";
 import CustomerDetails from "./modules/customers/components/CustomerDetails.tsx";
 import {customers} from "./data/adminMockData.ts";
 import QuotationDetails from "./modules/admin/pages/QuotationsDetailsPage.tsx";
+import {preloadWorkTypeData} from "./stores/ProductPreload.ts";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,9 @@ const OperatorProtected = () => {
 
 const App = () => {
   const isLoggedIn = useAppStore((s) => s.isLoggedIn);
+  useEffect(() => {
+    preloadWorkTypeData();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

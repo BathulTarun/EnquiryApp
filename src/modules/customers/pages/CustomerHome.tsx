@@ -24,6 +24,7 @@ import {Enquiry} from "@/types/enquiry";
 import {Engineer} from "@/types/engineer";
 import {LocationService} from "@/services/location.service";
 import {toast} from "sonner";
+import {preloadWorkTypeData} from "@/stores/ProductPreload";
 
 type Step = "home" | "mobile" | "otp" | "form" | "worktype" | "visit";
 
@@ -76,29 +77,29 @@ const Index = () => {
     setLocations(mapped);
   };
 
-  const preloadWorkTypeData = async () => {
-    // categories
-    await loadCategories();
+  // const preloadWorkTypeData = async () => {
+  //   // categories
+  //   await loadCategories();
 
-    // get categories from store
-    const cats = useWorkTypeStore.getState().categories;
+  //   // get categories from store
+  //   const cats = useWorkTypeStore.getState().categories;
 
-    // load all subcategories
-    await Promise.all(
-      cats.map((cat) => loadSubcategories(Number(cat.CategoryID))),
-    );
+  //   // load all subcategories
+  //   await Promise.all(
+  //     cats.map((cat) => loadSubcategories(Number(cat.CategoryID))),
+  //   );
 
-    // get updated subcategories
-    const allSubcategories = useWorkTypeStore.getState().subcategories;
+  //   // get updated subcategories
+  //   const allSubcategories = useWorkTypeStore.getState().subcategories;
 
-    // flatten subcategories
-    const subList = Object.values(allSubcategories).flat();
+  //   // flatten subcategories
+  //   const subList = Object.values(allSubcategories).flat();
 
-    // load all products
-    await Promise.all(
-      subList.map((sub) => loadProducts(Number(sub.SubCategoryID))),
-    );
-  };
+  //   // load all products
+  //   await Promise.all(
+  //     subList.map((sub) => loadProducts(Number(sub.SubCategoryID))),
+  //   );
+  // };
 
   const handleMobileSearch = async (num: string) => {
     setMobile(num);
@@ -236,14 +237,8 @@ const Index = () => {
     return true;
   };
 
-  const nextStep = async () => {
+  const nextStep = () => {
     if (step === "form") {
-      setIsLoadingWorkTypes(true);
-
-      await preloadWorkTypeData();
-
-      setIsLoadingWorkTypes(false);
-
       setStep("worktype");
     } else if (step === "worktype") setStep("visit");
   };
