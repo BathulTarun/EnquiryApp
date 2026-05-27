@@ -397,7 +397,7 @@ const CustomerDetails = ({
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {enquiries.map((enq) => {
+              {[...enquiries].reverse().map((enq) => {
                 return (
                   <div
                     key={enq.id}

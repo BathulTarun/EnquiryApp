@@ -224,67 +224,70 @@ const Dashboard: React.FC = () => {
                 </div>
               ))
             ) : enquiries?.length > 0 ? (
-              enquiries.slice(0, 5).map((task) => (
-                <button
-                  key={task.id}
-                  onClick={() =>
-                    navigate(`/operator/tasks/${task.id}`, {
-                      state: {enquiry: task},
-                    })
-                  }
-                  className="w-full bg-card rounded-lg shadow-material-sm p-4 text-left hover:shadow-material transition-shadow flex items-center justify-between gap-3"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <p className="font-medium text-card-foreground">
-                        {task.EnquiryNumber || `ENQ-${task.id}`}
-                      </p>
-
-                      <Badge
-                        variant="outline"
-                        className={statusColors[task.status]}
-                      >
-                        {StatusConvertor(task.status)}
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-card-foreground">
-                      <Calendar className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-xs">
-                        {task.siteVisit?.scheduledDate
-                          ?.split("T")[0]
-                          .split("-")
-                          .reverse()
-                          .join("-")}
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className={`border-0 h-4 ${getVisitDateStatus(task).badge}`}
-                      >
-                        <div
-                          className={`h-1.5 w-1.5 rounded-full ${getVisitDateStatus(task).dot}`}
-                        />
-
-                        <p
-                          className={`pl-2  ${getVisitDateStatus(task).color}`}
-                        >
-                          {getVisitDateStatus(task).text}
+              [...enquiries]
+                .reverse()
+                .slice(0, 5)
+                .map((task) => (
+                  <button
+                    key={task.id}
+                    onClick={() =>
+                      navigate(`/operator/tasks/${task.id}`, {
+                        state: {enquiry: task},
+                      })
+                    }
+                    className="w-full bg-card rounded-lg shadow-material-sm p-4 text-left hover:shadow-material transition-shadow flex items-center justify-between gap-3"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-3 mb-2">
+                        <p className="font-medium text-card-foreground">
+                          {task.EnquiryNumber || `ENQ-${task.id}`}
                         </p>
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-2 text-card-foreground">
-                      <Clock className="w-3 h-3 text-muted-foreground" />
-                      <span className="text-xs">
-                        {task.siteVisit.scheduledTime}
-                      </span>
-                    </div>
 
-                    <p className="text-xs italic leading-relaxed text-muted-foreground">
-                      "{task.description}"
-                    </p>
-                  </div>
-                </button>
-              ))
+                        <Badge
+                          variant="outline"
+                          className={statusColors[task.status]}
+                        >
+                          {StatusConvertor(task.status)}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-card-foreground">
+                        <Calendar className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs">
+                          {task.siteVisit?.scheduledDate
+                            ?.split("T")[0]
+                            .split("-")
+                            .reverse()
+                            .join("-")}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className={`border-0 h-4 ${getVisitDateStatus(task).badge}`}
+                        >
+                          <div
+                            className={`h-1.5 w-1.5 rounded-full ${getVisitDateStatus(task).dot}`}
+                          />
+
+                          <p
+                            className={`pl-2  ${getVisitDateStatus(task).color}`}
+                          >
+                            {getVisitDateStatus(task).text}
+                          </p>
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2 text-card-foreground">
+                        <Clock className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-xs">
+                          {task.siteVisit.scheduledTime}
+                        </span>
+                      </div>
+
+                      <p className="text-xs italic leading-relaxed text-muted-foreground">
+                        "{task.description}"
+                      </p>
+                    </div>
+                  </button>
+                ))
             ) : (
               <div className="text-center text-muted-foreground py-6">
                 No tasks assigned yet

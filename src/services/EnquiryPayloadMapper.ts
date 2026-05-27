@@ -2,6 +2,8 @@ import {Enquiry} from "@/types/enquiry";
 import {Customer} from "@/types/customer";
 import {Address} from "@/types/common";
 import {WorkItem} from "@/types/enquiry";
+import {UserManager} from "./userManager";
+import {Engineer} from "@/types/engineer";
 export const mapEnquiryToApi = (enquiry: Enquiry) => {
   return {
     Ledger: {
@@ -145,6 +147,7 @@ export const mapUpdatedEnquiryToApi = (
   workItems: WorkItem[],
   status?: string,
 ) => {
+  const EngineerDetails: Engineer = UserManager.getUser();
   return {
     ID: Number(enquiry.id),
 
@@ -199,7 +202,7 @@ export const mapUpdatedEnquiryToApi = (
 
         Timestamp: new Date().toISOString(),
 
-        UpdatedBy: enquiry.siteVisit.engineerId || null,
+        UpdatedBy: EngineerDetails.name || null,
 
         Remarks: enquiry.siteVisit?.remarks || "",
       },
