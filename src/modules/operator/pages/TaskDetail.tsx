@@ -12,7 +12,6 @@ import {mapUpdatedEnquiryToApi} from "@/services/EnquiryPayloadMapper";
 import {fileToBase64} from "@/components/ImageConvertor";
 import WorkTypeSelector from "@/modules/customers/components/WorkTypeSelector";
 import {WorkType, SelectedProduct} from "@/types/common";
-import {useProductStore} from "@/stores/productStore";
 import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
 import StatusConvertor from "@/components/StatusConvertor";
 import getVisitDateStatus from "@/components/VisitDateConvertor";
@@ -20,9 +19,6 @@ import {EnquiryStatus} from "@/types/enquiry";
 import {timeSlots} from "@/data/timeslot.mock";
 import {UserManager} from "@/services/userManager";
 import {Engineer} from "@/types/engineer";
-import {useWorkTypeStore} from "@/stores/ProductDetailsStore";
-import {preloadWorkTypeData} from "@/stores/ProductPreload";
-import Index from "@/modules/customers/pages/CustomerHome";
 import {
   ArrowLeft,
   Phone,
@@ -35,7 +31,6 @@ import {
   X,
   Check,
   RotateCcw,
-  Play,
   Image as ImageIcon,
   Pencil,
 } from "lucide-react";
@@ -45,25 +40,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {statusColors, trafficColors} from "../utils/task.constants";
 
 const TaskDetail: React.FC = () => {
-  const statusColors: Record<string, string> = {
-    Pending: "bg-amber-50 text-amber-600 border-amber-200",
-    SiteVisitScheduled: "bg-primary/10 text-primary border-primary/20",
-    SiteVisitRescheduled: "bg-orange-50 text-orange-600 border-orange-200",
-    SiteVisitCompleted: "bg-violet-50 text-violet-600 border-violet-200",
-    ReadyForQuotation: "bg-accent/10 text-accent border-accent/20",
-    Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
-  };
-
   const {enquiries} = useOperatorStore();
 
   const [selectorOpen, setSelectorOpen] = useState(false);
 
   const [selectedWork, setSelectedWork] = useState<WorkType[]>([]);
-  // const {productNames, loadProducts} = useProductStore();
-
-  const {loadCategories, loadSubcategories, loadProducts} = useWorkTypeStore();
 
   const {updateLocalEnquiry} = useOperatorStore();
 
@@ -78,7 +62,6 @@ const TaskDetail: React.FC = () => {
       setWorkItems(task.workItems || []);
     }
   }, [task]);
-
   const navigate = useNavigate();
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -122,32 +105,6 @@ const TaskDetail: React.FC = () => {
       </div>
     );
   }
-
-  const availableSlots = useMemo(() => {
-    if (!rescheduleDate) return timeSlots;
-
-    // all scheduled tasks for selected date
-    const bookedSlots = enquiries
-      .filter(
-        (e) =>
-          e.id !== task.id &&
-          ["SiteVisitScheduled", "SiteVisitRescheduled"].includes(e.status) &&
-          e.siteVisit?.scheduledDate?.split("T")[0] === rescheduleDate,
-      )
-      .map((e) => e.siteVisit?.scheduledTime);
-
-    // return only free slots
-    return timeSlots.filter((slot) => !bookedSlots.includes(slot.label));
-  }, [rescheduleDate, enquiries, task.id]);
-
-  const productIds = useMemo(() => {
-    return workItems.map((w) => w.productsId).filter(Boolean);
-  }, [workItems]);
-
-  // useEffect(() => {
-  //   loadProducts(productIds);
-  // }, [productIds]);
-
   const handleRemoveItem = (id: string) => {
     setWorkItems((prev) => prev.filter((i) => i.id !== id));
   };
@@ -296,11 +253,6 @@ const TaskDetail: React.FC = () => {
   // helper to get item name by id (for display purposes)
   const getItemName = (id: string) => {
     return workItems.find((item) => item.id === id)?.name || "Item";
-  };
-
-  const handleStartWork = () => {
-    // updateEnquiryStatus(task.id, "Site Visit Scheduled");
-    toast.success("Work started");
   };
 
   const handleReschedule = async () => {
@@ -726,7 +678,7 @@ const TaskDetail: React.FC = () => {
                   >
                     <option value="">Select Time Slot</option>
 
-                    {availableSlots.map((slot) => (
+                    {/* {availableSlots.map((slot) => (
                       <option key={slot.id} value={slot.label}>
                         {slot.label}
                       </option>
@@ -735,7 +687,30 @@ const TaskDetail: React.FC = () => {
                       <p className="text-xs text-red-500">
                         No slots available for selected date
                       </p>
-                    )}
+                    )} */}
+                    {timeSlots.map((slot) => {
+                      const isBooked = enquiries.some(
+                        (e) =>
+                          e.id !== task.id &&
+                          [
+                            "SiteVisitScheduled",
+                            "SiteVisitRescheduled",
+                          ].includes(e.status) &&
+                          e.siteVisit?.scheduledDate?.split("T")[0] ===
+                            rescheduleDate &&
+                          e.siteVisit?.scheduledTime === slot.label,
+                      );
+
+                      return (
+                        <option
+                          key={slot.id}
+                          value={slot.label}
+                          disabled={isBooked}
+                        >
+                          {slot.label} {isBooked ? "(Booked)" : ""}
+                        </option>
+                      );
+                    })}
                   </select>
                   {["Wrong Address", "Customer Not Available", "Other"].map(
                     (r) => (
