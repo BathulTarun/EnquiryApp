@@ -1,8 +1,7 @@
 import React, {useState, useMemo, useEffect} from "react";
-import {useNavigate, useParams, useLocation} from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {ALL_STATUSES, WorkItem, Enquiry} from "@/types/enquiry";
 import {Button} from "@/components/ui/button";
-import {Label} from "recharts";
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
 import {toast} from "sonner";
@@ -388,17 +387,22 @@ const TaskDetail: React.FC = () => {
       return;
     }
 
-    const newStatus: EnquiryStatus = "ReadyForQuotation";
+    const currentStatus: EnquiryStatus = "ReadyForQuotation";
     const updatedTask = {
       ...task,
 
-      status: newStatus,
+      status: currentStatus,
 
       statusHistory: [
         ...(task.statusHistory || []),
+        {
+          status: "SiteVisitCompleted" as EnquiryStatus,
+          remarks: "Site visit completed by operator",
+          timestamp: new Date().toISOString(),
+        },
 
         {
-          status: newStatus,
+          status: currentStatus,
 
           remarks: "Operator submitted work items",
 
@@ -406,7 +410,11 @@ const TaskDetail: React.FC = () => {
         },
       ],
     };
-    const payload = mapUpdatedEnquiryToApi(updatedTask, workItems, newStatus);
+    const payload = mapUpdatedEnquiryToApi(
+      updatedTask,
+      workItems,
+      currentStatus,
+    );
 
     const result = await OperatorService.updateEnquiry(payload);
 
@@ -414,7 +422,8 @@ const TaskDetail: React.FC = () => {
       updateLocalEnquiry({
         ...task,
         workItems,
-        status: newStatus,
+        status: currentStatus,
+        statusHistory: updatedTask.statusHistory,
       });
       toast.success("Submitted successfully");
     } else {
@@ -677,17 +686,6 @@ const TaskDetail: React.FC = () => {
                     className="border rounded-md px-2 py-2 text-sm w-full"
                   >
                     <option value="">Select Time Slot</option>
-
-                    {/* {availableSlots.map((slot) => (
-                      <option key={slot.id} value={slot.label}>
-                        {slot.label}
-                      </option>
-                    ))}
-                    {availableSlots.length === 0 && (
-                      <p className="text-xs text-red-500">
-                        No slots available for selected date
-                      </p>
-                    )} */}
                     {timeSlots.map((slot) => {
                       const isBooked = enquiries.some(
                         (e) =>
