@@ -1,56 +1,85 @@
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {  Clock, RotateCcw } from "lucide-react";
-import { format } from "date-fns";
-import React,{ useEffect, useState} from "react";
-import { EnquiryService } from "@/services/enquiry.service";
-import { CustomerService } from "@/services/customer.service";
-import {  Enquiry } from "@/types/enquiry";
-import { Customer } from "@/types/customer";
-
-const statusColors: Record<string, string> = {  
- "Pending": "bg-amber-50 text-amber-600 border-amber-200",
-  "SiteVisitScheduled": "bg-primary/10 text-primary border-primary/20",
-  "SiteVisitRescheduled": "bg-orange-50 text-orange-600 border-orange-200",
-  "SiteVisitCompleted": "bg-violet-50 text-violet-600 border-violet-200",
-  "ReadyForQuotation": "bg-accent/10 text-accent border-accent/20",
-  "Completed": "bg-emerald-50 text-emerald-600 border-emerald-200",
-};
-
+import {useNavigate, useSearchParams} from "react-router-dom";
+import {Card, CardContent} from "@/components/ui/card";
+import {Badge} from "@/components/ui/badge";
+import {
+  Clock,
+  RotateCcw,
+  ClipboardList,
+  CheckCircle2,
+  Users,
+} from "lucide-react";
+import {format} from "date-fns";
+import React, {useEffect, useState} from "react";
+import {EnquiryService} from "@/services/enquiry.service";
+import {CustomerService} from "@/services/customer.service";
+import {Enquiry} from "@/types/enquiry";
+import {Customer} from "@/types/customer";
+import {statusColors} from "@/modules/operator/utils/task.constants";
 const DashboardPage = () => {
   const navigate = useNavigate();
   const [enquiriesList, setEnquiriesList] = React.useState<Enquiry[]>([]);
-  const[customersList, setCustomersList] = React.useState<Customer[]>([]);
-  
+  const [customersList, setCustomersList] = React.useState<Customer[]>([]);
 
-useEffect(() => {
-  const enquiries=async()=>{
-    const res= await EnquiryService.getAllEnquiries();
-    setEnquiriesList(res);
+  useEffect(() => {
+    const enquiries = async () => {
+      const res = await EnquiryService.getAllEnquiries();
+      setEnquiriesList(res);
+    };
+    enquiries();
+  }, []);
+  useEffect(() => {
+    const customers = async () => {
+      const res = await CustomerService.getAllCustomers();
+      setCustomersList(res);
+    };
+    customers();
+  }, []);
 
-  }; enquiries();
-}, []);  
-useEffect(() => {
-  const customers=async()=>{
-    const res= await CustomerService.getAllCustomers();
-    setCustomersList(res);
-  }; customers();
-}, []);
-
-
-
-  const stats = [ 
-    // { label: "Total Enquiries", value: enquiries.length, icon: ClipboardList, filter: "", color: "bg-primary" },
-    { label: "Pending", value: enquiriesList.filter((e) => e.status === "Pending").length, icon: Clock, filter: "Pending", color: "bg-warning" },
-    // { label: "Completed", value: enquiries.filter((e) => e.status === "Completed").length, icon: CheckCircle2, filter: "Completed", color: "bg-success" },
-    { label: "Rescheduled", value: enquiriesList.filter((e) => e.status === "SiteVisitRescheduled").length, icon: RotateCcw, filter: "Site Visit Rescheduled", color: "bg-destructive" },
-    // { label: "Engineers", value: engineers.length, icon: Users, filter: "", color: "bg-accent" },
+  const stats = [
+    {
+      label: "Total Enquiries",
+      value: enquiriesList.length,
+      icon: ClipboardList,
+      filter: "",
+      color: "bg-primary",
+    },
+    {
+      label: "Pending",
+      value: enquiriesList.filter((e) => e.status === "Pending").length,
+      icon: Clock,
+      filter: "Pending",
+      color: "bg-warning",
+    },
+    {
+      label: "Completed",
+      value: enquiriesList.filter((e) => e.status === "Completed").length,
+      icon: CheckCircle2,
+      filter: "Completed",
+      color: "bg-success",
+    },
+    {
+      label: "Rescheduled",
+      value: enquiriesList.filter((e) => e.status === "Site Visit Rescheduled")
+        .length,
+      icon: RotateCcw,
+      filter: "Site Visit Rescheduled",
+      color: "bg-destructive",
+    },
+    {
+      label: "Engineers",
+      value: enquiriesList.length,
+      icon: Users,
+      filter: "",
+      color: "bg-accent",
+    },
   ];
 
-  
-
-  const recent = [...enquiriesList].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
+  const recent = [...enquiriesList]
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )
+    .slice(0, 5);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -62,11 +91,18 @@ useEffect(() => {
             className="cursor-pointer hover:material-shadow-lg transition-shadow material-shadow"
             onClick={() => {
               if (s.label === "Engineers") navigate("/admin/engineers");
-              else navigate(s.filter ? `/admin/enquiries?status=${encodeURIComponent(s.filter)}` : "/admin/enquiries");
+              else
+                navigate(
+                  s.filter
+                    ? `/admin/enquiries?status=${encodeURIComponent(s.filter)}`
+                    : "/admin/enquiries",
+                );
             }}
           >
             <CardContent className="p-2 flex flex-row  items-center text-center gap-2">
-              <div className={`w-10 h-10 rounded-full ${s.color} flex items-center justify-center`}>
+              <div
+                className={`w-10 h-10 rounded-full ${s.color} flex items-center justify-center`}
+              >
                 <s.icon className="h-5 w-5 text-primary-foreground" />
               </div>
               <span className="text-2xl font-bold">{s.value}</span>
@@ -92,8 +128,10 @@ useEffect(() => {
               </thead>
               <tbody>
                 {recent.map((enq) => {
-                  const cust = customersList.find((c) => c.id === enq.customer.id);
-                 
+                  const cust = customersList.find(
+                    (c) => c.id === enq.customer.id,
+                  );
+
                   return (
                     <tr
                       key={enq.id}
@@ -101,12 +139,23 @@ useEffect(() => {
                       onClick={() => navigate(`/admin/enquiries/${enq.id}`)}
                     >
                       <td className="py-3 pr-4 font-medium">{cust?.name}</td>
-                      <td className="py-3 pr-4 hidden sm:table-cell">{cust?.mobile}</td>
-                      <td className="py-3 pr-4">{enq.workTypes.map((wt) => wt.name).join(", ")}</td>
-                      <td className="py-3 pr-4">
-                        <Badge variant="outline" className={statusColors[enq.status]}>{enq.status}</Badge>
+                      <td className="py-3 pr-4 hidden sm:table-cell">
+                        {cust?.mobile}
                       </td>
-                      <td className="py-3 hidden md:table-cell text-muted-foreground">{format(new Date(enq.createdAt), "dd MMM yyyy")}</td>
+                      <td className="py-3 pr-4">
+                        {enq.workTypes.map((wt) => wt.name).join(", ")}
+                      </td>
+                      <td className="py-3 pr-4">
+                        <Badge
+                          variant="outline"
+                          className={statusColors[enq.status]}
+                        >
+                          {enq.status}
+                        </Badge>
+                      </td>
+                      <td className="py-3 hidden md:table-cell text-muted-foreground">
+                        {format(new Date(enq.createdAt), "dd MMM yyyy")}
+                      </td>
                     </tr>
                   );
                 })}

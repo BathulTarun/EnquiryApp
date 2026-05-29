@@ -2,6 +2,7 @@ import React, {useEffect} from "react";
 import {useParams, useNavigate} from "react-router-dom";
 import PageLoader from "@/components/PageLoader";
 import {EnquiryStatus} from "@/types/enquiry";
+import {Card, CardContent} from "@/components/ui/card";
 import {
   ClipboardList,
   Clock,
@@ -20,40 +21,19 @@ import {TokenManager} from "@/services/tokenManager.service";
 import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
 import {useWorkTypeStore} from "@/stores/ProductDetailsStore";
 import {useProductStore} from "@/stores/productStore";
-import StatusConvertor from "@/components/StatusConvertor";
 import getVisitDateStatus from "@/components/VisitDateConvertor";
 import {toast} from "sonner";
+import {statusColors} from "../utils/task.constants";
+import {filterMap} from "../utils/task.constants";
+import {cardColors} from "../utils/task.constants";
 const statusIcon: Record<string, React.ReactNode> = {
+  Today: <Calendar className="w-5 h-5" />,
+  Tomorrow: <Calendar className="w-5 h-5" />,
   "My Tasks": <ClipboardList className="w-5 h-5" />,
   Upcoming: <Clock className="w-5 h-5" />,
   Completed: <CheckCircle2 className="w-5 h-5" />,
   Pending: <AlertCircle className="w-5 h-5" />,
   Rescheduled: <RotateCcw className="w-5 h-5" />,
-};
-
-const statusColors: Record<string, string> = {
-  Pending: "bg-amber-50 text-amber-600 border-amber-200",
-  SiteVisitScheduled: "bg-primary/10 text-primary border-primary/20",
-  SiteVisitRescheduled: "bg-orange-50 text-orange-600 border-orange-200",
-  SiteVisitCompleted: "bg-violet-50 text-violet-600 border-violet-200",
-  ReadyForQuotation: "bg-accent/10 text-accent border-accent/20",
-  Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
-};
-
-const filterMap: Record<string, (s: EnquiryStatus) => boolean> = {
-  "My Tasks": () => true,
-  Upcoming: (s) => s === "SiteVisitScheduled",
-  Completed: (s) => s === "SiteVisitCompleted" || s === "Completed",
-  Pending: (s) => s === "Pending" || s === "ReadyForQuotation",
-  Rescheduled: (s) => s === "SiteVisitRescheduled",
-};
-
-const cardColors: Record<string, string> = {
-  "My Tasks": "bg-primary/10 text-primary",
-  Upcoming: "bg-info/10 text-info",
-  Completed: "bg-success/10 text-success",
-  Pending: "bg-warning/10 text-warning",
-  Rescheduled: "bg-destructive/10 text-destructive",
 };
 
 const Dashboard: React.FC = () => {
@@ -65,11 +45,12 @@ const Dashboard: React.FC = () => {
     };
     engineer();
   }, []);
-
   const navigate = useNavigate();
 
   const {engineerId} = useParams();
   const sections = [
+    "Today",
+    "Tomorrow",
     "Upcoming",
     "Rescheduled",
     "Pending",
@@ -152,8 +133,6 @@ const Dashboard: React.FC = () => {
                 TokenManager.clearToken(),
                 UserManager.clearUser());
               clearStore();
-              clearWorkTypes();
-              clearProducts();
             }}
           >
             <LogOut className="w-5 h-5" />
@@ -165,8 +144,8 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {sections.map((section) => {
             const count =
-              enquiries?.filter((t) => filterMap[section](t.status)).length ||
-              0;
+              enquiries?.filter((t) => filterMap[section](t.status, t))
+                .length || 0;
 
             return (
               <button
@@ -178,14 +157,14 @@ const Dashboard: React.FC = () => {
                 }
                 className="bg-card rounded-lg shadow-material p-2 text-left hover:shadow-material-lg transition-shadow"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
                   <div
                     className={`w-9 h-9 rounded-lg flex items-center justify-center ${cardColors[section]}`}
                   >
                     {statusIcon[section]}
                   </div>
 
-                  <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex items-center gap-1 min-w-0">
                     <p className="text-lg font-bold text-card-foreground">
                       {count}
                     </p>
@@ -247,7 +226,7 @@ const Dashboard: React.FC = () => {
                           variant="outline"
                           className={statusColors[task.status]}
                         >
-                          {StatusConvertor(task.status)}
+                          {task.status}
                         </Badge>
                       </div>
 

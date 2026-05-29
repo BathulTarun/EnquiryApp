@@ -16,7 +16,7 @@ import {LocationService} from "@/services/location.service";
 import {mapLocationToAddress} from "@/services/AddressPayloadMapper";
 import {toast} from "sonner";
 import WorkTypeService from "@/services/worktype.service";
-import StatusConvertor from "@/components/StatusConvertor";
+import {statusColors} from "@/modules/operator/utils/task.constants";
 interface CustomerDetailsProps {
   addresses: Address[];
   customer: Customer;
@@ -24,15 +24,6 @@ interface CustomerDetailsProps {
   onUpdateCustomer?: (customer: Customer) => void;
   onSelectEnquiry?: (enquiry: Enquiry) => void;
 }
-
-const statusColor: Record<string, string> = {
-  Pending: "bg-amber-50 text-amber-600 border-amber-200",
-  SiteVisitScheduled: "bg-primary/10 text-primary border-primary/20",
-  SiteVisitRescheduled: "bg-orange-50 text-orange-600 border-orange-200",
-  SiteVisitCompleted: "bg-violet-50 text-violet-600 border-violet-200",
-  ReadyForQuotation: "bg-accent/10 text-accent border-accent/20",
-  Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
-};
 
 const CustomerDetails = ({
   customer,
@@ -127,16 +118,16 @@ const CustomerDetails = ({
       case "Pending":
         return "Scheduling Shortly";
 
-      case "SiteVisitScheduled":
+      case "Site Visit Scheduled":
         return "Engineer Assigned";
 
-      case "SiteVisitRescheduled":
+      case "Site Visit Rescheduled":
         return "Visit Rescheduled";
 
-      case "SiteVisitCompleted":
+      case "Site Visit Completed":
         return "Site Visit Completed";
 
-      case "ReadyForQuotation":
+      case "Ready For Quotation":
         return "Quotation in Progress";
 
       case "Completed":
@@ -407,8 +398,8 @@ const CustomerDetails = ({
                       <span className="font-medium text-sm">
                         {enq.EnquiryNumber || `ENQ-${enq.id}`}
                       </span>
-                      <Badge className={statusColor[enq.status]}>
-                        {StatusConvertor(enq.status)}
+                      <Badge className={statusColors[enq.status]}>
+                        {enq.status}
                       </Badge>
                     </div>
 
@@ -422,7 +413,7 @@ const CustomerDetails = ({
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {enq.workItems?.map((w, idx) => (
-                        <Badge key={idx} className={statusColor.Completed}>
+                        <Badge key={idx} className={statusColors.Completed}>
                           {w.productName || "Product"}
                         </Badge>
                       ))}

@@ -198,7 +198,7 @@ export class EnquiryService {
     const enquiry = enquiries.find((e) => e.id === enquiryId);
     if (!enquiry) return;
 
-    enquiry.status = "SiteVisitCompleted";
+    enquiry.status = "Site Visit Completed";
     enquiry.updatedAt = new Date().toISOString();
   }
 

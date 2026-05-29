@@ -1,24 +1,24 @@
-import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Mail, Phone, User, Wrench } from "lucide-react";
+import {useEffect, useState} from "react";
+import {useNavigate, useParams} from "react-router-dom";
+import {ArrowLeft, Mail, Phone, User, Wrench} from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent} from "@/components/ui/card";
+import {Badge} from "@/components/ui/badge";
 
-import { OperatorService } from "@/services/operator.service";
-import { EnquiryService } from "@/services/enquiry.service";
-import { CustomerService } from "@/services/customer.service";
+import {OperatorService} from "@/services/operator.service";
+import {EnquiryService} from "@/services/enquiry.service";
+import {CustomerService} from "@/services/customer.service";
 
-import type { Engineer } from "@/types/engineer";
-import type { Enquiry } from "@/types/enquiry";
-import type { Customer } from "@/types/customer";
+import type {Engineer} from "@/types/engineer";
+import type {Enquiry} from "@/types/enquiry";
+import type {Customer} from "@/types/customer";
 
-import { format } from "date-fns";
+import {format} from "date-fns";
 
 const EngineerDetailsPage = () => {
-  const { id } = useParams();
-  const enginnerid =Number(id);
+  const {id} = useParams();
+  const enginnerid = id;
   const navigate = useNavigate();
 
   const [engineer, setEngineer] = useState<Engineer | null>(null);
@@ -52,16 +52,11 @@ const EngineerDetailsPage = () => {
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/admin/engineers")}
-        >
+        <Button variant="ghost" onClick={() => navigate("/admin/engineers")}>
           <ArrowLeft className="h-4 w-4 mr-2" />
         </Button>
 
-        <h2 className="text-2xl font-medium">
-          Engineer Details
-        </h2>
+        <h2 className="text-2xl font-medium">Engineer Details</h2>
       </div>
 
       <Card>
@@ -72,13 +67,9 @@ const EngineerDetailsPage = () => {
             </div>
 
             <div>
-              <h3 className="text-xl font-semibold">
-                {engineer.name}
-              </h3>
+              <h3 className="text-xl font-semibold">{engineer.name}</h3>
 
-              <p className="text-muted-foreground">
-                {engineer.specialization}
-              </p>
+              <p className="text-muted-foreground">{engineer.specialization}</p>
             </div>
           </div>
 
@@ -96,9 +87,7 @@ const EngineerDetailsPage = () => {
             <div>
               <Badge
                 variant={
-                  engineer.status === "Available"
-                    ? "default"
-                    : "secondary"
+                  engineer.status === "Available" ? "default" : "secondary"
                 }
               >
                 {engineer.status}
@@ -109,47 +98,36 @@ const EngineerDetailsPage = () => {
       </Card>
 
       <div>
-        <h3 className="text-lg font-medium mb-3">
-          Assigned Tasks
-        </h3>
+        <h3 className="text-lg font-medium mb-3">Assigned Tasks</h3>
 
         {engineerTasks.length === 0 ? (
-          <p className="text-muted-foreground">
-            No tasks assigned.
-          </p>
+          <p className="text-muted-foreground">No tasks assigned.</p>
         ) : (
           <div className="space-y-3">
             {engineerTasks.map((t) => {
-              const customer = customers.find(
-                (c) => c.id === t.customer.id
-              );
+              const customer = customers.find((c) => c.id === t.customer.id);
 
               return (
-                <Card key={t.id} onClick={()=> navigate(`/admin/enquiries/${t.id}`)} className="cursor-pointer hover:material-shadow-lg transition-shadow">
+                <Card
+                  key={t.id}
+                  onClick={() => navigate(`/admin/enquiries/${t.id}`)}
+                  className="cursor-pointer hover:material-shadow-lg transition-shadow"
+                >
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-medium">
-                          {customer?.name}
-                        </p>
+                        <p className="font-medium">{customer?.name}</p>
 
                         <p className="text-sm text-muted-foreground">
-                          {t.workTypes
-                            .map((w) => w.name)
-                            .join(", ")}
+                          {t.workTypes.map((w) => w.name).join(", ")}
                         </p>
 
                         <p className="text-xs text-muted-foreground mt-1">
-                          {format(
-                            new Date(t.createdAt),
-                            "dd MMM yyyy"
-                          )}
+                          {format(new Date(t.createdAt), "dd MMM yyyy")}
                         </p>
                       </div>
 
-                      <Badge variant="outline">
-                        {t.status}
-                      </Badge>
+                      <Badge variant="outline">{t.status}</Badge>
                     </div>
                   </CardContent>
                 </Card>

@@ -3,18 +3,18 @@ import {Address, Remark, WorkType} from "./common";
 
 export type EnquiryStatus =
   | "Pending"
-  | "SiteVisitScheduled"
-  | "SiteVisitRescheduled"
-  | "SiteVisitCompleted"
-  | "ReadyForQuotation"
+  | "Site Visit Scheduled"
+  | "Site Visit Rescheduled"
+  | "Site Visit Completed"
+  | "Ready For Quotation"
   | "Completed";
 
 export const ALL_STATUSES: EnquiryStatus[] = [
   "Pending",
-  "SiteVisitScheduled",
-  "SiteVisitRescheduled",
-  "SiteVisitCompleted",
-  "ReadyForQuotation",
+  "Site Visit Scheduled",
+  "Site Visit Rescheduled",
+  "Site Visit Completed",
+  "Ready For Quotation",
   "Completed",
 ];
 

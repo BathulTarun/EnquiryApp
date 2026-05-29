@@ -6,27 +6,11 @@ import {ArrowLeft, Phone, MapPin, Clock, Calendar} from "lucide-react";
 import {Button} from "@/components/ui/button";
 import {useProductStore} from "@/stores/productStore";
 import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
-import StatusConvertor from "@/components/StatusConvertor";
 import getVisitDateStatus from "@/components/VisitDateConvertor";
-const filterMap: Record<string, (s: EnquiryStatus) => boolean> = {
-  "My Tasks": () => true,
-  Upcoming: (s) => s === "SiteVisitScheduled",
-  Completed: (s) => s === "SiteVisitCompleted" || s === "Completed",
-  Pending: (s) => s === "Pending" || s === "ReadyForQuotation",
-  Rescheduled: (s) => s === "SiteVisitRescheduled",
-};
-
+import {filterMap} from "../utils/task.constants";
+import {statusColors} from "../utils/task.constants";
 const TaskList: React.FC = () => {
   const {productNames, loadProducts} = useProductStore();
-
-  const statusColors: Record<string, string> = {
-    Pending: "bg-amber-50 text-amber-600 border-amber-200",
-    SiteVisitScheduled: "bg-primary/10 text-primary border-primary/20",
-    SiteVisitRescheduled: "bg-orange-50 text-orange-600 border-orange-200",
-    SiteVisitCompleted: "bg-violet-50 text-violet-600 border-violet-200",
-    ReadyForQuotation: "bg-accent/10 text-accent border-accent/20",
-    Completed: "bg-emerald-50 text-emerald-600 border-emerald-200",
-  };
 
   const {enquiries, fetchEnquiries} = useOperatorStore();
 
@@ -38,7 +22,7 @@ const TaskList: React.FC = () => {
   const filter = searchParams.get("filter") || "My Tasks";
   const engineerId = searchParams.get("engineerId");
   const fn = filterMap[filter] || filterMap["My Tasks"];
-  const filtered = enquiries.filter((t) => fn(t.status));
+  const filtered = enquiries.filter((t) => fn(t.status, t));
 
   return (
     <div className="min-h-screen bg-background">
@@ -81,7 +65,7 @@ const TaskList: React.FC = () => {
                 {task.customer.name}
               </p>
               <Badge variant="outline" className={statusColors[task.status]}>
-                {StatusConvertor(task.status)}
+                {task.status}
               </Badge>
             </div>
             <div className="space-y-1 text-sm text-muted-foreground">

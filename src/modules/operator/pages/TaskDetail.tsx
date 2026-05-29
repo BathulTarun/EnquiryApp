@@ -12,7 +12,6 @@ import {fileToBase64} from "@/components/ImageConvertor";
 import WorkTypeSelector from "@/modules/customers/components/WorkTypeSelector";
 import {WorkType, SelectedProduct} from "@/types/common";
 import {useOperatorStore} from "@/stores/OperatorStore/operatorStore";
-import StatusConvertor from "@/components/StatusConvertor";
 import getVisitDateStatus from "@/components/VisitDateConvertor";
 import {EnquiryStatus} from "@/types/enquiry";
 import {timeSlots} from "@/data/timeslot.mock";
@@ -90,7 +89,7 @@ const TaskDetail: React.FC = () => {
   } | null>(null);
 
   const isReadOnly =
-    task.status === "ReadyForQuotation" || task.status === "Completed";
+    task.status === "Ready For Quotation" || task.status === "Completed";
 
   const currentStepIndex = useMemo(
     () => (task ? ALL_STATUSES.indexOf(task.status) : 0),
@@ -271,7 +270,7 @@ const TaskDetail: React.FC = () => {
     const alreadyBooked = enquiries.some(
       (e) =>
         e.id !== task.id &&
-        ["SiteVisitScheduled", "SiteVisitRescheduled"].includes(e.status) &&
+        ["Site Visit Scheduled", "Site Visit Rescheduled"].includes(e.status) &&
         e.siteVisit?.scheduledDate?.split("T")[0] === rescheduleDate &&
         e.siteVisit?.scheduledTime === rescheduleTime,
     );
@@ -281,8 +280,8 @@ const TaskDetail: React.FC = () => {
       return;
     }
 
-    const RescheduledStatus: EnquiryStatus = "SiteVisitRescheduled";
-    const scheduledStatus: EnquiryStatus = "SiteVisitScheduled";
+    const RescheduledStatus: EnquiryStatus = "Site Visit Rescheduled";
+    const scheduledStatus: EnquiryStatus = "Site Visit Scheduled";
 
     const remarks =
       rescheduleReason + (rescheduleNote ? ` - ${rescheduleNote}` : "");
@@ -387,7 +386,7 @@ const TaskDetail: React.FC = () => {
       return;
     }
 
-    const currentStatus: EnquiryStatus = "ReadyForQuotation";
+    const currentStatus: EnquiryStatus = "Ready For Quotation";
     const updatedTask = {
       ...task,
 
@@ -396,7 +395,7 @@ const TaskDetail: React.FC = () => {
       statusHistory: [
         ...(task.statusHistory || []),
         {
-          status: "SiteVisitCompleted" as EnquiryStatus,
+          status: "Site Visit Completed" as EnquiryStatus,
           remarks: "Site visit completed by operator",
           timestamp: new Date().toISOString(),
         },
@@ -479,7 +478,7 @@ const TaskDetail: React.FC = () => {
             </p>
           </div>
           <Badge variant="outline" className={statusColors[task.status]}>
-            {StatusConvertor(task.status)}
+            {task.status}
           </Badge>
         </div>
       </header>
@@ -691,8 +690,8 @@ const TaskDetail: React.FC = () => {
                         (e) =>
                           e.id !== task.id &&
                           [
-                            "SiteVisitScheduled",
-                            "SiteVisitRescheduled",
+                            "Site Visit Scheduled",
+                            "Site Visit Rescheduled",
                           ].includes(e.status) &&
                           e.siteVisit?.scheduledDate?.split("T")[0] ===
                             rescheduleDate &&

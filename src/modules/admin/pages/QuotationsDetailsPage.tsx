@@ -1,34 +1,31 @@
-import { useParams, useNavigate } from "react-router-dom";
+import {useParams, useNavigate} from "react-router-dom";
 
-import { Button } from "@/components/ui/button";
-import { Printer, ArrowLeft } from "lucide-react";
-import { enquiries } from "@/data/adminMockData";
-import { customers } from "@/data/adminMockData";
-import { useEffect, useState } from "react";
-import { Quotation } from "@/types/quotation";
-import { QuotationService } from "@/services/quotation.service";
+import {Button} from "@/components/ui/button";
+import {Printer, ArrowLeft} from "lucide-react";
+import {Enquiries} from "@/data/adminMockData";
+import {Customers} from "@/data/adminMockData";
+import {useEffect, useState} from "react";
+import {Quotation} from "@/types/quotation";
+import {QuotationService} from "@/services/quotation.service";
 
 export default function QuotationDetails() {
-  const { id } = useParams();
+  const {id} = useParams();
   const navigate = useNavigate();
 
-  const[selectedQuotation,setSelectedQuotation]=useState<Quotation | null>();
+  const [selectedQuotation, setSelectedQuotation] =
+    useState<Quotation | null>();
 
-  useEffect(()=>{
-    const quotation=async()=>{
-      const res=await QuotationService.getById(id);
+  useEffect(() => {
+    const quotation = async () => {
+      const res = await QuotationService.getById(id);
       setSelectedQuotation(res);
     };
     quotation();
-  })
-
- 
-
-
+  });
 
   const getEnquiryLabel = (eId: string) => {
-    const enq = enquiries.find((e) => e.id === eId);
-    const cust =  customers.find((c) => c.id === enq?.customer?.id);
+    const enq = Enquiries.find((e) => e.id === eId);
+    const cust = Customers.find((c) => c.id === enq?.customer?.id);
     return cust ? `${cust.name} – ${enq?.workTypes}` : eId;
   };
 
@@ -38,7 +35,6 @@ export default function QuotationDetails() {
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
-      
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <Button variant="ghost" onClick={() => navigate(-1)}>
@@ -81,7 +77,7 @@ export default function QuotationDetails() {
                   ₹{item.unitPrice.toLocaleString()}
                 </td>
                 <td className="py-2 text-right">
-                  ₹{(item.unitPrice).toLocaleString()}
+                  ₹{item.unitPrice.toLocaleString()}
                 </td>
               </tr>
             ))}
@@ -94,7 +90,7 @@ export default function QuotationDetails() {
         <p className="font-bold text-base">
           Total: ₹
           {selectedQuotation.items
-            .reduce((s, i) => s +  i.unitPrice, 0)
+            .reduce((s, i) => s + i.unitPrice, 0)
             .toLocaleString()}
         </p>
       </div>

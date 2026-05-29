@@ -24,7 +24,6 @@ import CreateQuotationPage from "./modules/admin/pages/CreateQuotationsPage.tsx"
 import GlobalLogin from "./pages/GlobalLogin.tsx";
 import EngineerDetailPage from "./modules/admin/pages/EnginnerDetailPasge.tsx";
 import CustomerDetails from "./modules/customers/components/CustomerDetails.tsx";
-import {customers} from "./data/adminMockData.ts";
 import QuotationDetails from "./modules/admin/pages/QuotationsDetailsPage.tsx";
 import {preloadWorkTypeData} from "./stores/ProductPreload.ts";
 
