@@ -4,6 +4,7 @@ import {Engineer} from "@/types/engineer";
 import {Enquiry} from "@/types/enquiry";
 import {EnquiryStatus, WorkItem} from "@/types/enquiry";
 import {mapEnquiryFromApi} from "./EnquiryPayloadMapper";
+import {TokenManager} from "./tokenManager.service";
 const COMPANY_ID = import.meta.env.VITE_COMPANY_ID;
 const TENANT_ID = import.meta.env.VITE_TENANT_ID;
 const Package_ID = import.meta.env.VITE_PACKAGE_ID;
@@ -68,21 +69,19 @@ export class OperatorService {
   }
 
   static async getEnquriesByOperatorId(operatorID: string) {
+    const token = TokenManager.getToken;
     try {
-      const response = await fetch(
-        `${FixedURL}/api/enquiry/getbyoperatorid?id=${operatorID}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "ngrok-skip-browser-warning": "true",
-            company: `${COMPANY_ID}`,
-            tenant: `${TENANT_ID}`,
-            //  "Authorization": `Bearer ${token}`,
-            Package: `${Package_ID}`,
-          },
+      const response = await fetch(`${FixedURL}/api/enquiry/getbyoperatorid`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
+          company: `${COMPANY_ID}`,
+          tenant: `${TENANT_ID}`,
+          Authorization: `Bearer ${operatorID}`,
+          Package: `${Package_ID}`,
         },
-      );
+      });
       if (!response.ok) {
         throw new Error("filed to load");
       }

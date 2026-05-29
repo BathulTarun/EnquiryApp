@@ -73,7 +73,8 @@ const App = () => {
 
             {/* OPERATOR */}
             <Route path="/operator" element={<OperatorProtected />}>
-              <Route path="dashboard/:engineerId" element={<Dashboard />} />
+              {/* <Route path="dashboard/:engineerId" element={<Dashboard />} /> */}
+              <Route path="dashboard" element={<Dashboard />} />
               <Route path="tasks" element={<TaskList />} />
               <Route path="tasks/:taskId" element={<TaskDetail />} />
             </Route>

@@ -4,11 +4,11 @@ import {Engineer} from "@/types/engineer";
 const USER_KEY = "logged_user";
 
 export const UserManager = {
-  setUser(user: Engineer) {
+  setUserName(user: string) {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
   },
 
-  getUser(): Engineer | null {
+  getUserName(): string | null {
     const data = localStorage.getItem(USER_KEY);
 
     if (!data) return null;
@@ -16,7 +16,7 @@ export const UserManager = {
     return JSON.parse(data);
   },
 
-  clearUser() {
+  clearUserName() {
     localStorage.removeItem(USER_KEY);
   },
 };

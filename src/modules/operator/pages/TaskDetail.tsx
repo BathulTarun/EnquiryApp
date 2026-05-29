@@ -286,7 +286,7 @@ const TaskDetail: React.FC = () => {
     const remarks =
       rescheduleReason + (rescheduleNote ? ` - ${rescheduleNote}` : "");
 
-    const EngineerDetails: Engineer = UserManager.getUser();
+    const EngineerName: string = UserManager.getUserName();
 
     const updatedTask: Enquiry = {
       ...task,
@@ -307,7 +307,7 @@ const TaskDetail: React.FC = () => {
         {
           status: RescheduledStatus,
 
-          updatedBy: EngineerDetails.name,
+          updatedBy: EngineerName,
 
           remarks,
 

@@ -74,28 +74,28 @@ export class AuthService {
     }
   }
 
-  static async getUserDetails(token: string): Promise<Engineer | null> {
-    try {
-      const response = await fetch(`${FixedURL}/api/operator/profile`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true",
-          Package: `${Package_ID}`,
-          Authorization: `bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("filed to load");
-      }
-      const result = await response.json();
-      if (result.Status === "Success") {
-        UserManager.setUser(mapOperatorFromApi(result));
-        return mapOperatorFromApi(result);
-      }
-      return null;
-    } catch (error) {
-      return null;
-    }
-  }
+  // static async getUserDetails(token: string): Promise<Engineer | null> {
+  //   try {
+  //     const response = await fetch(`${FixedURL}/api/operator/profile`, {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         "ngrok-skip-browser-warning": "true",
+  //         Package: `${Package_ID}`,
+  //         Authorization: `bearer ${token}`,
+  //       },
+  //     });
+  //     if (!response.ok) {
+  //       throw new Error("filed to load");
+  //     }
+  //     const result = await response.json();
+  //     if (result.Status === "Success") {
+  //       UserManager.setUser(mapOperatorFromApi(result));
+  //       return mapOperatorFromApi(result);
+  //     }
+  //     return null;
+  //   } catch (error) {
+  //     return null;
+  //   }
+  // }
 }

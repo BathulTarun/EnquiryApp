@@ -39,7 +39,8 @@ const LoginPage = () => {
       if (result.role === "admin") {
         navigate("/admin/dashboard");
       } else if (result.role === "operator") {
-        navigate(`/operator/dashboard/${result.id}`);
+        // navigate(`/operator/dashboard/${result.id}`);
+        navigate(`/operator/dashboard`);
       }
     } catch (err) {
       setError("Something went wrong. Please try again.");

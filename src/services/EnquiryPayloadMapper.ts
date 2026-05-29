@@ -147,7 +147,7 @@ export const mapUpdatedEnquiryToApi = (
   workItems: WorkItem[],
   status?: string,
 ) => {
-  const EngineerDetails: Engineer = UserManager.getUser();
+  const EngineerName: String = UserManager.getUserName();
   return {
     ID: Number(enquiry.id),
 
@@ -202,7 +202,7 @@ export const mapUpdatedEnquiryToApi = (
 
         Timestamp: new Date().toISOString(),
 
-        UpdatedBy: EngineerDetails.name || null,
+        UpdatedBy: EngineerName || null,
 
         Remarks: enquiry.siteVisit?.remarks || "",
       },

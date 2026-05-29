@@ -40,8 +40,8 @@ const statusIcon: Record<string, React.ReactNode> = {
 const Dashboard: React.FC = () => {
   useEffect(() => {
     const engineer = async () => {
-      const res = UserManager.getUser();
-      setEngineer(res);
+      const res = UserManager.getUserName();
+      setEngineerName(res);
       await preloadWorkTypeData();
     };
     engineer();
@@ -49,6 +49,7 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   const {engineerId} = useParams();
+  const token = TokenManager.getToken();
   const sections = [
     "Today",
     "Tomorrow",
@@ -59,7 +60,7 @@ const Dashboard: React.FC = () => {
     "Completed",
     "My Tasks",
   ];
-  const [engineer, setEngineer] = React.useState<Engineer | null>(null);
+  const [engineerName, setEngineerName] = React.useState<String | null>(null);
   const {enquiries, fetchEnquiries, loading, clearStore} = useOperatorStore();
   const {clearProducts} = useProductStore();
   const {
@@ -102,7 +103,7 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const handleFocus = () => {
-      fetchEnquiries(engineerId, true);
+      fetchEnquiries(token, true);
     };
 
     window.addEventListener("focus", handleFocus);
@@ -113,7 +114,7 @@ const Dashboard: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    fetchEnquiries(engineerId);
+    fetchEnquiries(token);
   }, []);
 
   return (
@@ -125,7 +126,7 @@ const Dashboard: React.FC = () => {
             <h1 className="text-lg font-semibold text-card-foreground">
               Welcome,
             </h1>
-            <h1 className="text-s text-muted-foreground">{engineer?.name}</h1>
+            <h1 className="text-s text-muted-foreground">{engineerName}</h1>
           </div>
           <Button
             variant="ghost"
@@ -133,7 +134,7 @@ const Dashboard: React.FC = () => {
             onClick={() => {
               (navigate("/"),
                 TokenManager.clearToken(),
-                UserManager.clearUser());
+                UserManager.clearUserName());
               clearStore();
             }}
           >

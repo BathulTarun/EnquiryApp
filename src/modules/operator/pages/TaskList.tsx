@@ -31,7 +31,7 @@ const TaskList: React.FC = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate(`/operator/dashboard/${engineerId}`)}
+            onClick={() => navigate(`/operator/dashboard`)}
           >
             <ArrowLeft className="w-5 h-5" />
           </Button>
