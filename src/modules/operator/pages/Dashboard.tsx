@@ -29,6 +29,7 @@ import {cardColors} from "../utils/task.constants";
 const statusIcon: Record<string, React.ReactNode> = {
   Today: <Calendar className="w-5 h-5" />,
   Tomorrow: <Calendar className="w-5 h-5" />,
+  Overdue: <AlertCircle className="w-5 h-5" />,
   "My Tasks": <ClipboardList className="w-5 h-5" />,
   Upcoming: <Clock className="w-5 h-5" />,
   Completed: <CheckCircle2 className="w-5 h-5" />,
@@ -51,6 +52,7 @@ const Dashboard: React.FC = () => {
   const sections = [
     "Today",
     "Tomorrow",
+    "Overdue",
     "Upcoming",
     "Rescheduled",
     "Pending",

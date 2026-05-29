@@ -41,7 +41,7 @@ const getVisitDateStatus = (task: Enquiry) => {
   if (
     diff < 0 &&
     task.status !== "Completed" &&
-    task.status !== "ReadyForQuotation"
+    task.status !== "Ready For Quotation"
   ) {
     return {
       text: "Visit overdue",
@@ -53,7 +53,7 @@ const getVisitDateStatus = (task: Enquiry) => {
 
   if (
     diff < 0 &&
-    (task.status === "Completed" || task.status === "ReadyForQuotation")
+    (task.status === "Completed" || task.status === "Ready For Quotation")
   ) {
     return {
       text: "Visit Done",

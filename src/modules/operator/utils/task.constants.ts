@@ -1,4 +1,5 @@
 import {Enquiry, EnquiryStatus} from "@/types/enquiry";
+import getVisitDateStatus from "@/components/VisitDateConvertor";
 
 const today = new Date().toISOString().split("T")[0];
 
@@ -19,6 +20,7 @@ export const statusColors: Record<string, string> = {
 export const cardColors: Record<string, string> = {
   Today: "bg-blue-100 text-blue-600",
   Tomorrow: "bg-violet-100 text-violet-600",
+  Overdue: "bg-red-100 text-red-600",
   "My Tasks": "bg-primary/10 text-primary",
   Upcoming: "bg-info/10 text-info",
   Completed: "bg-success/10 text-success",
@@ -42,6 +44,9 @@ export const filterMap: Record<
 
   Tomorrow: (_, task) =>
     task?.siteVisit?.scheduledDate?.split("T")[0] === tomorrow,
+
+  Overdue: (_, task) => getVisitDateStatus(task).text === "Visit overdue",
+
   "My Tasks": () => true,
   Upcoming: (s) => s === "Site Visit Scheduled",
   Completed: (s) => s === "Site Visit Completed" || s === "Completed",
