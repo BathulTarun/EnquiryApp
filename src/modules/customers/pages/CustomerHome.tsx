@@ -82,6 +82,11 @@ const Index = () => {
     setStep("otp");
   };
 
+  // const handleMobileSearch = async (num: string) => {
+  //   setMobile(num);
+  //   setStep("otp");
+  // };
+
   const handleOtpVerified = async () => {
     setIsLoadingCustomer(true);
 
