@@ -53,9 +53,9 @@ const OperatorProtected = () => {
 
 const App = () => {
   const isLoggedIn = useAppStore((s) => s.isLoggedIn);
-  useEffect(() => {
-    preloadWorkTypeData();
-  }, []);
+  // useEffect(() => {
+  //   preloadWorkTypeData();
+  // }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

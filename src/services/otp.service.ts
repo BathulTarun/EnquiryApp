@@ -28,9 +28,13 @@ class OtpService {
       });
       const data = await response.json();
       // console.log(data);
-      return {
-        success: response.ok,
-      };
+      if (data.Status?.toLowerCase() === "success") {
+        return {
+          success: response.ok,
+        };
+      } else {
+        return null;
+      }
     } catch (error) {
       console.error("Send OTP error:", error);
       return {success: false};

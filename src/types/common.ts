@@ -59,5 +59,5 @@ export interface WorkType {
     name: string;
   };
   // selectedSubOption?: SelectedProduct;
-  selectedProduct?: SelectedProduct;
+  selectedProduct?: SelectedProduct[];
 }

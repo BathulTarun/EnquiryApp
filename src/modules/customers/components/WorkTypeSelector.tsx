@@ -24,7 +24,7 @@ interface WorkTypeSelectorProps {
     subCategory: {id: string; name: string},
   ) => void;
 
-  onProductChange: (workTypeId: string, product: SelectedProduct) => void;
+  onProductChange: (workTypeId: string, product: SelectedProduct[]) => void;
 }
 
 const WorkTypeSelector = ({
@@ -78,8 +78,7 @@ const WorkTypeSelector = ({
 
             const checked = !!selectedItem;
 
-            const selectedCount =
-              checked && selectedItem?.selectedProduct ? 1 : 0;
+            const selectedCount = selectedItem?.selectedProduct?.length || 0;
 
             return (
               <AccordionItem key={type.id} value={type.id}>
@@ -113,8 +112,9 @@ const WorkTypeSelector = ({
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 ml-4">
                             {sub.products?.map((product) => {
                               const isSelected =
-                                selectedItem?.selectedProduct?.id ===
-                                product.id;
+                                selectedItem?.selectedProduct?.some(
+                                  (p) => p.id === product.id,
+                                ) ?? false;
 
                               return (
                                 <div
@@ -125,29 +125,40 @@ const WorkTypeSelector = ({
                                       : "border-border hover:border-primary/40"
                                   }`}
                                   onClick={() => {
+                                    const existingProducts =
+                                      selectedItem?.selectedProduct || [];
+
+                                    const isSelected = existingProducts.some(
+                                      (p) => p.id === product.id,
+                                    );
+
+                                    const updatedProducts = isSelected
+                                      ? existingProducts.filter(
+                                          (p) => p.id !== product.id,
+                                        )
+                                      : [
+                                          ...existingProducts,
+                                          {
+                                            id: product.id,
+                                            name: product.name,
+                                            price: product.price,
+                                          },
+                                        ];
+
                                     onUpdate({
                                       ...selectedItem,
                                       selectedSubCategory: {
                                         id: sub.id,
                                         name: sub.name,
                                       },
-                                      selectedProduct: {
-                                        id: product.id,
-                                        name: product.name,
-                                        price: product.price,
-                                      },
+                                      selectedProduct: updatedProducts,
                                     });
 
                                     onSubCategoryChange(type.id!, {
                                       id: sub.id,
                                       name: sub.name,
                                     });
-
-                                    onProductChange(type.id!, {
-                                      id: product.id,
-                                      name: product.name,
-                                      price: product.price,
-                                    });
+                                    onProductChange(type.id!, updatedProducts);
                                   }}
                                 >
                                   <Checkbox checked={isSelected} />

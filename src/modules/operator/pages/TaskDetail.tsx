@@ -143,18 +143,14 @@ const TaskDetail: React.FC = () => {
 
   const handleProductChange = (
     workTypeId: string,
-    product: SelectedProduct,
+    products: SelectedProduct[],
   ) => {
     setSelectedWork((prev) =>
       prev.map((w) =>
         w.id === workTypeId
           ? {
               ...w,
-              selectedProduct: {
-                id: product.id,
-                name: product.name,
-                price: product.price,
-              },
+              selectedProduct: products,
             }
           : w,
       ),
@@ -165,33 +161,32 @@ const TaskDetail: React.FC = () => {
     const newItems: WorkItem[] = [];
 
     selectedWork.forEach((work) => {
-      if (!work.selectedProduct) return;
+      work.selectedProduct?.forEach((product) => {
+        newItems.push({
+          id: crypto.randomUUID(),
 
-      newItems.push({
-        id: crypto.randomUUID(),
+          CategoryID: Number(work.id),
 
-        // IMPORTANT
-        CategoryID: Number(work.id),
+          subCategoryID: Number(work.selectedSubCategory?.id),
 
-        subCategoryID: Number(work.selectedSubCategory?.id),
+          productsId: product.id,
 
-        productsId: work.selectedProduct.id,
+          productName: product.name,
 
-        productName: work.selectedProduct.name,
+          name: "Operator",
 
-        name: "Operator",
+          quantity: "1",
 
-        quantity: "1",
+          measurement: "",
 
-        measurement: "",
+          unitPrice: product.price || 0,
 
-        unitPrice: work.selectedProduct.price || 0,
+          notes: "",
 
-        notes: "",
+          isCustom: false,
 
-        isCustom: false,
-
-        images: [],
+          images: [],
+        });
       });
     });
 

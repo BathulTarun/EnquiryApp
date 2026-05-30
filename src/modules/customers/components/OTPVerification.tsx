@@ -71,6 +71,12 @@ const OTPVerification = ({
 
   const handleResend = async () => {
     OtpService.sendOtp(mobile).then((res) => {
+      if (!res) {
+        toast.success("Failed to send OTP try again", {
+          duration: 5000,
+        });
+        return;
+      }
       if (res.success) {
         toast.success("OTP sent successfully", {
           duration: 5000,

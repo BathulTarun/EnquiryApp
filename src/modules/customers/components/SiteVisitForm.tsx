@@ -231,8 +231,8 @@ const SiteVisitForm = ({
       customer: customer,
       images: imageStrings,
       workTypes: workTypes,
-      workItems: workTypes.map((w) => {
-        return {
+      workItems: workTypes.flatMap((w) =>
+        (w.selectedProduct || []).map((product) => ({
           id: w.id,
           name: "User",
 
@@ -240,13 +240,13 @@ const SiteVisitForm = ({
 
           subCategoryName: w.selectedSubCategory?.name || "",
 
-          productsId: w.selectedProduct?.id || "",
+          productsId: product.id,
 
-          productName: w.selectedProduct?.name || "",
+          productName: product.name,
 
-          unitPrice: w.selectedProduct?.price || 0,
-        };
-      }),
+          unitPrice: product.price || 0,
+        })),
+      ),
 
       address: finalAddress,
       addressId: finalAddress.id,
@@ -534,7 +534,7 @@ const SiteVisitForm = ({
             type="submit"
             className="w-full sm:w-auto"
             size="lg"
-            disabled={!date || !timeSlot || !remarks}
+            disabled={!date || !timeSlot}
           >
             Submit Enquiry
           </Button>

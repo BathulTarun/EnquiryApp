@@ -26,6 +26,7 @@ import {toast} from "sonner";
 import {statusColors} from "../utils/task.constants";
 import {filterMap} from "../utils/task.constants";
 import {cardColors} from "../utils/task.constants";
+import {preloadWorkTypeData} from "@/stores/ProductPreload";
 const statusIcon: Record<string, React.ReactNode> = {
   Today: <Calendar className="w-5 h-5" />,
   Tomorrow: <Calendar className="w-5 h-5" />,
@@ -42,9 +43,13 @@ const Dashboard: React.FC = () => {
     const engineer = async () => {
       const res = UserManager.getUserName();
       setEngineerName(res);
-      await preloadWorkTypeData();
+      // await preloadWorkTypeDataDetails();
     };
     engineer();
+  }, []);
+
+  useEffect(() => {
+    preloadWorkTypeData();
   }, []);
   const navigate = useNavigate();
 
@@ -73,7 +78,7 @@ const Dashboard: React.FC = () => {
     clearWorkTypes,
   } = useWorkTypeStore();
 
-  const preloadWorkTypeData = async () => {
+  const preloadWorkTypeDataDetails = async () => {
     if (loading) {
       // categories
       await loadCategories();

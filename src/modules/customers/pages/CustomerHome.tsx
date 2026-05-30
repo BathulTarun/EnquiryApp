@@ -77,29 +77,9 @@ const Index = () => {
     setLocations(mapped);
   };
 
-  // const preloadWorkTypeData = async () => {
-  //   // categories
-  //   await loadCategories();
-
-  //   // get categories from store
-  //   const cats = useWorkTypeStore.getState().categories;
-
-  //   // load all subcategories
-  //   await Promise.all(
-  //     cats.map((cat) => loadSubcategories(Number(cat.CategoryID))),
-  //   );
-
-  //   // get updated subcategories
-  //   const allSubcategories = useWorkTypeStore.getState().subcategories;
-
-  //   // flatten subcategories
-  //   const subList = Object.values(allSubcategories).flat();
-
-  //   // load all products
-  //   await Promise.all(
-  //     subList.map((sub) => loadProducts(Number(sub.SubCategoryID))),
-  //   );
-  // };
+  useEffect(() => {
+    preloadWorkTypeData();
+  }, []);
 
   const handleMobileSearch = async (num: string) => {
     setMobile(num);
@@ -114,6 +94,8 @@ const Index = () => {
 
       if (found) {
         await loadLocations(found.id);
+
+        // await preloadWorkTypeData();
 
         setCustomer(found);
         setIsNew(false);
@@ -164,14 +146,14 @@ const Index = () => {
 
   const handleProductChange = (
     workTypeId: string,
-    product: SelectedProduct,
+    products: SelectedProduct[],
   ) => {
     setSelectedWork((prev) =>
       prev.map((w) =>
         w.id === workTypeId
           ? {
               ...w,
-              selectedProduct: product,
+              selectedProduct: products,
             }
           : w,
       ),
@@ -231,7 +213,10 @@ const Index = () => {
       return (
         selectedWork.length > 0 &&
         selectedWork.every(
-          (item) => item.selectedSubCategory && item.selectedProduct,
+          (item) =>
+            item.selectedSubCategory &&
+            item.selectedProduct &&
+            item.selectedProduct.length > 0,
         )
       );
     return true;
@@ -422,7 +407,7 @@ const Index = () => {
                 onSubCategoryChange={handleSubCategoryChange}
                 onProductChange={handleProductChange}
               />
-              <div className="flex justify-between">
+              <div className="sticky bottom-0 bg-background border-t p-4 flex justify-between">
                 <Button variant="outline" onClick={prevStep}>
                   <ArrowLeft size={16} /> Back
                 </Button>
@@ -445,7 +430,7 @@ const Index = () => {
                 workTypes={selectedWork}
                 customerId={customer?.id}
                 addresses={locations}
-                contactNumber={customer?.mobile || mobile}
+                contactNumber={mobile}
                 onSubmit={(id) => {
                   setEnquiryId(id);
                   setConfirmOpen(true);

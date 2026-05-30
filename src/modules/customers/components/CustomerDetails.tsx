@@ -15,7 +15,6 @@ import {CustomerService} from "@/services/customer.service";
 import {LocationService} from "@/services/location.service";
 import {mapLocationToAddress} from "@/services/AddressPayloadMapper";
 import {toast} from "sonner";
-import WorkTypeService from "@/services/worktype.service";
 import {statusColors} from "@/modules/operator/utils/task.constants";
 interface CustomerDetailsProps {
   addresses: Address[];
@@ -34,7 +33,6 @@ const CustomerDetails = ({
   const [states, setStates] = useState<any[]>([]);
   // new for address
   const [locations, setLocations] = useState<Address[]>([]);
-  const [productMap, setProductMap] = useState<Record<string, string>>({});
 
   //new for address
   useEffect(() => {
@@ -42,6 +40,9 @@ const CustomerDetails = ({
       const data = await LocationService.getAllLocationsForCustomer(
         customer.id,
       );
+      if (!data) {
+        toast.error("Add Address");
+      }
 
       const mapped = data.map(mapLocationToAddress);
 
@@ -56,39 +57,6 @@ const CustomerDetails = ({
       setStates(data);
     });
   }, []);
-
-  useEffect(() => {
-    const loadProducts = async () => {
-      if (!enquiries?.length) return;
-
-      try {
-        // get unique sub category ids
-        const subCategoryIds = [
-          ...new Set(
-            enquiries.flatMap((e) => e.workItems?.map((w) => w.subCategoryID)),
-          ),
-        ].filter(Boolean);
-
-        let map: Record<string, string> = {};
-
-        // fetch products for each sub category
-        for (const subCategoryId of subCategoryIds) {
-          const products =
-            await WorkTypeService.getProductsBySubcategory(subCategoryId);
-
-          products.forEach((p: any) => {
-            map[String(p.UID)] = p.Name;
-          });
-        }
-
-        setProductMap(map);
-      } catch (err) {
-        console.error("Failed loading products", err);
-      }
-    };
-
-    loadProducts();
-  }, [enquiries]);
 
   // new for address
   const allAddresses = [...(addresses || []), ...(locations || [])];

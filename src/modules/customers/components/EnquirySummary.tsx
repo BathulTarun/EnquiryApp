@@ -59,7 +59,7 @@ const EnquirySummary = ({
                     {w.selectedSubCategory?.name}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {w.selectedProduct?.name}
+                    {w.selectedProduct?.map((p) => p.name).join(", ")}
                   </p>
                 </div>
               ))}
