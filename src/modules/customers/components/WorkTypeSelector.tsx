@@ -36,7 +36,8 @@ const WorkTypeSelector = ({
 }: WorkTypeSelectorProps) => {
   const selectedMap = new Map(selected.map((t) => [t.id, t]));
 
-  const {categories, subcategories, products} = useWorkTypeStore();
+  const {categories, subcategories, products, loadSubcategories, loadProducts} =
+    useWorkTypeStore();
 
   const workTypes: WorkType[] = useMemo(() => {
     return categories.map((cat: any) => ({
@@ -84,7 +85,22 @@ const WorkTypeSelector = ({
               <AccordionItem key={type.id} value={type.id}>
                 <AccordionTrigger
                   className="hover:no-underline"
-                  onClick={() => handleToggle(type)}
+                  onClick={async () => {
+                    handleToggle(type);
+                    const categoryId = Number(type.id);
+
+                    if (!checked) {
+                      await loadSubcategories(categoryId);
+
+                      const subs =
+                        useWorkTypeStore.getState().subcategories[categoryId] ||
+                        [];
+
+                      await Promise.all(
+                        subs.map((sub: any) => loadProducts(sub.SubCategoryID)),
+                      );
+                    }
+                  }}
                 >
                   <div className="flex items-center gap-2 text-left">
                     <span className="text-sm font-medium">{type.name}</span>
@@ -98,9 +114,9 @@ const WorkTypeSelector = ({
                 </AccordionTrigger>
 
                 <AccordionContent>
-                  {checked && selectedItem?.subCategories && (
+                  {checked && type.subCategories && (
                     <div className="pl-2 space-y-5">
-                      {selectedItem.subCategories.map((sub) => (
+                      {type.subCategories.map((sub) => (
                         <div key={sub.id} className="space-y-3">
                           {/* SUBCATEGORY TITLE */}
                           <div className="flex items-center gap-1 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
@@ -142,11 +158,14 @@ const WorkTypeSelector = ({
                                             id: product.id,
                                             name: product.name,
                                             price: product.price,
+
+                                            subCategoryId: sub.id,
+                                            subCategoryName: sub.name,
                                           },
                                         ];
 
                                     onUpdate({
-                                      ...selectedItem,
+                                      ...type,
                                       selectedSubCategory: {
                                         id: sub.id,
                                         name: sub.name,

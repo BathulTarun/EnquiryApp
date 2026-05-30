@@ -206,7 +206,7 @@ const TaskDetail: React.FC = () => {
 
     setSelectorOpen(false);
 
-    toast.success("Products added");
+    toast.success("Products added Save to Draft.");
   };
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -216,6 +216,8 @@ const TaskDetail: React.FC = () => {
     if (!selectedItemId) {
       toast.error("Please select a work item first");
       return;
+    } else {
+      toast.error("Save Draft After Uploading");
     }
     const previewImages = Array.from(files).map((file) => ({
       id: crypto.randomUUID(),
@@ -1013,7 +1015,7 @@ const TaskDetail: React.FC = () => {
               onProductChange={handleProductChange}
             />
 
-            <div className="flex justify-end gap-2 mt-4">
+            <div className="sticky bottom-0 bg-background border-t p-2 flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setSelectorOpen(false)}>
                 Cancel
               </Button>

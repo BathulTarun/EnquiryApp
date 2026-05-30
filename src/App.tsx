@@ -25,7 +25,6 @@ import GlobalLogin from "./pages/GlobalLogin.tsx";
 import EngineerDetailPage from "./modules/admin/pages/EnginnerDetailPasge.tsx";
 import CustomerDetails from "./modules/customers/components/CustomerDetails.tsx";
 import QuotationDetails from "./modules/admin/pages/QuotationsDetailsPage.tsx";
-import {preloadWorkTypeData} from "./stores/ProductPreload.ts";
 
 const queryClient = new QueryClient();
 
@@ -53,10 +52,6 @@ const OperatorProtected = () => {
 
 const App = () => {
   const isLoggedIn = useAppStore((s) => s.isLoggedIn);
-  // useEffect(() => {
-  //   preloadWorkTypeData();
-  // }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       {/* <AppProvider> */}

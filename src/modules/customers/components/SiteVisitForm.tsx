@@ -75,7 +75,6 @@ const SiteVisitForm = ({
       const mapped = data.map(mapLocationToAddress);
       setLocations(mapped);
     };
-
     loadLocations();
   }, []);
 
@@ -209,6 +208,27 @@ const SiteVisitForm = ({
       });
       return;
     }
+    // No existing address selected
+    if (
+      addressChoice === "existing" &&
+      (!selectedAddressId || uniqueAddresses.length === 0)
+    ) {
+      toast.warning(
+        "Please add and save an address before submitting the enquiry.",
+        {
+          duration: 5000,
+        },
+      );
+      return;
+    }
+
+    if (addressChoice === "new" && !savedNewAddress) {
+      toast.warning("Please save the address before submitting the enquiry.", {
+        duration: 5000,
+      });
+      return;
+    }
+
     let finalAddress: Address;
 
     if (addressChoice === "new") {
@@ -236,9 +256,9 @@ const SiteVisitForm = ({
           id: w.id,
           name: "User",
 
-          subCategoryID: Number(w.selectedSubCategory?.id),
+          subCategoryID: Number(product.subCategoryId),
 
-          subCategoryName: w.selectedSubCategory?.name || "",
+          subCategoryName: product.subCategoryName || "",
 
           productsId: product.id,
 

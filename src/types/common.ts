@@ -47,6 +47,9 @@ export interface SelectedProduct {
   id: string;
   name: string;
   price?: number;
+
+  subCategoryId?: string;
+  subCategoryName?: string;
 }
 
 export interface WorkType {

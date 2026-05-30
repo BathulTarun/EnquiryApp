@@ -53,14 +53,34 @@ const EnquirySummary = ({
                   key={w.id}
                   className="rounded-md border bg-secondary px-2 py-1"
                 >
-                  <p className="text-xs ">{w.name}</p>
+                  <p className="text-xs font-medium">{w.name}</p>
 
-                  <p className="text-xs text-muted-foreground">
-                    {w.selectedSubCategory?.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {w.selectedProduct?.map((p) => p.name).join(", ")}
-                  </p>
+                  {Object.entries(
+                    (w.selectedProduct || []).reduce(
+                      (acc, product) => {
+                        const key = product.subCategoryName || "Others";
+
+                        if (!acc[key]) {
+                          acc[key] = [];
+                        }
+
+                        acc[key].push(product.name);
+
+                        return acc;
+                      },
+                      {} as Record<string, string[]>,
+                    ),
+                  ).map(([subCategory, products]) => (
+                    <div key={subCategory} className="mt-1">
+                      <p className="text-xs text-muted-foreground font-medium">
+                        {subCategory}
+                      </p>
+
+                      <p className="text-xs text-muted-foreground">
+                        {products.join(", ")}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>

@@ -13,7 +13,7 @@ class WorkTypeService {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          // "ngrok-skip-browser-warning": "true",
+          "ngrok-skip-browser-warning": "true",
           company: `${COMPANY_ID}`,
           tenant: `${TENANT_ID}`,
         },
@@ -35,7 +35,7 @@ class WorkTypeService {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            // "ngrok-skip-browser-warning": "true",
+            "ngrok-skip-browser-warning": "true",
             company: `${COMPANY_ID}`,
             tenant: `${TENANT_ID}`,
           },
@@ -60,7 +60,7 @@ class WorkTypeService {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            // "ngrok-skip-browser-warning": "true",
+            "ngrok-skip-browser-warning": "true",
             company: `${COMPANY_ID}`,
             tenant: `${TENANT_ID}`,
           },
@@ -83,7 +83,7 @@ class WorkTypeService {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            // "ngrok-skip-browser-warning": "true",
+            "ngrok-skip-browser-warning": "true",
             company: `${COMPANY_ID}`,
             tenant: `${TENANT_ID}`,
             Package: `${Package_ID}`,

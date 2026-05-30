@@ -48,9 +48,9 @@ const Dashboard: React.FC = () => {
     engineer();
   }, []);
 
-  useEffect(() => {
-    preloadWorkTypeData();
-  }, []);
+  // useEffect(() => {
+  //   preloadWorkTypeData();
+  // }, []);
   const navigate = useNavigate();
 
   const {engineerId} = useParams();
@@ -78,33 +78,37 @@ const Dashboard: React.FC = () => {
     clearWorkTypes,
   } = useWorkTypeStore();
 
-  const preloadWorkTypeDataDetails = async () => {
-    if (loading) {
-      // categories
-      await loadCategories();
+  useEffect(() => {
+    loadCategories();
+  }, []);
 
-      // get categories from store
-      const cats = useWorkTypeStore.getState().categories;
+  // const preloadWorkTypeDataDetails = async () => {
+  //   if (loading) {
+  //     // categories
+  //     await loadCategories();
 
-      // load all subcategories
-      await Promise.all(
-        cats.map((cat) => loadSubcategories(Number(cat.CategoryID))),
-      );
+  //     // get categories from store
+  //     const cats = useWorkTypeStore.getState().categories;
 
-      // get updated subcategories
-      const allSubcategories = useWorkTypeStore.getState().subcategories;
+  //     // load all subcategories
+  //     await Promise.all(
+  //       cats.map((cat) => loadSubcategories(Number(cat.CategoryID))),
+  //     );
 
-      // flatten subcategories
-      const subList = Object.values(allSubcategories).flat();
+  //     // get updated subcategories
+  //     const allSubcategories = useWorkTypeStore.getState().subcategories;
 
-      // load all products
-      await Promise.all(
-        subList.map((sub) => loadProducts(Number(sub.SubCategoryID))),
-      );
-    } else {
-      console.log("No Tasks No Api calling");
-    }
-  };
+  //     // flatten subcategories
+  //     const subList = Object.values(allSubcategories).flat();
+
+  //     // load all products
+  //     await Promise.all(
+  //       subList.map((sub) => loadProducts(Number(sub.SubCategoryID))),
+  //     );
+  //   } else {
+  //     console.log("No Tasks No Api calling");
+  //   }
+  // };
 
   useEffect(() => {
     const handleFocus = () => {
@@ -212,7 +216,12 @@ const Dashboard: React.FC = () => {
               ))
             ) : enquiries?.length > 0 ? (
               [...enquiries]
-                .reverse()
+                .filter((t) => t.status !== "Completed")
+                .sort(
+                  (a, b) =>
+                    new Date(a.siteVisit?.scheduledDate || "").getTime() -
+                    new Date(b.siteVisit?.scheduledDate || "").getTime(),
+                )
                 .slice(0, 5)
                 .map((task) => (
                   <button

@@ -31,6 +31,8 @@ export const mapEnquiryToApi = (enquiry: Enquiry) => {
       State: enquiry.address?.stateId || 0,
       PostalCode: enquiry.address?.pincode,
       Landmark: enquiry.address?.landmark || "",
+      Latitude: enquiry.address?.lat,
+      Longitude: enquiry.address?.lng,
       Country: null,
     },
 

@@ -69,17 +69,13 @@ const Index = () => {
       stateId: loc.StateID,
       pincode: loc.PostalCode,
       landmark: loc.LandMark || "",
-      lat: 0,
-      lng: 0,
+      lat: loc.Latitude,
+      lng: loc.Longitude,
       verified: true,
       addressType: loc.Name,
     }));
     setLocations(mapped);
   };
-
-  useEffect(() => {
-    preloadWorkTypeData();
-  }, []);
 
   const handleMobileSearch = async (num: string) => {
     setMobile(num);
@@ -224,6 +220,7 @@ const Index = () => {
 
   const nextStep = () => {
     if (step === "form") {
+      loadCategories();
       setStep("worktype");
     } else if (step === "worktype") setStep("visit");
   };
@@ -378,7 +375,7 @@ const Index = () => {
                 <CustomerForm mobile={mobile} onSave={handleCustomerSave} />
               )}
               {customer && (
-                <div className="flex justify-between">
+                <div className="sticky bottom-0 bg-background border-t p-4 flex justify-between">
                   <Button variant="outline" onClick={prevStep}>
                     <ArrowLeft size={16} /> Back
                   </Button>

@@ -15,8 +15,8 @@ export const mapAddressToApi = (address: Address, customerId: Number) => {
     State: address.stateId || 0, //  must be ID
     Country: 1, // or Number(address.countryId) later
 
-    Latitude: address.lat ? String(address.lat) : "",
-    Longitude: address.lng ? String(address.lng) : "",
+    Latitude: address.lat,
+    Longitude: address.lng,
   };
 };
 
@@ -30,8 +30,8 @@ export const mapLocationToAddress = (loc: any): Address => ({
   stateId: loc.StateID,
   pincode: loc.PostalCode,
   landmark: loc.LandMark || "",
-  lat: 0, // not provided
-  lng: 0,
+  lat: loc.Latitude, // not provided
+  lng: loc.Longitude,
   addressType: loc.Name || "Home",
   verified: true, // since coming from saved data
 });

@@ -60,6 +60,9 @@ const TaskList: React.FC = () => {
             }
             className="w-full bg-card rounded-lg shadow-material-sm p-4 text-left hover:shadow-material transition-shadow"
           >
+            <p className="font-medium text-card-foreground">
+              {task.EnquiryNumber || `ENQ-${task.id}`}
+            </p>
             <div className="flex items-start justify-between gap-3 mb-2">
               <p className="font-medium text-card-foreground">
                 {task.customer.name}
