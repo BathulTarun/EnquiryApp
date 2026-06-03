@@ -31,6 +31,7 @@ import {
   RotateCcw,
   Image as ImageIcon,
   Pencil,
+  Loader2,
 } from "lucide-react";
 import {
   Dialog,
@@ -50,6 +51,8 @@ const TaskDetail: React.FC = () => {
   const {updateLocalEnquiry} = useOperatorStore();
 
   const {taskId} = useParams<{taskId: string}>();
+
+  const [loading, setLoading] = useState(false);
 
   const task = useMemo(() => {
     return enquiries.find((e) => e.id === taskId) || null;
@@ -251,77 +254,81 @@ const TaskDetail: React.FC = () => {
   };
 
   const handleReschedule = async () => {
+    if (loading) return;
+
     if (!rescheduleDate || !rescheduleTime) {
       toast.warning("Please select date and time slot");
       return;
     }
+
     if (!rescheduleReason) {
       toast.warning("Please select reschedule reason");
       return;
     }
+
     if (rescheduleReason === "Other" && !rescheduleNote.trim()) {
       toast.warning("Please enter reschedule note");
       return;
     }
 
-    const alreadyBooked = enquiries.some(
-      (e) =>
-        e.id !== task.id &&
-        ["Site Visit Scheduled", "Site Visit Rescheduled"].includes(e.status) &&
-        e.siteVisit?.scheduledDate?.split("T")[0] === rescheduleDate &&
-        e.siteVisit?.scheduledTime === rescheduleTime,
-    );
+    try {
+      setLoading(true);
 
-    if (alreadyBooked) {
-      toast.error("Selected slot already booked");
-      return;
-    }
+      const alreadyBooked = enquiries.some(
+        (e) =>
+          e.id !== task.id &&
+          ["Site Visit Scheduled", "Site Visit Rescheduled"].includes(
+            e.status,
+          ) &&
+          e.siteVisit?.scheduledDate?.split("T")[0] === rescheduleDate &&
+          e.siteVisit?.scheduledTime === rescheduleTime,
+      );
 
-    const RescheduledStatus: EnquiryStatus = "Site Visit Rescheduled";
-    const scheduledStatus: EnquiryStatus = "Site Visit Scheduled";
+      if (alreadyBooked) {
+        toast.error("Selected slot already booked");
+        return;
+      }
 
-    const remarks =
-      rescheduleReason + (rescheduleNote ? ` - ${rescheduleNote}` : "");
+      const RescheduledStatus: EnquiryStatus = "Site Visit Rescheduled";
+      // const scheduledStatus: EnquiryStatus = "Site Visit Scheduled";
 
-    const EngineerName: string = UserManager.getUserName();
+      const remarks =
+        rescheduleReason + (rescheduleNote ? ` - ${rescheduleNote}` : "");
 
-    const updatedTask: Enquiry = {
-      ...task,
+      const EngineerName = UserManager.getUserName();
 
-      status: scheduledStatus,
-
-      siteVisit: {
-        ...task.siteVisit,
-
-        scheduledDate: new Date(rescheduleDate).toISOString(),
-
-        scheduledTime: rescheduleTime,
-      },
-
-      statusHistory: [
-        ...(task.statusHistory || []),
-
-        {
-          status: RescheduledStatus,
-
-          updatedBy: EngineerName,
-
-          remarks,
-
-          timestamp: new Date().toISOString(),
+      const updatedTask: Enquiry = {
+        ...task,
+        status: RescheduledStatus,
+        siteVisit: {
+          ...task.siteVisit,
+          scheduledDate: new Date(rescheduleDate).toISOString(),
+          scheduledTime: rescheduleTime,
         },
-      ],
-    };
+        statusHistory: [
+          ...(task.statusHistory || []),
+          {
+            status: RescheduledStatus,
+            updatedBy: EngineerName,
+            remarks,
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      };
 
-    const payload = mapUpdatedEnquiryToApi(
-      updatedTask,
-      workItems,
-      scheduledStatus,
-    );
+      const payload = mapUpdatedEnquiryToApi(
+        updatedTask,
+        workItems,
+        RescheduledStatus,
+      );
 
-    const data = await OperatorService.updateEnquiry(payload);
+      const data = await OperatorService.updateEnquiry(payload);
 
-    if (data) {
+      if (!data) {
+        toast.error("Failed to reschedule task");
+        return;
+      }
+
       updateLocalEnquiry(updatedTask);
 
       setShowReschedule(false);
@@ -332,8 +339,10 @@ const TaskDetail: React.FC = () => {
       setRescheduleNote("");
       setRescheduleDate("");
       setRescheduleTime("");
-    } else {
-      toast.error("Failed to reschedule task");
+    } catch (error) {
+      toast.error("Failed to reschedule task try again.");
+    } finally {
+      setLoading(false);
     }
   };
   const openNavigation = (lat: number, lng: number) => {
@@ -344,6 +353,8 @@ const TaskDetail: React.FC = () => {
   };
 
   const handleSave = async () => {
+    if (loading) return;
+
     const invalidItem = workItems.find(
       (item) =>
         !item.measurement?.toString().trim() ||
@@ -356,20 +367,35 @@ const TaskDetail: React.FC = () => {
       );
       return;
     }
-    const payload = mapUpdatedEnquiryToApi(task, workItems, task.status);
 
-    const result = await OperatorService.updateEnquiry(payload);
-    if (result) {
+    try {
+      setLoading(true);
+
+      const payload = mapUpdatedEnquiryToApi(task, workItems, task.status);
+
+      const result = await OperatorService.updateEnquiry(payload);
+
+      if (!result) {
+        toast.error("Failed to save");
+        return;
+      }
+
       updateLocalEnquiry({
         ...task,
         workItems,
       });
+
       toast.success("Draft saved");
-    } else {
+    } catch (error) {
+      console.error("Save draft error:", error);
       toast.error("Failed to save");
+    } finally {
+      setLoading(false);
     }
   };
   const handleSubmit = async () => {
+    if (loading) return;
+
     const invalidItem = workItems.find(
       (item) =>
         !item.measurement?.toString().trim() ||
@@ -383,47 +409,55 @@ const TaskDetail: React.FC = () => {
       return;
     }
 
-    const currentStatus: EnquiryStatus = "Ready For Quotation";
-    const updatedTask = {
-      ...task,
+    try {
+      setLoading(true);
 
-      status: currentStatus,
+      const currentStatus: EnquiryStatus = "Ready For Quotation";
 
-      statusHistory: [
-        ...(task.statusHistory || []),
-        {
-          status: "Site Visit Completed" as EnquiryStatus,
-          remarks: "Site visit completed by operator",
-          timestamp: new Date().toISOString(),
-        },
+      const updatedTask: Enquiry = {
+        ...task,
+        status: currentStatus,
+        statusHistory: [
+          ...(task.statusHistory || []),
+          {
+            status: "Site Visit Completed" as EnquiryStatus,
+            remarks: "Site visit completed by operator",
+            timestamp: new Date().toISOString(),
+          },
+          {
+            status: currentStatus,
+            remarks: "Operator submitted work items",
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      };
 
-        {
-          status: currentStatus,
+      const payload = mapUpdatedEnquiryToApi(
+        updatedTask,
+        workItems,
+        currentStatus,
+      );
 
-          remarks: "Operator submitted work items",
+      const result = await OperatorService.updateEnquiry(payload);
 
-          timestamp: new Date().toISOString(),
-        },
-      ],
-    };
-    const payload = mapUpdatedEnquiryToApi(
-      updatedTask,
-      workItems,
-      currentStatus,
-    );
+      if (!result) {
+        toast.error("Failed to submit");
+        return;
+      }
 
-    const result = await OperatorService.updateEnquiry(payload);
-
-    if (result) {
       updateLocalEnquiry({
         ...task,
         workItems,
         status: currentStatus,
         statusHistory: updatedTask.statusHistory,
       });
+
       toast.success("Submitted successfully");
-    } else {
-      toast.error("Failed to submit");
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast.error("Failed to submit try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -732,8 +766,19 @@ const TaskDetail: React.FC = () => {
                       className="mt-1"
                     />
                   )}
-                  <Button size="sm" onClick={handleReschedule}>
-                    Confirm Reschedule
+                  <Button
+                    size="sm"
+                    onClick={handleReschedule}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Rescheduling...
+                      </>
+                    ) : (
+                      "Confirm Reschedule"
+                    )}
                   </Button>
                 </div>
               )}
@@ -895,19 +940,33 @@ const TaskDetail: React.FC = () => {
             {/* Submit */}
             <section className="sticky bottom-0 bg-background border-t p-4 flex gap-3">
               <Button
-                disabled={isReadOnly}
+                disabled={isReadOnly || loading}
                 variant="outline"
                 className="flex-1"
                 onClick={handleSave}
               >
-                Save Draft
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Draft"
+                )}
               </Button>
               <Button
-                disabled={isReadOnly}
+                disabled={isReadOnly || loading}
                 className="flex-1"
                 onClick={handleSubmit}
               >
-                Submit
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit"
+                )}
               </Button>
             </section>
 

@@ -30,10 +30,10 @@ class OtpService {
       // console.log(data);
       if (data.Status?.toLowerCase() === "success") {
         return {
-          success: response.ok,
+          success: true,
         };
       } else {
-        return null;
+        return {success: false};
       }
     } catch (error) {
       console.error("Send OTP error:", error);

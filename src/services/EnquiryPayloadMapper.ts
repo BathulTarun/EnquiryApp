@@ -196,19 +196,7 @@ export const mapUpdatedEnquiryToApi = (
       Unit: item.measurement || "",
     })),
 
-    StatusHistory: [
-      ...(enquiry.statusHistory || []),
-
-      {
-        Status: status || enquiry.status,
-
-        Timestamp: new Date().toISOString(),
-
-        UpdatedBy: EngineerName || null,
-
-        Remarks: enquiry.siteVisit?.remarks || "",
-      },
-    ],
+    StatusHistory: enquiry.statusHistory || [],
 
     Notes: enquiry.description || "",
     Status: status || enquiry.status,

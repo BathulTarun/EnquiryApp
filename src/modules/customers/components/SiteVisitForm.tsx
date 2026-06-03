@@ -15,7 +15,7 @@ import {Address} from "@/types/common";
 import {Customer} from "@/types/customer";
 import {Enquiry} from "@/types/enquiry";
 import {WorkType} from "@/types/common";
-import {Calendar, Clock, MapPin, Upload, X} from "lucide-react";
+import {Calendar, Clock, MapPin, Upload, X, Loader2} from "lucide-react";
 import LocationSearch, {
   LocationResult,
 } from "@/modules/customers/components/LocationSearch";
@@ -50,6 +50,7 @@ const SiteVisitForm = ({
   const [savedNewAddress, setSavedNewAddress] = useState<Address | null>(null);
   const [addressChoice, setAddressChoice] = useState<string>("existing");
   const [selectedAddressId, setSelectedAddressId] = useState("");
+  const [loading, setLoading] = useState(false);
   const [newAddr, setNewAddr] = useState({
     address1: "",
     address2: "",
@@ -202,105 +203,129 @@ const SiteVisitForm = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!customer) {
-      toast.error("Customer not loaded", {
-        duration: 5000,
-      });
-      return;
-    }
-    // No existing address selected
-    if (
-      addressChoice === "existing" &&
-      (!selectedAddressId || uniqueAddresses.length === 0)
-    ) {
-      toast.warning(
-        "Please add and save an address before submitting the enquiry.",
-        {
-          duration: 5000,
-        },
-      );
-      return;
-    }
 
-    if (addressChoice === "new" && !savedNewAddress) {
-      toast.warning("Please save the address before submitting the enquiry.", {
-        duration: 5000,
-      });
-      return;
-    }
-
-    let finalAddress: Address;
-
-    if (addressChoice === "new") {
-      if (!savedNewAddress) {
-        toast.error("Please save address first", {
+    if (loading) return;
+    try {
+      setLoading(true);
+      if (!customer) {
+        toast.error("Customer not loaded", {
           duration: 5000,
         });
         return;
       }
 
-      finalAddress = savedNewAddress;
-    } else {
-      finalAddress = uniqueAddresses.find(
-        (a) => String(a.id) === selectedAddressId,
-      )!;
-    }
-    const imageStrings = photos.map((img) => img.url);
+      if (!date || !timeSlot) {
+        toast.warning("Please select date and time slot");
+        return;
+      }
+      // No existing address selected
+      if (
+        addressChoice === "existing" &&
+        (!selectedAddressId || uniqueAddresses.length === 0)
+      ) {
+        toast.warning(
+          "Please add and save an address before submitting the enquiry.",
+          {
+            duration: 5000,
+          },
+        );
+        return;
+      }
 
-    const newEnquiry: Enquiry = {
-      customer: customer,
-      images: imageStrings,
-      workTypes: workTypes,
-      workItems: workTypes.flatMap((w) =>
-        (w.selectedProduct || []).map((product) => ({
-          id: w.id,
-          name: "User",
+      if (addressChoice === "new" && !savedNewAddress) {
+        toast.warning(
+          "Please save the address before submitting the enquiry.",
+          {
+            duration: 5000,
+          },
+        );
+        return;
+      }
 
-          subCategoryID: Number(product.subCategoryId),
+      let finalAddress: Address;
 
-          subCategoryName: product.subCategoryName || "",
+      if (addressChoice === "new") {
+        if (!savedNewAddress) {
+          toast.error("Please save address first", {
+            duration: 5000,
+          });
+          return;
+        }
 
-          productsId: product.id,
+        finalAddress = savedNewAddress;
+      } else {
+        const address = uniqueAddresses.find(
+          (a) => String(a.id) === selectedAddressId,
+        );
 
-          productName: product.name,
+        if (!address) {
+          toast.error("Selected address not found");
+          return;
+        }
 
-          unitPrice: product.price || 0,
-        })),
-      ),
+        finalAddress = address;
+      }
+      const imageStrings = photos.map((img) => img.url);
 
-      address: finalAddress,
-      addressId: finalAddress.id,
-      description: remarks,
-      status: "Pending", // REQUIRED
-      siteVisit: {
-        scheduledDate: date,
-        scheduledTime: timeSlot,
-        contactNumber,
+      const newEnquiry: Enquiry = {
+        customer: customer,
+        images: imageStrings,
+        workTypes: workTypes,
+        workItems: workTypes.flatMap((w) =>
+          (w.selectedProduct || []).map((product) => ({
+            id: w.id,
+            name: "User",
+
+            subCategoryID: Number(product.subCategoryId),
+
+            subCategoryName: product.subCategoryName || "",
+
+            productsId: product.id,
+
+            productName: product.name,
+
+            unitPrice: product.price || 0,
+          })),
+        ),
+
         address: finalAddress,
-      }, // REQUIRED (basic structure)
-      statusHistory: [
-        {
-          status: "Pending",
-          timestamp: new Date().toISOString(),
-          updatedBy: "System",
-        },
-      ], // REQUIRED
-    };
+        addressId: finalAddress.id,
+        description: remarks,
+        status: "Pending", // REQUIRED
+        siteVisit: {
+          scheduledDate: date,
+          scheduledTime: timeSlot,
+          contactNumber,
+          address: finalAddress,
+        }, // REQUIRED (basic structure)
+        statusHistory: [
+          {
+            status: "Pending",
+            timestamp: new Date().toISOString(),
+            updatedBy: "System",
+          },
+        ], // REQUIRED
+      };
+      const response = await CustomerService.createEnquiry(newEnquiry);
 
-    const response = await CustomerService.createEnquiry(newEnquiry);
+      const enquiryId = response;
 
-    const enquiryId = response;
-
-    if (!enquiryId) {
-      toast.error("Failed to create enquiry", {
-        duration: 5000,
-      });
-      return;
+      if (!enquiryId) {
+        toast.error("Failed to create enquiry", {
+          duration: 5000,
+        });
+        return;
+      }
+      onSubmit(enquiryId);
+      setDate("");
+      setTimeSlot("");
+      setRemarks("");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to create enquiry");
+    } finally {
+      setLoading(false);
     }
-    onSubmit(enquiryId);
-    setDate("");
-    setTimeSlot("");
-    setRemarks("");
   };
 
   const addressFields = [
@@ -554,9 +579,16 @@ const SiteVisitForm = ({
             type="submit"
             className="w-full sm:w-auto"
             size="lg"
-            disabled={!date || !timeSlot}
+            disabled={!date || !timeSlot || loading}
           >
-            Submit Enquiry
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Submitting...
+              </>
+            ) : (
+              " Submit Enquiry"
+            )}
           </Button>
         </form>
       </CardContent>

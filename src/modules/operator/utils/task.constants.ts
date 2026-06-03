@@ -51,8 +51,9 @@ export const filterMap: Record<
   Upcoming: (s) => s === "Site Visit Scheduled",
   Completed: (s) => s === "Site Visit Completed" || s === "Completed",
   Pending: (s) => s === "Pending" || s === "Ready For Quotation",
-  Rescheduled: (_, task) =>
-    task?.statusHistory?.some((h) => h.status === "Site Visit Rescheduled"),
+  // Rescheduled: (_, task) =>
+  //   task?.statusHistory?.some((h) => h.status === "Site Visit Rescheduled"),
+  Rescheduled: (s) => s === "Site Visit Rescheduled",
 };
 
 export const badgeColors = {

@@ -1,8 +1,19 @@
 import React, {useEffect} from "react";
 import {useParams, useNavigate} from "react-router-dom";
+import {Enquiry} from "@/types/enquiry";
 import PageLoader from "@/components/PageLoader";
 import {EnquiryStatus} from "@/types/enquiry";
 import {Card, CardContent} from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   ClipboardList,
   Clock,
@@ -67,6 +78,7 @@ const Dashboard: React.FC = () => {
   ];
   const [engineerName, setEngineerName] = React.useState<String | null>(null);
   const {enquiries, fetchEnquiries, loading, clearStore} = useOperatorStore();
+  const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
   const {clearProducts} = useProductStore();
   const {
     categories,
@@ -81,34 +93,6 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     loadCategories();
   }, []);
-
-  // const preloadWorkTypeDataDetails = async () => {
-  //   if (loading) {
-  //     // categories
-  //     await loadCategories();
-
-  //     // get categories from store
-  //     const cats = useWorkTypeStore.getState().categories;
-
-  //     // load all subcategories
-  //     await Promise.all(
-  //       cats.map((cat) => loadSubcategories(Number(cat.CategoryID))),
-  //     );
-
-  //     // get updated subcategories
-  //     const allSubcategories = useWorkTypeStore.getState().subcategories;
-
-  //     // flatten subcategories
-  //     const subList = Object.values(allSubcategories).flat();
-
-  //     // load all products
-  //     await Promise.all(
-  //       subList.map((sub) => loadProducts(Number(sub.SubCategoryID))),
-  //     );
-  //   } else {
-  //     console.log("No Tasks No Api calling");
-  //   }
-  // };
 
   useEffect(() => {
     const handleFocus = () => {
@@ -126,6 +110,33 @@ const Dashboard: React.FC = () => {
     fetchEnquiries(token);
   }, []);
 
+  const getPriority = (task: Enquiry) => {
+    const today = new Date().toISOString().split("T")[0];
+    const taskDate = task.siteVisit?.scheduledDate?.split("T")[0];
+
+    if (task.status === "Site Visit Scheduled" && taskDate < today) {
+      return 1; // overdue
+    }
+
+    if (taskDate === today) {
+      return 2; // today
+    }
+
+    if (task.status === "Site Visit Rescheduled") {
+      return 3; // rescheduled
+    }
+
+    return 4; // upcoming
+  };
+
+  const handleLogout = () => {
+    TokenManager.clearToken();
+    UserManager.clearUserName();
+    clearStore();
+
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -140,12 +151,7 @@ const Dashboard: React.FC = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => {
-              (navigate("/"),
-                TokenManager.clearToken(),
-                UserManager.clearUserName());
-              clearStore();
-            }}
+            onClick={() => setShowLogoutDialog(true)}
           >
             <LogOut className="w-5 h-5" />
           </Button>
@@ -217,11 +223,16 @@ const Dashboard: React.FC = () => {
             ) : enquiries?.length > 0 ? (
               [...enquiries]
                 .filter((t) => t.status !== "Completed")
-                .sort(
-                  (a, b) =>
+                .sort((a, b) => {
+                  const priorityDiff = getPriority(a) - getPriority(b);
+
+                  if (priorityDiff !== 0) return priorityDiff;
+
+                  return (
                     new Date(a.siteVisit?.scheduledDate || "").getTime() -
-                    new Date(b.siteVisit?.scheduledDate || "").getTime(),
-                )
+                    new Date(b.siteVisit?.scheduledDate || "").getTime()
+                  );
+                })
                 .slice(0, 5)
                 .map((task) => (
                   <button
@@ -292,6 +303,24 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </main>
+
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Logout</AlertDialogTitle>
+
+            <AlertDialogDescription>
+              Are you sure you want to logout?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
