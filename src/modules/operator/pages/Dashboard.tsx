@@ -200,7 +200,7 @@ const Dashboard: React.FC = () => {
         {/* Recent Tasks */}
         <div>
           <h2 className="text-base font-semibold text-foreground mb-3">
-            Recent Tasks
+            My Work Queue
           </h2>
 
           <div className="space-y-2">

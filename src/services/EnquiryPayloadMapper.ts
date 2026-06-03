@@ -133,9 +133,13 @@ export const mapEnquiryFromApi = (apiEnquiry: any): Enquiry => {
 
     status: apiEnquiry.Status,
 
-    statusHistory: [],
-
-    // remarks: apiEnquiry.Remarks ? [apiEnquiry.Remarks] : [],
+    statusHistory:
+      apiEnquiry.StatusHistory?.map((s: any) => ({
+        status: s.Status,
+        timestamp: s.Timestamp,
+        updatedBy: s.UpdatedBy,
+        remarks: s.Remarks,
+      })) || [],
 
     assignedEngineerId: apiEnquiry.AssignedTo,
 
@@ -196,7 +200,13 @@ export const mapUpdatedEnquiryToApi = (
       Unit: item.measurement || "",
     })),
 
-    StatusHistory: enquiry.statusHistory || [],
+    StatusHistory:
+      enquiry.statusHistory?.map((s) => ({
+        Status: s.status,
+        Timestamp: s.timestamp,
+        Remarks: s.remarks || "",
+        UpdatedBy: s.updatedBy || "",
+      })) || [],
 
     Notes: enquiry.description || "",
     Status: status || enquiry.status,
