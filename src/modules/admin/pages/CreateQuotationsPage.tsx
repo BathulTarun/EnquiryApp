@@ -17,7 +17,7 @@ import {useNavigate, useSearchParams} from "react-router-dom";
 import {useAppStore} from "@/services/appStore";
 import {QuotationItem} from "@/types/quotation";
 import {Enquiry} from "@/types/enquiry";
-import {EnquiryService} from "@/services/enquiry.service";
+import {AdminEnquiryService} from "@/services/AdminEnquiry.service";
 import {
   Dialog,
   DialogContent,
@@ -53,7 +53,7 @@ export default function CreateQuotationPage() {
 
   useEffect(() => {
     const enquiries = async () => {
-      const res = await EnquiryService.getAllEnquiries();
+      const res = await AdminEnquiryService.getAllEnquiries();
       setEnquriesList(res);
     };
     enquiries();

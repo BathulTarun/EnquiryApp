@@ -39,6 +39,8 @@ export interface WorkItem {
   notes?: string;
   isCustom?: boolean;
   images?: string[];
+
+  imageFiles?: File[];
 }
 
 export interface SiteVisit {

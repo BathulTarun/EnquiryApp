@@ -1,4 +1,5 @@
 import {EnquiryService} from "./enquiry.service";
+import {AdminEnquiryService} from "./AdminEnquiry.service";
 import {engineers} from "@/data/engineer.mock";
 import {Engineer} from "@/types/engineer";
 import {Enquiry} from "@/types/enquiry";
@@ -12,13 +13,15 @@ const Package_ID = import.meta.env.VITE_PACKAGE_ID;
 const FixedURL = import.meta.env.VITE_API_BASE_URL;
 
 export class OperatorService {
+  //  Admin Mock  services
+  // {
   static async getTasksByEngineer(engineerId: string) {
-    return EnquiryService.getByEngineer(engineerId);
+    return AdminEnquiryService.getByEngineer(engineerId);
     // return CustomerService.getEnquriesByCustomerId(19693);
   }
 
   static async getEngineerByTask(taskId: string): Promise<Engineer | null> {
-    const enquiry = await EnquiryService.getById(taskId);
+    const enquiry = await AdminEnquiryService.getById(taskId);
     if (!enquiry?.assignedEngineerId) return null;
 
     return engineers.find((e) => e.id === enquiry.assignedEngineerId) || null;
@@ -33,40 +36,20 @@ export class OperatorService {
     status: EnquiryStatus,
     note?: string,
   ) {
-    await EnquiryService.updateStatus(
+    await AdminEnquiryService.updateStatus(
       taskId,
       status,
       note || "Updated by Operator",
     );
   }
 
-  static async updateWorkItems(taskId: string, items: WorkItem[]) {
-    await EnquiryService.updateWorkItems(taskId, items);
-  }
-
-  static async addWorkItemsImages(
-    taskId: string,
-    workitemId: string,
-    images: string[],
-  ) {
-    await EnquiryService.addWorkItemsImage(taskId, workitemId, images);
-  }
-
-  static async addEnquiryImages(taskId: string, images: string[]) {
-    await EnquiryService.addImages(taskId, images);
-  }
-
-  static async saveTask(taskId: string) {
-    await EnquiryService.saveTask(taskId);
-  }
-
-  static async submitTask(taskId: string) {
-    await EnquiryService.submitTask(taskId);
-  }
-
   static async getAllOperators(): Promise<Engineer[]> {
     return engineers;
   }
+
+  // }
+
+  // Real API services
 
   static async getEnquriesByOperatorId(operatorID: string) {
     const token = TokenManager.getToken;
@@ -103,5 +86,60 @@ export class OperatorService {
 
   static async updateEnquiry(payload: any) {
     return await EnquiryService.updateEnquiry(payload);
+  }
+
+  static async uploadImages(
+    files: File[],
+    productID: string,
+    EnquiryID: string,
+  ): Promise<string[]> {
+    const formData = new FormData();
+
+    files.forEach((file) => {
+      formData.append("file", file);
+    });
+
+    formData.append("productID", productID);
+    formData.append("enquiryID", EnquiryID);
+    const response = await fetch(`${FixedURL}/api/enquiry/upload-image`, {
+      method: "POST",
+      headers: {
+        company: `${COMPANY_ID}`,
+        tenant: `${TENANT_ID}`,
+        Package: `${Package_ID}`,
+      },
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    return result.Data?.Images || [];
+  }
+
+  static async deleteImage(
+    enquiryID: string,
+    productID: string,
+    imageUrl: string,
+  ): Promise<boolean> {
+    try {
+      const response = await fetch(
+        `${FixedURL}/api/enquiry/delete-image?enquiryID=${enquiryID}&productID=${productID}&imageUrl=${encodeURIComponent(imageUrl)}`,
+        {
+          method: "DELETE",
+          headers: {
+            company: `${COMPANY_ID}`,
+            tenant: `${TENANT_ID}`,
+            Package: `${Package_ID}`,
+          },
+        },
+      );
+
+      const result = await response.json();
+
+      return result.Status === "Success";
+    } catch (error) {
+      console.error("Delete image failed:", error);
+      return false;
+    }
   }
 }

@@ -6,7 +6,7 @@ import {Input} from "@/components/ui/input";
 import {Customer} from "@/types/customer";
 import {Enquiry} from "@/types/enquiry";
 import {Quotation} from "@/types/quotation";
-import {EnquiryService} from "@/services/enquiry.service";
+import {AdminEnquiryService} from "@/services/AdminEnquiry.service";
 import {CustomerService} from "@/services/customer.service";
 import {QuotationService} from "@/services/quotation.service";
 
@@ -28,7 +28,7 @@ const QuotationsPage = () => {
 
   useEffect(() => {
     const enquiries = async () => {
-      const res = await EnquiryService.getAllEnquiries();
+      const res = await AdminEnquiryService.getAllEnquiries();
       setEnquriesList(res);
     };
     enquiries();

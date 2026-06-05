@@ -52,16 +52,38 @@ const TaskDetail: React.FC = () => {
 
   const {taskId} = useParams<{taskId: string}>();
 
-  const [loading, setLoading] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+
+  const [saveLoading, setSaveLoading] = useState(false);
+
+  const [rescheduleLoading, setRescheduleLoading] = useState(false);
 
   const task = useMemo(() => {
     return enquiries.find((e) => e.id === taskId) || null;
   }, [enquiries, taskId]);
 
+  // useEffect(() => {
+  //   if (task && workItems.length === 0) {
+  //     setWorkItems(task.workItems || []);
+  //   }
+  // }, [task]);
+
   useEffect(() => {
-    if (task && workItems.length === 0) {
-      setWorkItems(task.workItems || []);
-    }
+    if (!task) return;
+
+    setWorkItems(task.workItems || []);
+
+    const uploadedImages =
+      task.workItems?.flatMap((item) =>
+        (item.images || []).map((url) => ({
+          id: Date.now().toString() + Math.random(),
+          url,
+          workItemId: item.id,
+          productID: item.productsId || "",
+        })),
+      ) || [];
+
+    setImages(uploadedImages);
   }, [task]);
   const navigate = useNavigate();
   const [itemDialogOpen, setItemDialogOpen] = useState(false);
@@ -84,7 +106,7 @@ const TaskDetail: React.FC = () => {
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [rescheduleTime, setRescheduleTime] = useState("");
   const [images, setImages] = useState<
-    {id: string; url: string; workItemId: string}[]
+    {id: string; url: string; workItemId: string; productID?: string}[]
   >([]);
   const [previewImage, setPreviewImage] = useState<{
     url: string;
@@ -166,7 +188,7 @@ const TaskDetail: React.FC = () => {
     selectedWork.forEach((work) => {
       work.selectedProduct?.forEach((product) => {
         newItems.push({
-          id: crypto.randomUUID(),
+          id: Date.now().toString() + Math.random(),
 
           CategoryID: Number(work.id),
 
@@ -223,15 +245,12 @@ const TaskDetail: React.FC = () => {
       toast.error("Save Draft After Uploading");
     }
     const previewImages = Array.from(files).map((file) => ({
-      id: crypto.randomUUID(),
+      id: Date.now().toString() + Math.random(),
       url: URL.createObjectURL(file),
       workItemId: selectedItemId,
     }));
 
     setImages((prev) => [...prev, ...previewImages]);
-    const base64Images = await Promise.all(
-      Array.from(files).map((file) => fileToBase64(file)),
-    );
 
     setWorkItems((prev) =>
       prev.map((item) => {
@@ -239,22 +258,71 @@ const TaskDetail: React.FC = () => {
 
         return {
           ...item,
-          images: [...(item.images || []), ...base64Images],
+          imageFiles: [...(item.imageFiles || []), ...Array.from(files)],
         };
       }),
     );
   };
-  // handler to remove image from state (and ideally from server in a real app)
-  const handleRemoveImage = (id: string) => {
-    setImages((prev) => prev.filter((img) => img.id !== id));
+
+  const handleRemoveImage = async (id: string) => {
+    const imageToRemove = images.find((img) => img.id === id);
+
+    if (!imageToRemove) return;
+
+    try {
+      const deleted = await OperatorService.deleteImage(
+        task.id,
+        imageToRemove.productID,
+        imageToRemove.url,
+      );
+
+      if (!deleted) {
+        toast.error("Failed to delete image");
+        return;
+      }
+
+      const updatedWorkItems = workItems.map((item) => {
+        if (item.id !== imageToRemove.workItemId) {
+          return item;
+        }
+
+        return {
+          ...item,
+          images: (item.images || []).filter(
+            (url) => url !== imageToRemove.url,
+          ),
+        };
+      });
+
+      const payload = mapUpdatedEnquiryToApi(
+        task,
+        updatedWorkItems,
+        task.status,
+      );
+
+      await OperatorService.updateEnquiry(payload);
+
+      setWorkItems(updatedWorkItems);
+
+      updateLocalEnquiry({
+        ...task,
+        workItems: updatedWorkItems,
+      });
+
+      setImages((prev) => prev.filter((img) => img.id !== id));
+
+      toast.success("Image removed");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to remove image");
+    }
   };
-  // helper to get item name by id (for display purposes)
   const getItemName = (id: string) => {
-    return workItems.find((item) => item.id === id)?.name || "Item";
+    return workItems.find((item) => item.id === id)?.productName || "Item";
   };
 
   const handleReschedule = async () => {
-    if (loading) return;
+    if (rescheduleLoading) return;
 
     if (!rescheduleDate || !rescheduleTime) {
       toast.warning("Please select date and time slot");
@@ -272,7 +340,7 @@ const TaskDetail: React.FC = () => {
     }
 
     try {
-      setLoading(true);
+      setRescheduleLoading(true);
 
       const alreadyBooked = enquiries.some(
         (e) =>
@@ -342,7 +410,7 @@ const TaskDetail: React.FC = () => {
     } catch (error) {
       toast.error("Failed to reschedule task try again.");
     } finally {
-      setLoading(false);
+      setRescheduleLoading(false);
     }
   };
   const openNavigation = (lat: number, lng: number) => {
@@ -352,8 +420,32 @@ const TaskDetail: React.FC = () => {
     );
   };
 
+  const uploadWorkItemImages = async (items: WorkItem[]) => {
+    const updatedItems = [...items];
+
+    for (const item of updatedItems) {
+      if (!item.imageFiles?.length) {
+        continue;
+      }
+
+      const urls = await OperatorService.uploadImages(
+        item.imageFiles,
+        item.productsId || "",
+        task.id || "",
+      );
+
+      // item.images = urls;
+
+      item.images = [...(item.images || []), ...urls];
+
+      item.imageFiles = []; // IMPORTANT
+    }
+
+    return updatedItems;
+  };
+
   const handleSave = async () => {
-    if (loading) return;
+    if (saveLoading) return;
 
     const invalidItem = workItems.find(
       (item) =>
@@ -369,9 +461,15 @@ const TaskDetail: React.FC = () => {
     }
 
     try {
-      setLoading(true);
+      setSaveLoading(true);
 
-      const payload = mapUpdatedEnquiryToApi(task, workItems, task.status);
+      const updatedWorkItems = await uploadWorkItemImages(workItems);
+
+      const payload = mapUpdatedEnquiryToApi(
+        task,
+        updatedWorkItems,
+        task.status,
+      );
 
       const result = await OperatorService.updateEnquiry(payload);
 
@@ -382,7 +480,7 @@ const TaskDetail: React.FC = () => {
 
       updateLocalEnquiry({
         ...task,
-        workItems,
+        workItems: updatedWorkItems,
       });
 
       toast.success("Draft saved");
@@ -390,11 +488,11 @@ const TaskDetail: React.FC = () => {
       console.error("Save draft error:", error);
       toast.error("Failed to save");
     } finally {
-      setLoading(false);
+      setSaveLoading(false);
     }
   };
   const handleSubmit = async () => {
-    if (loading) return;
+    if (submitLoading) return;
 
     const invalidItem = workItems.find(
       (item) =>
@@ -410,7 +508,7 @@ const TaskDetail: React.FC = () => {
     }
 
     try {
-      setLoading(true);
+      setSubmitLoading(true);
 
       const currentStatus: EnquiryStatus = "Ready For Quotation";
 
@@ -432,9 +530,11 @@ const TaskDetail: React.FC = () => {
         ],
       };
 
+      const updatedWorkItems = await uploadWorkItemImages(workItems);
+
       const payload = mapUpdatedEnquiryToApi(
         updatedTask,
-        workItems,
+        updatedWorkItems,
         currentStatus,
       );
 
@@ -447,7 +547,7 @@ const TaskDetail: React.FC = () => {
 
       updateLocalEnquiry({
         ...task,
-        workItems,
+        workItems: updatedWorkItems,
         status: currentStatus,
         statusHistory: updatedTask.statusHistory,
       });
@@ -457,7 +557,7 @@ const TaskDetail: React.FC = () => {
       console.error("Submit error:", error);
       toast.error("Failed to submit try again.");
     } finally {
-      setLoading(false);
+      setSubmitLoading(false);
     }
   };
 
@@ -769,9 +869,9 @@ const TaskDetail: React.FC = () => {
                   <Button
                     size="sm"
                     onClick={handleReschedule}
-                    disabled={loading}
+                    disabled={rescheduleLoading}
                   >
-                    {loading ? (
+                    {rescheduleLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Rescheduling...
@@ -897,7 +997,7 @@ const TaskDetail: React.FC = () => {
                     accept="image/*"
                     disabled={isReadOnly}
                     multiple
-                    capture="environment"
+                    // capture="environment"
                     onChange={handleImageUpload}
                     className="hidden"
                   />
@@ -923,6 +1023,7 @@ const TaskDetail: React.FC = () => {
                     {/* ❌ REMOVE BUTTON */}
                     <button
                       onClick={() => handleRemoveImage(img.id)}
+                      disabled={isReadOnly}
                       className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
                     >
                       <X className="w-3 h-3" />
@@ -940,12 +1041,12 @@ const TaskDetail: React.FC = () => {
             {/* Submit */}
             <section className="sticky bottom-0 bg-background border-t p-4 flex gap-3">
               <Button
-                disabled={isReadOnly || loading}
+                disabled={isReadOnly || saveLoading}
                 variant="outline"
                 className="flex-1"
                 onClick={handleSave}
               >
-                {loading ? (
+                {saveLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
@@ -955,11 +1056,11 @@ const TaskDetail: React.FC = () => {
                 )}
               </Button>
               <Button
-                disabled={isReadOnly || loading}
+                disabled={isReadOnly || submitLoading}
                 className="flex-1"
                 onClick={handleSubmit}
               >
-                {loading ? (
+                {submitLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Submitting...

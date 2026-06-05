@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import {format} from "date-fns";
 import React, {useEffect, useState} from "react";
-import {EnquiryService} from "@/services/enquiry.service";
+import {AdminEnquiryService} from "@/services/AdminEnquiry.service";
 import {CustomerService} from "@/services/customer.service";
 import {Enquiry} from "@/types/enquiry";
 import {Customer} from "@/types/customer";
@@ -22,7 +22,7 @@ const DashboardPage = () => {
 
   useEffect(() => {
     const enquiries = async () => {
-      const res = await EnquiryService.getAllEnquiries();
+      const res = await AdminEnquiryService.getAllEnquiries();
       setEnquiriesList(res);
     };
     enquiries();

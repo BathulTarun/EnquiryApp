@@ -37,7 +37,7 @@ import {Engineer} from "@/types/engineer";
 import {Enquiry} from "@/types/enquiry";
 import {Customer} from "@/types/customer";
 import {CustomerService} from "@/services/customer.service";
-import {EnquiryService} from "@/services/enquiry.service";
+import {AdminEnquiryService} from "@/services/AdminEnquiry.service";
 import {OperatorService} from "@/services/operator.service";
 import {ALL_STATUSES} from "@/types/enquiry";
 
@@ -53,7 +53,7 @@ const EnquiryDetailPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const enqs2 = await EnquiryService.getById(id!);
+      const enqs2 = await AdminEnquiryService.getById(id!);
       setEnquiry(enqs2);
 
       const custs = await CustomerService.getById(enqs2.customer.id!);
@@ -67,7 +67,7 @@ const EnquiryDetailPage = () => {
       const engs = await OperatorService.getAllOperators();
       setEngineersList(engs);
 
-      const enqs = await EnquiryService.getAllEnquiries();
+      const enqs = await AdminEnquiryService.getAllEnquiries();
       setEnquiriesList(enqs);
     };
     fetchData();
@@ -97,7 +97,7 @@ const EnquiryDetailPage = () => {
   const handleAddRemark = () => {
     if (newRemark.trim()) {
       // addRemark(enquiry.id, newRemark.trim());
-      EnquiryService.addRemark(enquiry.id, newRemark.trim());
+      AdminEnquiryService.addRemark(enquiry.id, newRemark.trim());
       setNewRemark("");
     }
   };
@@ -109,8 +109,11 @@ const EnquiryDetailPage = () => {
     }
 
     if (selectedEngineer && enquiry) {
-      await EnquiryService.assignEngineer(enquiry.id, selectedEngineer);
-      await EnquiryService.updateStatus(enquiry.id, "Site Visit Scheduled");
+      await AdminEnquiryService.assignEngineer(enquiry.id, selectedEngineer);
+      await AdminEnquiryService.updateStatus(
+        enquiry.id,
+        "Site Visit Scheduled",
+      );
 
       // ✅ UPDATE UI STATE
       setEnquiry({

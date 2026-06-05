@@ -19,7 +19,7 @@ import {cn} from "@/lib/utils";
 import type {EnquiryStatus} from "@/types/enquiry";
 import type {DateRange} from "react-day-picker";
 import {CustomerService} from "@/services/customer.service";
-import {EnquiryService} from "@/services/enquiry.service";
+import {AdminEnquiryService} from "@/services/AdminEnquiry.service";
 import {OperatorService} from "@/services/operator.service";
 import {Enquiry} from "@/types/enquiry";
 import {Customer} from "@/types/customer";
@@ -51,7 +51,7 @@ const EnquiriesPage = () => {
       const engs = await OperatorService.getAllOperators();
       setEngineersList(engs);
 
-      const enqs = await EnquiryService.getAllEnquiries();
+      const enqs = await AdminEnquiryService.getAllEnquiries();
       setEnquiriesList(enqs);
       const custs = await CustomerService.getAllCustomers();
       setCustomersList(custs);

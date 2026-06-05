@@ -7,7 +7,7 @@ import {ArrowLeft} from "lucide-react";
 import {useNavigate} from "react-router-dom";
 import type {Engineer} from "@/types/engineer";
 import {OperatorService} from "@/services/operator.service";
-import {EnquiryService} from "@/services/enquiry.service";
+import {AdminEnquiryService} from "@/services/AdminEnquiry.service";
 import {CustomerService} from "@/services/customer.service";
 import {Enquiry} from "@/types/enquiry";
 import {Customer} from "@/types/customer";
@@ -22,7 +22,7 @@ const EngineersPage = () => {
       const engs = await OperatorService.getAllOperators();
       setEngineersList(engs);
 
-      const enqs = await EnquiryService.getAllEnquiries();
+      const enqs = await AdminEnquiryService.getAllEnquiries();
       setEnquiriesList(enqs);
     };
     fetchData();

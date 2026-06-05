@@ -7,7 +7,7 @@ import {Card, CardContent} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
 
 import {OperatorService} from "@/services/operator.service";
-import {EnquiryService} from "@/services/enquiry.service";
+import {AdminEnquiryService} from "@/services/AdminEnquiry.service";
 import {CustomerService} from "@/services/customer.service";
 
 import type {Engineer} from "@/types/engineer";
@@ -32,7 +32,7 @@ const EngineerDetailsPage = () => {
 
       setEngineer(found || null);
 
-      const enqs = await EnquiryService.getAllEnquiries();
+      const enqs = await AdminEnquiryService.getAllEnquiries();
       setEnquiries(enqs);
 
       const custs = await CustomerService.getAllCustomers();
