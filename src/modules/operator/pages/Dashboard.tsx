@@ -38,6 +38,7 @@ import {statusColors} from "../utils/task.constants";
 import {filterMap} from "../utils/task.constants";
 import {cardColors} from "../utils/task.constants";
 import {preloadWorkTypeData} from "@/stores/ProductPreload";
+import BottomNav from "../components/BottomNav";
 const statusIcon: Record<string, React.ReactNode> = {
   Today: <Calendar className="w-5 h-5" />,
   Tomorrow: <Calendar className="w-5 h-5" />,
@@ -303,6 +304,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </main>
+      <BottomNav />
 
       <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
         <AlertDialogContent>

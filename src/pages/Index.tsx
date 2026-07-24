@@ -1,8 +1,9 @@
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Users } from "lucide-react";
-import { useAppStore } from "@/services/appStore";
+import {useNavigate} from "react-router-dom";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Card, CardContent} from "@/components/ui/card";
+import {Users} from "lucide-react";
+import {useAppStore} from "@/services/appStore";
 
 export default function Index() {
   const navigate = useNavigate();
@@ -12,21 +13,14 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative">
-      
       {/* TOP RIGHT BUTTON */}
       <div className="absolute top-4 right-4">
-       
-          <Button onClick={() => navigate("/globalLogin")}>
-            Login
-          </Button>
-       
+        <Button onClick={() => navigate("/globalLogin")}>Login</Button>
       </div>
 
       {/* HEADER */}
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">
-          Service Management Portal
-        </h1>
+        <h1 className="text-3xl font-bold mb-2">Service Management Portal</h1>
         <p className="text-muted-foreground">
           Manage customer enquiries and schedule site visits efficiently
         </p>

@@ -25,6 +25,9 @@ import GlobalLogin from "./pages/GlobalLogin.tsx";
 import EngineerDetailPage from "./modules/admin/pages/EnginnerDetailPasge.tsx";
 import CustomerDetails from "./modules/customers/components/CustomerDetails.tsx";
 import QuotationDetails from "./modules/admin/pages/QuotationsDetailsPage.tsx";
+import Profile from "./modules/operator/pages/Profile.tsx";
+import Analytics from "./modules/operator/pages/Analytics.tsx";
+import Availability from "./modules/operator/pages/Availability.tsx";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +75,9 @@ const App = () => {
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="tasks" element={<TaskList />} />
               <Route path="tasks/:taskId" element={<TaskDetail />} />
+              <Route path="/operator/analytics" element={<Analytics />} />
+              <Route path="/operator/availability" element={<Availability />} />
+              <Route path="/operator/profile" element={<Profile />} />
             </Route>
 
             {/* Admin LOGIN */}
